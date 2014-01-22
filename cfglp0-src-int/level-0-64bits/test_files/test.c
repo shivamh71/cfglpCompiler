@@ -2,5 +2,5 @@ int a;
 main()
 {
 	int b;
-	b = a;
+	b = 10 + 10;
 }

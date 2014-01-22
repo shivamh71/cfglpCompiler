@@ -33,35 +33,49 @@ using namespace std;
 
 class Ast;
 
-class Ast
-{
+class Ast {
+
 protected:
-	Data_Type node_data_type;
+
+	Data_Type node_data_type; 	// Data_Type is defined in symbol-table.hh but this file in not included here
+								// rather it is included in ast.cc where node_data_type is actually used
+								// here its just declared but never used
+
 public:
+
 	Ast();
+	
 	~Ast();
 
+	// Following are pure virtual functions and hence should never be reached 
+
 	virtual Data_Type get_data_type();
+	
 	virtual bool check_ast(int line);
 
 	virtual void print_ast(ostream & file_buffer) = 0;
+	
 	virtual void print_value(Local_Environment & eval_env, ostream & file_buffer);
 
 	virtual Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
+	
 	virtual void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
+	
 	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
 };
 
-class Assignment_Ast:public Ast
-{
+class Assignment_Ast:public Ast {
 	Ast * lhs;
 	Ast * rhs;
 
 public:
+
 	Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs);
+
 	~Assignment_Ast();
 
 	Data_Type get_data_type();
+	
 	bool check_ast(int line);
 
 	void print_ast(ostream & file_buffer);

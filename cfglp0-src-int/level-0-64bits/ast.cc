@@ -29,7 +29,6 @@ using namespace std;
 #include"user-options.hh"
 #include"error-display.hh"
 #include"local-environment.hh"
-
 #include"symbol-table.hh"
 #include"ast.hh"
 
@@ -59,6 +58,12 @@ Eval_Result & Ast::get_value_of_evaluation(Local_Environment & eval_env)
 	report_internal_error("Should not reach, Ast : get_value_of_evaluation");
 }
 
+// I added this function
+Eval_Result & Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
+{
+	report_internal_error("Should not reach, Ast : evaluate");
+}
+
 void Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result)
 {
 	report_internal_error("Should not reach, Ast : set_value_of_evaluation");
@@ -80,10 +85,10 @@ Assignment_Ast::~Assignment_Ast()
 
 Data_Type Assignment_Ast::get_data_type()
 {
-	return node_data_type;
+	return node_data_type; // whats this node data type ?
 }
 
-bool Assignment_Ast::check_ast(int line)
+bool Assignment_Ast::check_ast(int line) // ??
 {
 	if (lhs->get_data_type() == rhs->get_data_type())
 	{
