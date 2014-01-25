@@ -37,7 +37,8 @@ class Symbol_Table_Entry; // a single entry in symbol table -- has data type and
 typedef enum
 {
 	void_data_type,
-	int_data_type
+	int_data_type,
+	bool_data_type
 } Data_Type;
 
 // typedef for variable scope -- can be global or local

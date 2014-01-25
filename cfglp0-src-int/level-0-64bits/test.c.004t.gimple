@@ -1,0 +1,12 @@
+main ()
+{
+  int b;
+  int c;
+
+  b = 5;
+  c = 6;
+  c = b + b;
+  return;
+}
+
+

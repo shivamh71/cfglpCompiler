@@ -83,6 +83,51 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
+enum Comparator {LE, LT, GE, GT, EQ};
+
+class Relational_Expr_Ast:public Ast {
+
+	Ast * lhs;
+	Ast * rhs;
+	Comparator C;
+
+public:
+
+	Relational_Expr_Ast(Ast* arg_lhs, Comparator c, Ast* arg_rhs);
+
+	~Relational_Expr_Ast();
+
+	Data_Type get_data_type();
+	
+	bool check_ast(int line);
+
+	void print_ast(ostream & file_buffer);
+
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+enum Bool {AND, OR, NOT};
+
+class Boolean_Expr_Ast:public Ast {
+	Ast * lhs;
+	Ast * rhs;
+	Bool C;
+
+public:
+
+	Boolean_Expr_Ast(Ast* arg_lhs, Bool c, Ast* arg_rhs);
+
+	~Boolean_Expr_Ast();
+
+	Data_Type get_data_type();
+	
+	bool check_ast(int line);
+
+	void print_ast(ostream & file_buffer);
+
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
 class Name_Ast:public Ast
 {
 	string variable_name;
@@ -110,6 +155,22 @@ class Number_Ast:public Ast
 public:
 	Number_Ast(T number, Data_Type constant_data_type);
 	~Number_Ast();
+
+	Data_Type get_data_type();
+
+	void print_ast(ostream & file_buffer);
+
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+template <class T>
+class Bool_Ast:public Ast
+{
+	T boolean;
+
+public:
+	Bool_Ast(T value, Data_Type boolean_data_type);
+	~Bool_Ast();
 
 	Data_Type get_data_type();
 

@@ -31,12 +31,38 @@ int		{
 			return Parser::INTEGER; 
 		}
 
-return		{ 
+return	{ 
 			store_token_name("RETURN");
 			return Parser::RETURN; 
 		}
 
-[<>:{}();=]	{
+while	{
+			std::cout << "something\n";
+			store_token_name("WHILE");
+			return Parser::WHILE;	
+		}
+
+do		{
+			store_token_name("DO");
+			return Parser::DO;	
+		}
+
+for		{
+			store_token_name("FOR");
+			return Parser::FOR;
+		}
+
+if		{
+			store_token_name("IF");
+			return Parser::IF;	
+		}
+
+else	{
+			store_token_name("ELSE");
+			return Parser::ELSE;	
+		}	
+
+[<>:{}();=+]	{
 			store_token_name("META CHAR");
 			return matched()[0];
 		}
