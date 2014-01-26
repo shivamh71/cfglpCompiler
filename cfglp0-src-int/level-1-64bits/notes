@@ -1,0 +1,11 @@
+main.cc = imp
+parser.yy = parsing syntax
+
+TO DO : 
+1) make arithmetic_expression class
+2) make relational_expression class
+3) make goto_statement class
+
+report_error(string error, int line) // prints the error message
+user_options.hh and user_options.cc // handles all issues like handling command line options taking input file name and writing messages 										to appropriate buffers
+

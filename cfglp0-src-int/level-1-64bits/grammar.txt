@@ -1,0 +1,141 @@
+program : 
+	decl_stat_list	procedure
+	procedure
+
+procedure:
+	name '(' ')' proc_body
+
+proc_body:
+	'{' basic_block_list '}'
+
+basic_block_list:
+	basic_block_list basic_block
+	basic_block
+	{empty}
+
+basic_block:
+	bb number
+	statement_list
+
+statement_list:
+	statement_list statement
+	statement
+
+statement:
+	selection_statement
+	iterative_statement
+	assignment_statement
+	condition_statement
+	compound_statement
+	return_statement
+
+compound_statement:
+	'{' decl_stat_list statement_list '}'
+
+iterative_statement:
+	while_statement
+	for_statement
+	do_while_statement
+
+selection_statement:
+	ifelse_statement
+
+ifelse_statement:
+	if '(' boolean_expression ')' statement
+	if '(' boolean_expression ')' else statement
+
+while_statement:
+	while '(' boolean_expression ')' statement
+
+do_while_statement:
+	do statement while '(' boolean_expression ')' ';'
+
+for_statement:
+	for '(' comma_separated_assignments comma_separated_booleans comma_separated_assignments_without_semicolon ')' statement
+
+comma_separated_assignment:
+	';'
+	assignment_statement ',' comma_separated_assignment
+
+comma_separated_booleans:
+	';'
+	boolean_expression ',' comma_separated_booleans
+
+comma_separated_assignments_without_semicolon:
+	assignment_statement ',' comma_separated_assignments_without_semicolon	
+
+expression:
+	boolean_expression
+
+less_than_expression:
+	less_than_expression '<' arithmetic_expression
+	less_than_expression '<=' arithmetic_expression
+	arithmetic_expression
+
+greater_than_expression:
+	greater_than_expression '>' less_than_expression
+	greater_than_expression '>=' less_than_expression
+	less_than_expression	
+
+equality_expression:
+	equality_expression '==' greater_than_expression
+	equality_expression '!=' greater_than_expression
+	greater_than_expression
+
+comparison_expression:
+	equality_expression
+
+basic_expression:
+	'(' expression ')'
+	identifier
+
+not_expression:
+	! not_expression
+	basic_expression
+
+and_or_expression:
+	and_expression && comparison_expression
+	comparison_expression
+
+or_expression:
+	or_expression || and_expression
+	and_expression
+
+boolean_expression:
+	or_expression
+
+mult_expression:
+	mult_expression * not_expression
+	mult_expression / not_expression
+	not_expression
+
+add_expression:
+	add_expression + mult_expression
+	add_expression - mult_expression
+	mult_expression
+
+arithmetic_expression:
+	add_expression
+
+assignment_statement:
+	identifier = expression ';'
+
+return_statement:
+	return ';'
+
+condition_statement:
+	identifier = '(' boolean_expression ')' '?' expression ':' expression ';'
+
+decl_stat_list:
+	decl_stat_list decl_stat
+	decl_stat
+	{empty}
+
+decl_stat:
+	type identifier ';'
+
+type:
+	int
+
+identifier:
+	string ??
