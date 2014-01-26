@@ -81,6 +81,10 @@ basic_block_list:
 
 basic_block:
 	'<' NAME INTEGER_NUMBER '>' ':' statement_list
+|
+	'<' NAME INTEGER_NUMBER '>' ':' statement_list ifelse_statement
+|
+	'<' NAME INTEGER_NUMBER '>' ':' ifelse_statement
 ;
 
 statement_list:
@@ -90,8 +94,6 @@ statement_list:
 ;
 
 statement:
-	selection_statement
-|
 	assignment_statement
 |
 	condition_statement
@@ -110,15 +112,9 @@ goto_statement:
 compound_statement:
 	'{' declaration_statement_list statement_list '}'
 ;
-
-selection_statement:
-	ifelse_statement
-;
-
+ 
 ifelse_statement:
-	IF '(' boolean_expression ')' goto_statement
-|
-	IF '(' boolean_expression ')' goto_statement ELSE goto_statement
+	IF '(' expression ')' goto_statement ELSE goto_statement 
 ;
 
 expression:

@@ -80,7 +80,8 @@ goto	{
 		}    
 
 ";;".*  	|
-[ \t]		{
+[ \t]		|
+"//".*			{
 			if (command_options.is_show_tokens_selected())
 				ignore_token();
 		}
