@@ -203,8 +203,6 @@ arithmetic_expression:
 
 assignment_statement:
 	identifier '=' expression ';'
-|
-	identifier '=' constant ';'
 ;
 
 return_statement:
@@ -212,7 +210,7 @@ return_statement:
 ;
 
 condition_statement:
-	identifier '=' '(' boolean_expression ')' '?' expression ':' expression ';'
+	identifier '=' '(' expression ')' '?' expression ':' expression ';'
 ;
 
 identifier:
