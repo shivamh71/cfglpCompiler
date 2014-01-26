@@ -6,7 +6,7 @@ main()
 	b = 5;
 	c = 7;
 
-	if (a = c)
+	if (a && b && c)
 	{
 		if (a >= b)
 		{
