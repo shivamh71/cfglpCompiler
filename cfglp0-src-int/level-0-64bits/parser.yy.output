@@ -1,0 +1,1552 @@
+[[parser.yy (info)] Line 264: 
+Production Rules
+(rule precedences determined from %prec or 1st terminal between parentheses):
+1: program ->  declaration_statement_list procedure_name procedure_body
+2: program ->  procedure_name procedure_body
+3: procedure_name (NAME) ->  NAME '(' ')'
+4: procedure_body ('{') ->  '{' declaration_statement_list basic_block_list '}'
+5: procedure_body ('{') ->  '{' basic_block_list '}'
+6: declaration_statement_list ->  declaration_statement_list declaration_statement
+7: declaration_statement_list ->  declaration_statement
+8: declaration_statement (INTEGER) ->  INTEGER identifier ';'
+9: basic_block_list ->  basic_block_list basic_block
+10: basic_block_list ->  basic_block
+11: basic_block ('<') ->  '<' NAME INTEGER_NUMBER '>' ':' statement_list
+12: statement_list ->  statement_list statement
+13: statement_list ->  statement
+14: statement ->  selection_statement
+15: statement ->  iterative_statement
+16: statement ->  assignment_statement
+17: statement ->  condition_statement
+18: statement ->  compound_statement
+19: statement ->  goto_statement
+20: statement ->  return_statement
+21: goto_statement (GOTO) ->  GOTO '<' NAME INTEGER_NUMBER '>' ';'
+22: compound_statement ('{') ->  '{' declaration_statement_list statement_list '}'
+23: iterative_statement ->  while_statement
+24: iterative_statement ->  for_statement
+25: iterative_statement ->  do_while_statement
+26: selection_statement ->  ifelse_statement
+27: ifelse_statement (IF) ->  IF '(' boolean_expression ')' statement
+28: ifelse_statement (IF) ->  IF '(' boolean_expression ')' statement ELSE statement
+29: while_statement (WHILE) ->  WHILE '(' boolean_expression ')' statement
+30: do_while_statement (DO) ->  DO statement WHILE '(' boolean_expression ')' ';'
+31: for_statement (FOR) ->  FOR '(' comma_separated_assignment comma_separated_booleans comma_separated_assignments_without_semicolon ')' statement
+32: comma_separated_assignment (';') ->  ';'
+33: comma_separated_assignment (',') ->  assignment_statement ',' comma_separated_assignment
+34: comma_separated_booleans (';') ->  ';'
+35: comma_separated_booleans (',') ->  boolean_expression ',' comma_separated_booleans
+36: comma_separated_assignments_without_semicolon (',') ->  assignment_statement ',' comma_separated_assignments_without_semicolon
+37: expression ->  boolean_expression
+38: less_than_expression ('<') ->  less_than_expression '<' arithmetic_expression
+39: less_than_expression ('<') ->  less_than_expression '<' '=' arithmetic_expression
+40: less_than_expression ->  arithmetic_expression
+41: greater_than_expression ('>') ->  greater_than_expression '>' less_than_expression
+42: greater_than_expression ('>') ->  greater_than_expression '>' '=' less_than_expression
+43: greater_than_expression ->  less_than_expression
+44: equality_expression ('=') ->  equality_expression '=' '=' greater_than_expression
+45: equality_expression ('!') ->  equality_expression '!' '=' greater_than_expression
+46: equality_expression ->  greater_than_expression
+47: comparison_expression ->  equality_expression
+48: basic_expression ('(') ->  '(' expression ')'
+49: basic_expression ->  identifier
+50: not_expression ('!') ->  '!' not_expression
+51: not_expression ->  basic_expression
+52: and_expression ('&') ->  and_expression '&' '&' comparison_expression
+53: and_expression ->  comparison_expression
+54: or_expression ('|') ->  or_expression '|' '|' and_expression
+55: or_expression ->  and_expression
+56: boolean_expression ->  or_expression
+57: mult_expression ('*') ->  mult_expression '*' not_expression
+58: mult_expression ('/') ->  mult_expression '/' not_expression
+59: mult_expression ->  not_expression
+60: add_expression ('+') ->  add_expression '+' mult_expression
+61: add_expression ('-') ->  add_expression '-' mult_expression
+62: add_expression ->  mult_expression
+63: arithmetic_expression ->  add_expression
+64: assignment_statement ('=') ->  identifier '=' expression ';'
+65: assignment_statement ('=') ->  identifier '=' constant ';'
+66: return_statement (RETURN) ->  RETURN ';'
+67: condition_statement ('=') ->  identifier '=' '(' boolean_expression ')' '?' expression ':' expression ';'
+68: identifier (NAME) ->  NAME
+69: identifier ->  constant
+70: constant (INTEGER_NUMBER) ->  INTEGER_NUMBER
+71: program_$ ->  program
+
+[[parser.yy (info)] 
+Symbolic Terminal tokens:
+       error
+       EOF
+   257: INTEGER_NUMBER
+   258: NAME
+   259: RETURN
+   260: INTEGER
+   261: WHILE
+   262: IF
+   263: ELSE
+   264: DO
+   265: FOR
+   266: GOTO
+    40: '('
+    41: ')'
+   123: '{'
+   125: '}'
+    59: ';'
+    60: '<'
+    62: '>'
+    58: ':'
+    44: ','
+    61: '='
+    33: '!'
+    38: '&'
+   124: '|'
+    42: '*'
+    47: '/'
+    43: '+'
+    45: '-'
+    63: '?'
+
+[[parser.yy (info)] 
+Grammar States: 
+[[parser.yy (info)] State 0:
+71: program_$ ->  . program 
+  0:   On program to state 1
+  1:   On declaration_statement_list to state 2
+  2:   On procedure_name to state 3
+  3:   On declaration_statement to state 4
+  4:   On NAME to state 5
+  5:   On INTEGER to state 6
+
+
+State 1:
+71: program_$ -> program  . 
+
+
+State 2:
+1: program -> declaration_statement_list  . procedure_name procedure_body 
+6: declaration_statement_list -> declaration_statement_list  . declaration_statement 
+  0:   On procedure_name to state 7
+  1:   On declaration_statement to state 8
+  2:   On NAME to state 5
+  3:   On INTEGER to state 6
+
+
+State 3:
+2: program -> procedure_name  . procedure_body 
+  0:   On procedure_body to state 9
+  1:   On '{' to state 10
+
+
+State 4:
+7: declaration_statement_list -> declaration_statement  . 
+  Reduce by 7: declaration_statement_list -> declaration_statement  . 
+
+
+State 5:
+3: procedure_name -> NAME  . '(' ')' 
+  0:   On '(' to state 11
+
+
+State 6:
+8: declaration_statement -> INTEGER  . identifier ';' 
+  0:   On identifier to state 12
+  1:   On NAME to state 13
+  2:   On constant to state 14
+  3:   On INTEGER_NUMBER to state 15
+
+
+State 7:
+1: program -> declaration_statement_list procedure_name  . procedure_body 
+  0:   On procedure_body to state 16
+  1:   On '{' to state 10
+
+
+State 8:
+6: declaration_statement_list -> declaration_statement_list declaration_statement  . 
+  Reduce by 6: declaration_statement_list -> declaration_statement_list declaration_statement  . 
+
+
+State 9:
+2: program -> procedure_name procedure_body  . 
+  Reduce by 2: program -> procedure_name procedure_body  . 
+
+
+State 10:
+4: procedure_body -> '{'  . declaration_statement_list basic_block_list '}' 
+5: procedure_body -> '{'  . basic_block_list '}' 
+  0:   On declaration_statement_list to state 17
+  1:   On basic_block_list to state 18
+  2:   On declaration_statement to state 4
+  3:   On basic_block to state 19
+  4:   On INTEGER to state 6
+  5:   On '<' to state 20
+
+
+State 11:
+3: procedure_name -> NAME '('  . ')' 
+  0:   On ')' to state 21
+
+
+State 12:
+8: declaration_statement -> INTEGER identifier  . ';' 
+  0:   On ';' to state 22
+
+
+State 13:
+68: identifier -> NAME  . 
+  Reduce by 68: identifier -> NAME  . 
+
+
+State 14:
+69: identifier -> constant  . 
+  Reduce by 69: identifier -> constant  . 
+
+
+State 15:
+70: constant -> INTEGER_NUMBER  . 
+  Reduce by 70: constant -> INTEGER_NUMBER  . 
+
+
+State 16:
+1: program -> declaration_statement_list procedure_name procedure_body  . 
+  Reduce by 1: program -> declaration_statement_list procedure_name procedure_body  . 
+
+
+State 17:
+4: procedure_body -> '{' declaration_statement_list  . basic_block_list '}' 
+6: declaration_statement_list -> declaration_statement_list  . declaration_statement 
+  0:   On basic_block_list to state 23
+  1:   On declaration_statement to state 8
+  2:   On basic_block to state 19
+  3:   On INTEGER to state 6
+  4:   On '<' to state 20
+
+
+State 18:
+5: procedure_body -> '{' basic_block_list  . '}' 
+9: basic_block_list -> basic_block_list  . basic_block 
+  0:   On '}' to state 24
+  1:   On basic_block to state 25
+  2:   On '<' to state 20
+
+
+State 19:
+10: basic_block_list -> basic_block  . 
+  Reduce by 10: basic_block_list -> basic_block  . 
+
+
+State 20:
+11: basic_block -> '<'  . NAME INTEGER_NUMBER '>' ':' statement_list 
+  0:   On NAME to state 26
+
+
+State 21:
+3: procedure_name -> NAME '(' ')'  . 
+  Reduce by 3: procedure_name -> NAME '(' ')'  . 
+
+
+State 22:
+8: declaration_statement -> INTEGER identifier ';'  . 
+  Reduce by 8: declaration_statement -> INTEGER identifier ';'  . 
+
+
+State 23:
+4: procedure_body -> '{' declaration_statement_list basic_block_list  . '}' 
+9: basic_block_list -> basic_block_list  . basic_block 
+  0:   On '}' to state 27
+  1:   On basic_block to state 25
+  2:   On '<' to state 20
+
+
+State 24:
+5: procedure_body -> '{' basic_block_list '}'  . 
+  Reduce by 5: procedure_body -> '{' basic_block_list '}'  . 
+
+
+State 25:
+9: basic_block_list -> basic_block_list basic_block  . 
+  Reduce by 9: basic_block_list -> basic_block_list basic_block  . 
+
+
+State 26:
+11: basic_block -> '<' NAME  . INTEGER_NUMBER '>' ':' statement_list 
+  0:   On INTEGER_NUMBER to state 28
+
+
+State 27:
+4: procedure_body -> '{' declaration_statement_list basic_block_list '}'  . 
+  Reduce by 4: procedure_body -> '{' declaration_statement_list basic_block_list '}'  . 
+
+
+State 28:
+11: basic_block -> '<' NAME INTEGER_NUMBER  . '>' ':' statement_list 
+  0:   On '>' to state 29
+
+
+State 29:
+11: basic_block -> '<' NAME INTEGER_NUMBER '>'  . ':' statement_list 
+  0:   On ':' to state 30
+
+
+State 30:
+11: basic_block -> '<' NAME INTEGER_NUMBER '>' ':'  . statement_list 
+  0:   On statement_list to state 31
+  1:   On statement to state 32
+  2:   On selection_statement to state 33
+  3:   On iterative_statement to state 34
+  4:   On assignment_statement to state 35
+  5:   On condition_statement to state 36
+  6:   On compound_statement to state 37
+  7:   On goto_statement to state 38
+  8:   On return_statement to state 39
+  9:   On ifelse_statement to state 40
+  10:   On while_statement to state 41
+  11:   On for_statement to state 42
+  12:   On do_while_statement to state 43
+  13:   On identifier to state 44
+  14:   On '{' to state 45
+  15:   On GOTO to state 46
+  16:   On RETURN to state 47
+  17:   On IF to state 48
+  18:   On WHILE to state 49
+  19:   On FOR to state 50
+  20:   On DO to state 51
+  21:   On NAME to state 13
+  22:   On constant to state 14
+  23:   On INTEGER_NUMBER to state 15
+
+
+State 31:
+11: basic_block -> '<' NAME INTEGER_NUMBER '>' ':' statement_list  . 
+12: statement_list -> statement_list  . statement 
+  0:   On statement to state 52
+  1:   On selection_statement to state 33
+  2:   On iterative_statement to state 34
+  3:   On assignment_statement to state 35
+  4:   On condition_statement to state 36
+  5:   On compound_statement to state 37
+  6:   On goto_statement to state 38
+  7:   On return_statement to state 39
+  8:   On ifelse_statement to state 40
+  9:   On while_statement to state 41
+  10:   On for_statement to state 42
+  11:   On do_while_statement to state 43
+  12:   On identifier to state 44
+  13:   On '{' to state 45
+  14:   On GOTO to state 46
+  15:   On RETURN to state 47
+  16:   On IF to state 48
+  17:   On WHILE to state 49
+  18:   On FOR to state 50
+  19:   On DO to state 51
+  20:   On NAME to state 13
+  21:   On constant to state 14
+  22:   On INTEGER_NUMBER to state 15
+  Reduce by 11: basic_block -> '<' NAME INTEGER_NUMBER '>' ':' statement_list  . 
+
+
+State 32:
+13: statement_list -> statement  . 
+  Reduce by 13: statement_list -> statement  . 
+
+
+State 33:
+14: statement -> selection_statement  . 
+  Reduce by 14: statement -> selection_statement  . 
+
+
+State 34:
+15: statement -> iterative_statement  . 
+  Reduce by 15: statement -> iterative_statement  . 
+
+
+State 35:
+16: statement -> assignment_statement  . 
+  Reduce by 16: statement -> assignment_statement  . 
+
+
+State 36:
+17: statement -> condition_statement  . 
+  Reduce by 17: statement -> condition_statement  . 
+
+
+State 37:
+18: statement -> compound_statement  . 
+  Reduce by 18: statement -> compound_statement  . 
+
+
+State 38:
+19: statement -> goto_statement  . 
+  Reduce by 19: statement -> goto_statement  . 
+
+
+State 39:
+20: statement -> return_statement  . 
+  Reduce by 20: statement -> return_statement  . 
+
+
+State 40:
+26: selection_statement -> ifelse_statement  . 
+  Reduce by 26: selection_statement -> ifelse_statement  . 
+
+
+State 41:
+23: iterative_statement -> while_statement  . 
+  Reduce by 23: iterative_statement -> while_statement  . 
+
+
+State 42:
+24: iterative_statement -> for_statement  . 
+  Reduce by 24: iterative_statement -> for_statement  . 
+
+
+State 43:
+25: iterative_statement -> do_while_statement  . 
+  Reduce by 25: iterative_statement -> do_while_statement  . 
+
+
+State 44:
+64: assignment_statement -> identifier  . '=' expression ';' 
+65: assignment_statement -> identifier  . '=' constant ';' 
+67: condition_statement -> identifier  . '=' '(' boolean_expression ')' '?' expression ':' expression ';' 
+  0:   On '=' to state 53
+
+
+State 45:
+22: compound_statement -> '{'  . declaration_statement_list statement_list '}' 
+  0:   On declaration_statement_list to state 54
+  1:   On declaration_statement to state 4
+  2:   On INTEGER to state 6
+
+
+State 46:
+21: goto_statement -> GOTO  . '<' NAME INTEGER_NUMBER '>' ';' 
+  0:   On '<' to state 55
+
+
+State 47:
+66: return_statement -> RETURN  . ';' 
+  0:   On ';' to state 56
+
+
+State 48:
+27: ifelse_statement -> IF  . '(' boolean_expression ')' statement 
+28: ifelse_statement -> IF  . '(' boolean_expression ')' statement ELSE statement 
+  0:   On '(' to state 57
+
+
+State 49:
+29: while_statement -> WHILE  . '(' boolean_expression ')' statement 
+  0:   On '(' to state 58
+
+
+State 50:
+31: for_statement -> FOR  . '(' comma_separated_assignment comma_separated_booleans comma_separated_assignments_without_semicolon ')' statement 
+  0:   On '(' to state 59
+
+
+State 51:
+30: do_while_statement -> DO  . statement WHILE '(' boolean_expression ')' ';' 
+  0:   On statement to state 60
+  1:   On selection_statement to state 33
+  2:   On iterative_statement to state 34
+  3:   On assignment_statement to state 35
+  4:   On condition_statement to state 36
+  5:   On compound_statement to state 37
+  6:   On goto_statement to state 38
+  7:   On return_statement to state 39
+  8:   On ifelse_statement to state 40
+  9:   On while_statement to state 41
+  10:   On for_statement to state 42
+  11:   On do_while_statement to state 43
+  12:   On identifier to state 44
+  13:   On '{' to state 45
+  14:   On GOTO to state 46
+  15:   On RETURN to state 47
+  16:   On IF to state 48
+  17:   On WHILE to state 49
+  18:   On FOR to state 50
+  19:   On DO to state 51
+  20:   On NAME to state 13
+  21:   On constant to state 14
+  22:   On INTEGER_NUMBER to state 15
+
+
+State 52:
+12: statement_list -> statement_list statement  . 
+  Reduce by 12: statement_list -> statement_list statement  . 
+
+
+State 53:
+64: assignment_statement -> identifier '='  . expression ';' 
+65: assignment_statement -> identifier '='  . constant ';' 
+67: condition_statement -> identifier '='  . '(' boolean_expression ')' '?' expression ':' expression ';' 
+  0:   On expression to state 61
+  1:   On constant to state 62
+  2:   On '(' to state 63
+  3:   On boolean_expression to state 64
+  4:   On INTEGER_NUMBER to state 15
+  5:   On or_expression to state 65
+  6:   On and_expression to state 66
+  7:   On comparison_expression to state 67
+  8:   On equality_expression to state 68
+  9:   On greater_than_expression to state 69
+  10:   On less_than_expression to state 70
+  11:   On arithmetic_expression to state 71
+  12:   On add_expression to state 72
+  13:   On mult_expression to state 73
+  14:   On not_expression to state 74
+  15:   On '!' to state 75
+  16:   On basic_expression to state 76
+  17:   On identifier to state 77
+  18:   On NAME to state 13
+
+
+State 54:
+22: compound_statement -> '{' declaration_statement_list  . statement_list '}' 
+6: declaration_statement_list -> declaration_statement_list  . declaration_statement 
+  0:   On statement_list to state 78
+  1:   On declaration_statement to state 8
+  2:   On statement to state 32
+  3:   On INTEGER to state 6
+  4:   On selection_statement to state 33
+  5:   On iterative_statement to state 34
+  6:   On assignment_statement to state 35
+  7:   On condition_statement to state 36
+  8:   On compound_statement to state 37
+  9:   On goto_statement to state 38
+  10:   On return_statement to state 39
+  11:   On ifelse_statement to state 40
+  12:   On while_statement to state 41
+  13:   On for_statement to state 42
+  14:   On do_while_statement to state 43
+  15:   On identifier to state 44
+  16:   On '{' to state 45
+  17:   On GOTO to state 46
+  18:   On RETURN to state 47
+  19:   On IF to state 48
+  20:   On WHILE to state 49
+  21:   On FOR to state 50
+  22:   On DO to state 51
+  23:   On NAME to state 13
+  24:   On constant to state 14
+  25:   On INTEGER_NUMBER to state 15
+
+
+State 55:
+21: goto_statement -> GOTO '<'  . NAME INTEGER_NUMBER '>' ';' 
+  0:   On NAME to state 79
+
+
+State 56:
+66: return_statement -> RETURN ';'  . 
+  Reduce by 66: return_statement -> RETURN ';'  . 
+
+
+State 57:
+27: ifelse_statement -> IF '('  . boolean_expression ')' statement 
+28: ifelse_statement -> IF '('  . boolean_expression ')' statement ELSE statement 
+  0:   On boolean_expression to state 80
+  1:   On or_expression to state 65
+  2:   On and_expression to state 66
+  3:   On comparison_expression to state 67
+  4:   On equality_expression to state 68
+  5:   On greater_than_expression to state 69
+  6:   On less_than_expression to state 70
+  7:   On arithmetic_expression to state 71
+  8:   On add_expression to state 72
+  9:   On mult_expression to state 73
+  10:   On not_expression to state 74
+  11:   On '!' to state 75
+  12:   On basic_expression to state 76
+  13:   On '(' to state 81
+  14:   On identifier to state 77
+  15:   On NAME to state 13
+  16:   On constant to state 14
+  17:   On INTEGER_NUMBER to state 15
+
+
+State 58:
+29: while_statement -> WHILE '('  . boolean_expression ')' statement 
+  0:   On boolean_expression to state 82
+  1:   On or_expression to state 65
+  2:   On and_expression to state 66
+  3:   On comparison_expression to state 67
+  4:   On equality_expression to state 68
+  5:   On greater_than_expression to state 69
+  6:   On less_than_expression to state 70
+  7:   On arithmetic_expression to state 71
+  8:   On add_expression to state 72
+  9:   On mult_expression to state 73
+  10:   On not_expression to state 74
+  11:   On '!' to state 75
+  12:   On basic_expression to state 76
+  13:   On '(' to state 81
+  14:   On identifier to state 77
+  15:   On NAME to state 13
+  16:   On constant to state 14
+  17:   On INTEGER_NUMBER to state 15
+
+
+State 59:
+31: for_statement -> FOR '('  . comma_separated_assignment comma_separated_booleans comma_separated_assignments_without_semicolon ')' statement 
+  0:   On comma_separated_assignment to state 83
+  1:   On ';' to state 84
+  2:   On assignment_statement to state 85
+  3:   On identifier to state 86
+  4:   On NAME to state 13
+  5:   On constant to state 14
+  6:   On INTEGER_NUMBER to state 15
+
+
+State 60:
+30: do_while_statement -> DO statement  . WHILE '(' boolean_expression ')' ';' 
+  0:   On WHILE to state 87
+
+
+State 61:
+64: assignment_statement -> identifier '=' expression  . ';' 
+  0:   On ';' to state 88
+
+
+State 62:
+65: assignment_statement -> identifier '=' constant  . ';' 
+69: identifier -> constant  . 
+  0:   On ';' to state 89
+  Reduce by 69: identifier -> constant  . 
+Solved SR CONFLICT on ';':
+	shift to state 89, removed ';' from LA-set of rule 69)
+
+
+State 63:
+67: condition_statement -> identifier '=' '('  . boolean_expression ')' '?' expression ':' expression ';' 
+48: basic_expression -> '('  . expression ')' 
+  0:   On boolean_expression to state 90
+  1:   On expression to state 91
+  2:   On or_expression to state 65
+  3:   On and_expression to state 66
+  4:   On comparison_expression to state 67
+  5:   On equality_expression to state 68
+  6:   On greater_than_expression to state 69
+  7:   On less_than_expression to state 70
+  8:   On arithmetic_expression to state 71
+  9:   On add_expression to state 72
+  10:   On mult_expression to state 73
+  11:   On not_expression to state 74
+  12:   On '!' to state 75
+  13:   On basic_expression to state 76
+  14:   On '(' to state 81
+  15:   On identifier to state 77
+  16:   On NAME to state 13
+  17:   On constant to state 14
+  18:   On INTEGER_NUMBER to state 15
+
+
+State 64:
+37: expression -> boolean_expression  . 
+  Reduce by 37: expression -> boolean_expression  . 
+
+
+State 65:
+56: boolean_expression -> or_expression  . 
+54: or_expression -> or_expression  . '|' '|' and_expression 
+  0:   On '|' to state 92
+  Reduce by 56: boolean_expression -> or_expression  . 
+
+
+State 66:
+55: or_expression -> and_expression  . 
+52: and_expression -> and_expression  . '&' '&' comparison_expression 
+  0:   On '&' to state 93
+  Reduce by 55: or_expression -> and_expression  . 
+
+
+State 67:
+53: and_expression -> comparison_expression  . 
+  Reduce by 53: and_expression -> comparison_expression  . 
+
+
+State 68:
+47: comparison_expression -> equality_expression  . 
+44: equality_expression -> equality_expression  . '=' '=' greater_than_expression 
+45: equality_expression -> equality_expression  . '!' '=' greater_than_expression 
+  0:   On '=' to state 94
+  1:   On '!' to state 95
+  Reduce by 47: comparison_expression -> equality_expression  . 
+
+
+State 69:
+46: equality_expression -> greater_than_expression  . 
+41: greater_than_expression -> greater_than_expression  . '>' less_than_expression 
+42: greater_than_expression -> greater_than_expression  . '>' '=' less_than_expression 
+  0:   On '>' to state 96
+  Reduce by 46: equality_expression -> greater_than_expression  . 
+
+
+State 70:
+43: greater_than_expression -> less_than_expression  . 
+38: less_than_expression -> less_than_expression  . '<' arithmetic_expression 
+39: less_than_expression -> less_than_expression  . '<' '=' arithmetic_expression 
+  0:   On '<' to state 97
+  Reduce by 43: greater_than_expression -> less_than_expression  . 
+
+
+State 71:
+40: less_than_expression -> arithmetic_expression  . 
+  Reduce by 40: less_than_expression -> arithmetic_expression  . 
+
+
+State 72:
+63: arithmetic_expression -> add_expression  . 
+60: add_expression -> add_expression  . '+' mult_expression 
+61: add_expression -> add_expression  . '-' mult_expression 
+  0:   On '+' to state 98
+  1:   On '-' to state 99
+  Reduce by 63: arithmetic_expression -> add_expression  . 
+
+
+State 73:
+62: add_expression -> mult_expression  . 
+57: mult_expression -> mult_expression  . '*' not_expression 
+58: mult_expression -> mult_expression  . '/' not_expression 
+  0:   On '*' to state 100
+  1:   On '/' to state 101
+  Reduce by 62: add_expression -> mult_expression  . 
+
+
+State 74:
+59: mult_expression -> not_expression  . 
+  Reduce by 59: mult_expression -> not_expression  . 
+
+
+State 75:
+50: not_expression -> '!'  . not_expression 
+  0:   On not_expression to state 102
+  1:   On '!' to state 75
+  2:   On basic_expression to state 76
+  3:   On '(' to state 81
+  4:   On identifier to state 77
+  5:   On NAME to state 13
+  6:   On constant to state 14
+  7:   On INTEGER_NUMBER to state 15
+
+
+State 76:
+51: not_expression -> basic_expression  . 
+  Reduce by 51: not_expression -> basic_expression  . 
+
+
+State 77:
+49: basic_expression -> identifier  . 
+  Reduce by 49: basic_expression -> identifier  . 
+
+
+State 78:
+22: compound_statement -> '{' declaration_statement_list statement_list  . '}' 
+12: statement_list -> statement_list  . statement 
+  0:   On '}' to state 103
+  1:   On statement to state 52
+  2:   On selection_statement to state 33
+  3:   On iterative_statement to state 34
+  4:   On assignment_statement to state 35
+  5:   On condition_statement to state 36
+  6:   On compound_statement to state 37
+  7:   On goto_statement to state 38
+  8:   On return_statement to state 39
+  9:   On ifelse_statement to state 40
+  10:   On while_statement to state 41
+  11:   On for_statement to state 42
+  12:   On do_while_statement to state 43
+  13:   On identifier to state 44
+  14:   On '{' to state 45
+  15:   On GOTO to state 46
+  16:   On RETURN to state 47
+  17:   On IF to state 48
+  18:   On WHILE to state 49
+  19:   On FOR to state 50
+  20:   On DO to state 51
+  21:   On NAME to state 13
+  22:   On constant to state 14
+  23:   On INTEGER_NUMBER to state 15
+
+
+State 79:
+21: goto_statement -> GOTO '<' NAME  . INTEGER_NUMBER '>' ';' 
+  0:   On INTEGER_NUMBER to state 104
+
+
+State 80:
+27: ifelse_statement -> IF '(' boolean_expression  . ')' statement 
+28: ifelse_statement -> IF '(' boolean_expression  . ')' statement ELSE statement 
+  0:   On ')' to state 105
+
+
+State 81:
+48: basic_expression -> '('  . expression ')' 
+  0:   On expression to state 91
+  1:   On boolean_expression to state 64
+  2:   On or_expression to state 65
+  3:   On and_expression to state 66
+  4:   On comparison_expression to state 67
+  5:   On equality_expression to state 68
+  6:   On greater_than_expression to state 69
+  7:   On less_than_expression to state 70
+  8:   On arithmetic_expression to state 71
+  9:   On add_expression to state 72
+  10:   On mult_expression to state 73
+  11:   On not_expression to state 74
+  12:   On '!' to state 75
+  13:   On basic_expression to state 76
+  14:   On '(' to state 81
+  15:   On identifier to state 77
+  16:   On NAME to state 13
+  17:   On constant to state 14
+  18:   On INTEGER_NUMBER to state 15
+
+
+State 82:
+29: while_statement -> WHILE '(' boolean_expression  . ')' statement 
+  0:   On ')' to state 106
+
+
+State 83:
+31: for_statement -> FOR '(' comma_separated_assignment  . comma_separated_booleans comma_separated_assignments_without_semicolon ')' statement 
+  0:   On comma_separated_booleans to state 107
+  1:   On ';' to state 108
+  2:   On boolean_expression to state 109
+  3:   On or_expression to state 65
+  4:   On and_expression to state 66
+  5:   On comparison_expression to state 67
+  6:   On equality_expression to state 68
+  7:   On greater_than_expression to state 69
+  8:   On less_than_expression to state 70
+  9:   On arithmetic_expression to state 71
+  10:   On add_expression to state 72
+  11:   On mult_expression to state 73
+  12:   On not_expression to state 74
+  13:   On '!' to state 75
+  14:   On basic_expression to state 76
+  15:   On '(' to state 81
+  16:   On identifier to state 77
+  17:   On NAME to state 13
+  18:   On constant to state 14
+  19:   On INTEGER_NUMBER to state 15
+
+
+State 84:
+32: comma_separated_assignment -> ';'  . 
+  Reduce by 32: comma_separated_assignment -> ';'  . 
+
+
+State 85:
+33: comma_separated_assignment -> assignment_statement  . ',' comma_separated_assignment 
+  0:   On ',' to state 110
+
+
+State 86:
+64: assignment_statement -> identifier  . '=' expression ';' 
+65: assignment_statement -> identifier  . '=' constant ';' 
+  0:   On '=' to state 111
+
+
+State 87:
+30: do_while_statement -> DO statement WHILE  . '(' boolean_expression ')' ';' 
+  0:   On '(' to state 112
+
+
+State 88:
+64: assignment_statement -> identifier '=' expression ';'  . 
+  Reduce by 64: assignment_statement -> identifier '=' expression ';'  . 
+
+
+State 89:
+65: assignment_statement -> identifier '=' constant ';'  . 
+  Reduce by 65: assignment_statement -> identifier '=' constant ';'  . 
+
+
+State 90:
+67: condition_statement -> identifier '=' '(' boolean_expression  . ')' '?' expression ':' expression ';' 
+37: expression -> boolean_expression  . 
+  0:   On ')' to state 113
+  Reduce by 37: expression -> boolean_expression  . 
+Solved SR CONFLICT on ')':
+	shift to state 113, removed ')' from LA-set of rule 37)
+
+
+State 91:
+48: basic_expression -> '(' expression  . ')' 
+  0:   On ')' to state 114
+
+
+State 92:
+54: or_expression -> or_expression '|'  . '|' and_expression 
+  0:   On '|' to state 115
+
+
+State 93:
+52: and_expression -> and_expression '&'  . '&' comparison_expression 
+  0:   On '&' to state 116
+
+
+State 94:
+44: equality_expression -> equality_expression '='  . '=' greater_than_expression 
+  0:   On '=' to state 117
+
+
+State 95:
+45: equality_expression -> equality_expression '!'  . '=' greater_than_expression 
+  0:   On '=' to state 118
+
+
+State 96:
+41: greater_than_expression -> greater_than_expression '>'  . less_than_expression 
+42: greater_than_expression -> greater_than_expression '>'  . '=' less_than_expression 
+  0:   On less_than_expression to state 119
+  1:   On '=' to state 120
+  2:   On arithmetic_expression to state 71
+  3:   On add_expression to state 72
+  4:   On mult_expression to state 73
+  5:   On not_expression to state 74
+  6:   On '!' to state 75
+  7:   On basic_expression to state 76
+  8:   On '(' to state 81
+  9:   On identifier to state 77
+  10:   On NAME to state 13
+  11:   On constant to state 14
+  12:   On INTEGER_NUMBER to state 15
+
+
+State 97:
+38: less_than_expression -> less_than_expression '<'  . arithmetic_expression 
+39: less_than_expression -> less_than_expression '<'  . '=' arithmetic_expression 
+  0:   On arithmetic_expression to state 121
+  1:   On '=' to state 122
+  2:   On add_expression to state 72
+  3:   On mult_expression to state 73
+  4:   On not_expression to state 74
+  5:   On '!' to state 75
+  6:   On basic_expression to state 76
+  7:   On '(' to state 81
+  8:   On identifier to state 77
+  9:   On NAME to state 13
+  10:   On constant to state 14
+  11:   On INTEGER_NUMBER to state 15
+
+
+State 98:
+60: add_expression -> add_expression '+'  . mult_expression 
+  0:   On mult_expression to state 123
+  1:   On not_expression to state 74
+  2:   On '!' to state 75
+  3:   On basic_expression to state 76
+  4:   On '(' to state 81
+  5:   On identifier to state 77
+  6:   On NAME to state 13
+  7:   On constant to state 14
+  8:   On INTEGER_NUMBER to state 15
+
+
+State 99:
+61: add_expression -> add_expression '-'  . mult_expression 
+  0:   On mult_expression to state 124
+  1:   On not_expression to state 74
+  2:   On '!' to state 75
+  3:   On basic_expression to state 76
+  4:   On '(' to state 81
+  5:   On identifier to state 77
+  6:   On NAME to state 13
+  7:   On constant to state 14
+  8:   On INTEGER_NUMBER to state 15
+
+
+State 100:
+57: mult_expression -> mult_expression '*'  . not_expression 
+  0:   On not_expression to state 125
+  1:   On '!' to state 75
+  2:   On basic_expression to state 76
+  3:   On '(' to state 81
+  4:   On identifier to state 77
+  5:   On NAME to state 13
+  6:   On constant to state 14
+  7:   On INTEGER_NUMBER to state 15
+
+
+State 101:
+58: mult_expression -> mult_expression '/'  . not_expression 
+  0:   On not_expression to state 126
+  1:   On '!' to state 75
+  2:   On basic_expression to state 76
+  3:   On '(' to state 81
+  4:   On identifier to state 77
+  5:   On NAME to state 13
+  6:   On constant to state 14
+  7:   On INTEGER_NUMBER to state 15
+
+
+State 102:
+50: not_expression -> '!' not_expression  . 
+  Reduce by 50: not_expression -> '!' not_expression  . 
+
+
+State 103:
+22: compound_statement -> '{' declaration_statement_list statement_list '}'  . 
+  Reduce by 22: compound_statement -> '{' declaration_statement_list statement_list '}'  . 
+
+
+State 104:
+21: goto_statement -> GOTO '<' NAME INTEGER_NUMBER  . '>' ';' 
+  0:   On '>' to state 127
+
+
+State 105:
+27: ifelse_statement -> IF '(' boolean_expression ')'  . statement 
+28: ifelse_statement -> IF '(' boolean_expression ')'  . statement ELSE statement 
+  0:   On statement to state 128
+  1:   On selection_statement to state 33
+  2:   On iterative_statement to state 34
+  3:   On assignment_statement to state 35
+  4:   On condition_statement to state 36
+  5:   On compound_statement to state 37
+  6:   On goto_statement to state 38
+  7:   On return_statement to state 39
+  8:   On ifelse_statement to state 40
+  9:   On while_statement to state 41
+  10:   On for_statement to state 42
+  11:   On do_while_statement to state 43
+  12:   On identifier to state 44
+  13:   On '{' to state 45
+  14:   On GOTO to state 46
+  15:   On RETURN to state 47
+  16:   On IF to state 48
+  17:   On WHILE to state 49
+  18:   On FOR to state 50
+  19:   On DO to state 51
+  20:   On NAME to state 13
+  21:   On constant to state 14
+  22:   On INTEGER_NUMBER to state 15
+
+
+State 106:
+29: while_statement -> WHILE '(' boolean_expression ')'  . statement 
+  0:   On statement to state 129
+  1:   On selection_statement to state 33
+  2:   On iterative_statement to state 34
+  3:   On assignment_statement to state 35
+  4:   On condition_statement to state 36
+  5:   On compound_statement to state 37
+  6:   On goto_statement to state 38
+  7:   On return_statement to state 39
+  8:   On ifelse_statement to state 40
+  9:   On while_statement to state 41
+  10:   On for_statement to state 42
+  11:   On do_while_statement to state 43
+  12:   On identifier to state 44
+  13:   On '{' to state 45
+  14:   On GOTO to state 46
+  15:   On RETURN to state 47
+  16:   On IF to state 48
+  17:   On WHILE to state 49
+  18:   On FOR to state 50
+  19:   On DO to state 51
+  20:   On NAME to state 13
+  21:   On constant to state 14
+  22:   On INTEGER_NUMBER to state 15
+
+
+State 107:
+31: for_statement -> FOR '(' comma_separated_assignment comma_separated_booleans  . comma_separated_assignments_without_semicolon ')' statement 
+  0:   On comma_separated_assignments_without_semicolon to state 130
+  1:   On assignment_statement to state 131
+  2:   On identifier to state 86
+  3:   On NAME to state 13
+  4:   On constant to state 14
+  5:   On INTEGER_NUMBER to state 15
+
+
+State 108:
+34: comma_separated_booleans -> ';'  . 
+  Reduce by 34: comma_separated_booleans -> ';'  . 
+
+
+State 109:
+35: comma_separated_booleans -> boolean_expression  . ',' comma_separated_booleans 
+  0:   On ',' to state 132
+
+
+State 110:
+33: comma_separated_assignment -> assignment_statement ','  . comma_separated_assignment 
+  0:   On comma_separated_assignment to state 133
+  1:   On ';' to state 84
+  2:   On assignment_statement to state 85
+  3:   On identifier to state 86
+  4:   On NAME to state 13
+  5:   On constant to state 14
+  6:   On INTEGER_NUMBER to state 15
+
+
+State 111:
+64: assignment_statement -> identifier '='  . expression ';' 
+65: assignment_statement -> identifier '='  . constant ';' 
+  0:   On expression to state 61
+  1:   On constant to state 62
+  2:   On boolean_expression to state 64
+  3:   On INTEGER_NUMBER to state 15
+  4:   On or_expression to state 65
+  5:   On and_expression to state 66
+  6:   On comparison_expression to state 67
+  7:   On equality_expression to state 68
+  8:   On greater_than_expression to state 69
+  9:   On less_than_expression to state 70
+  10:   On arithmetic_expression to state 71
+  11:   On add_expression to state 72
+  12:   On mult_expression to state 73
+  13:   On not_expression to state 74
+  14:   On '!' to state 75
+  15:   On basic_expression to state 76
+  16:   On '(' to state 81
+  17:   On identifier to state 77
+  18:   On NAME to state 13
+
+
+State 112:
+30: do_while_statement -> DO statement WHILE '('  . boolean_expression ')' ';' 
+  0:   On boolean_expression to state 134
+  1:   On or_expression to state 65
+  2:   On and_expression to state 66
+  3:   On comparison_expression to state 67
+  4:   On equality_expression to state 68
+  5:   On greater_than_expression to state 69
+  6:   On less_than_expression to state 70
+  7:   On arithmetic_expression to state 71
+  8:   On add_expression to state 72
+  9:   On mult_expression to state 73
+  10:   On not_expression to state 74
+  11:   On '!' to state 75
+  12:   On basic_expression to state 76
+  13:   On '(' to state 81
+  14:   On identifier to state 77
+  15:   On NAME to state 13
+  16:   On constant to state 14
+  17:   On INTEGER_NUMBER to state 15
+
+
+State 113:
+67: condition_statement -> identifier '=' '(' boolean_expression ')'  . '?' expression ':' expression ';' 
+  0:   On '?' to state 135
+
+
+State 114:
+48: basic_expression -> '(' expression ')'  . 
+  Reduce by 48: basic_expression -> '(' expression ')'  . 
+
+
+State 115:
+54: or_expression -> or_expression '|' '|'  . and_expression 
+  0:   On and_expression to state 136
+  1:   On comparison_expression to state 67
+  2:   On equality_expression to state 68
+  3:   On greater_than_expression to state 69
+  4:   On less_than_expression to state 70
+  5:   On arithmetic_expression to state 71
+  6:   On add_expression to state 72
+  7:   On mult_expression to state 73
+  8:   On not_expression to state 74
+  9:   On '!' to state 75
+  10:   On basic_expression to state 76
+  11:   On '(' to state 81
+  12:   On identifier to state 77
+  13:   On NAME to state 13
+  14:   On constant to state 14
+  15:   On INTEGER_NUMBER to state 15
+
+
+State 116:
+52: and_expression -> and_expression '&' '&'  . comparison_expression 
+  0:   On comparison_expression to state 137
+  1:   On equality_expression to state 68
+  2:   On greater_than_expression to state 69
+  3:   On less_than_expression to state 70
+  4:   On arithmetic_expression to state 71
+  5:   On add_expression to state 72
+  6:   On mult_expression to state 73
+  7:   On not_expression to state 74
+  8:   On '!' to state 75
+  9:   On basic_expression to state 76
+  10:   On '(' to state 81
+  11:   On identifier to state 77
+  12:   On NAME to state 13
+  13:   On constant to state 14
+  14:   On INTEGER_NUMBER to state 15
+
+
+State 117:
+44: equality_expression -> equality_expression '=' '='  . greater_than_expression 
+  0:   On greater_than_expression to state 138
+  1:   On less_than_expression to state 70
+  2:   On arithmetic_expression to state 71
+  3:   On add_expression to state 72
+  4:   On mult_expression to state 73
+  5:   On not_expression to state 74
+  6:   On '!' to state 75
+  7:   On basic_expression to state 76
+  8:   On '(' to state 81
+  9:   On identifier to state 77
+  10:   On NAME to state 13
+  11:   On constant to state 14
+  12:   On INTEGER_NUMBER to state 15
+
+
+State 118:
+45: equality_expression -> equality_expression '!' '='  . greater_than_expression 
+  0:   On greater_than_expression to state 139
+  1:   On less_than_expression to state 70
+  2:   On arithmetic_expression to state 71
+  3:   On add_expression to state 72
+  4:   On mult_expression to state 73
+  5:   On not_expression to state 74
+  6:   On '!' to state 75
+  7:   On basic_expression to state 76
+  8:   On '(' to state 81
+  9:   On identifier to state 77
+  10:   On NAME to state 13
+  11:   On constant to state 14
+  12:   On INTEGER_NUMBER to state 15
+
+
+State 119:
+41: greater_than_expression -> greater_than_expression '>' less_than_expression  . 
+38: less_than_expression -> less_than_expression  . '<' arithmetic_expression 
+39: less_than_expression -> less_than_expression  . '<' '=' arithmetic_expression 
+  0:   On '<' to state 97
+  Reduce by 41: greater_than_expression -> greater_than_expression '>' less_than_expression  . 
+
+
+State 120:
+42: greater_than_expression -> greater_than_expression '>' '='  . less_than_expression 
+  0:   On less_than_expression to state 140
+  1:   On arithmetic_expression to state 71
+  2:   On add_expression to state 72
+  3:   On mult_expression to state 73
+  4:   On not_expression to state 74
+  5:   On '!' to state 75
+  6:   On basic_expression to state 76
+  7:   On '(' to state 81
+  8:   On identifier to state 77
+  9:   On NAME to state 13
+  10:   On constant to state 14
+  11:   On INTEGER_NUMBER to state 15
+
+
+State 121:
+38: less_than_expression -> less_than_expression '<' arithmetic_expression  . 
+  Reduce by 38: less_than_expression -> less_than_expression '<' arithmetic_expression  . 
+
+
+State 122:
+39: less_than_expression -> less_than_expression '<' '='  . arithmetic_expression 
+  0:   On arithmetic_expression to state 141
+  1:   On add_expression to state 72
+  2:   On mult_expression to state 73
+  3:   On not_expression to state 74
+  4:   On '!' to state 75
+  5:   On basic_expression to state 76
+  6:   On '(' to state 81
+  7:   On identifier to state 77
+  8:   On NAME to state 13
+  9:   On constant to state 14
+  10:   On INTEGER_NUMBER to state 15
+
+
+State 123:
+60: add_expression -> add_expression '+' mult_expression  . 
+57: mult_expression -> mult_expression  . '*' not_expression 
+58: mult_expression -> mult_expression  . '/' not_expression 
+  0:   On '*' to state 100
+  1:   On '/' to state 101
+  Reduce by 60: add_expression -> add_expression '+' mult_expression  . 
+
+
+State 124:
+61: add_expression -> add_expression '-' mult_expression  . 
+57: mult_expression -> mult_expression  . '*' not_expression 
+58: mult_expression -> mult_expression  . '/' not_expression 
+  0:   On '*' to state 100
+  1:   On '/' to state 101
+  Reduce by 61: add_expression -> add_expression '-' mult_expression  . 
+
+
+State 125:
+57: mult_expression -> mult_expression '*' not_expression  . 
+  Reduce by 57: mult_expression -> mult_expression '*' not_expression  . 
+
+
+State 126:
+58: mult_expression -> mult_expression '/' not_expression  . 
+  Reduce by 58: mult_expression -> mult_expression '/' not_expression  . 
+
+
+State 127:
+21: goto_statement -> GOTO '<' NAME INTEGER_NUMBER '>'  . ';' 
+  0:   On ';' to state 142
+
+
+State 128:
+27: ifelse_statement -> IF '(' boolean_expression ')' statement  . 
+28: ifelse_statement -> IF '(' boolean_expression ')' statement  . ELSE statement 
+  0:   On ELSE to state 143
+  Reduce by 27: ifelse_statement -> IF '(' boolean_expression ')' statement  . 
+Solved SR CONFLICT on ELSE:
+	shift to state 143, removed ELSE from LA-set of rule 27)
+
+
+State 129:
+29: while_statement -> WHILE '(' boolean_expression ')' statement  . 
+  Reduce by 29: while_statement -> WHILE '(' boolean_expression ')' statement  . 
+
+
+State 130:
+31: for_statement -> FOR '(' comma_separated_assignment comma_separated_booleans comma_separated_assignments_without_semicolon  . ')' statement 
+  0:   On ')' to state 144
+
+
+State 131:
+36: comma_separated_assignments_without_semicolon -> assignment_statement  . ',' comma_separated_assignments_without_semicolon 
+  0:   On ',' to state 145
+
+
+State 132:
+35: comma_separated_booleans -> boolean_expression ','  . comma_separated_booleans 
+  0:   On comma_separated_booleans to state 146
+  1:   On ';' to state 108
+  2:   On boolean_expression to state 109
+  3:   On or_expression to state 65
+  4:   On and_expression to state 66
+  5:   On comparison_expression to state 67
+  6:   On equality_expression to state 68
+  7:   On greater_than_expression to state 69
+  8:   On less_than_expression to state 70
+  9:   On arithmetic_expression to state 71
+  10:   On add_expression to state 72
+  11:   On mult_expression to state 73
+  12:   On not_expression to state 74
+  13:   On '!' to state 75
+  14:   On basic_expression to state 76
+  15:   On '(' to state 81
+  16:   On identifier to state 77
+  17:   On NAME to state 13
+  18:   On constant to state 14
+  19:   On INTEGER_NUMBER to state 15
+
+
+State 133:
+33: comma_separated_assignment -> assignment_statement ',' comma_separated_assignment  . 
+  Reduce by 33: comma_separated_assignment -> assignment_statement ',' comma_separated_assignment  . 
+
+
+State 134:
+30: do_while_statement -> DO statement WHILE '(' boolean_expression  . ')' ';' 
+  0:   On ')' to state 147
+
+
+State 135:
+67: condition_statement -> identifier '=' '(' boolean_expression ')' '?'  . expression ':' expression ';' 
+  0:   On expression to state 148
+  1:   On boolean_expression to state 64
+  2:   On or_expression to state 65
+  3:   On and_expression to state 66
+  4:   On comparison_expression to state 67
+  5:   On equality_expression to state 68
+  6:   On greater_than_expression to state 69
+  7:   On less_than_expression to state 70
+  8:   On arithmetic_expression to state 71
+  9:   On add_expression to state 72
+  10:   On mult_expression to state 73
+  11:   On not_expression to state 74
+  12:   On '!' to state 75
+  13:   On basic_expression to state 76
+  14:   On '(' to state 81
+  15:   On identifier to state 77
+  16:   On NAME to state 13
+  17:   On constant to state 14
+  18:   On INTEGER_NUMBER to state 15
+
+
+State 136:
+54: or_expression -> or_expression '|' '|' and_expression  . 
+52: and_expression -> and_expression  . '&' '&' comparison_expression 
+  0:   On '&' to state 93
+  Reduce by 54: or_expression -> or_expression '|' '|' and_expression  . 
+
+
+State 137:
+52: and_expression -> and_expression '&' '&' comparison_expression  . 
+  Reduce by 52: and_expression -> and_expression '&' '&' comparison_expression  . 
+
+
+State 138:
+44: equality_expression -> equality_expression '=' '=' greater_than_expression  . 
+41: greater_than_expression -> greater_than_expression  . '>' less_than_expression 
+42: greater_than_expression -> greater_than_expression  . '>' '=' less_than_expression 
+  0:   On '>' to state 96
+  Reduce by 44: equality_expression -> equality_expression '=' '=' greater_than_expression  . 
+
+
+State 139:
+45: equality_expression -> equality_expression '!' '=' greater_than_expression  . 
+41: greater_than_expression -> greater_than_expression  . '>' less_than_expression 
+42: greater_than_expression -> greater_than_expression  . '>' '=' less_than_expression 
+  0:   On '>' to state 96
+  Reduce by 45: equality_expression -> equality_expression '!' '=' greater_than_expression  . 
+
+
+State 140:
+42: greater_than_expression -> greater_than_expression '>' '=' less_than_expression  . 
+38: less_than_expression -> less_than_expression  . '<' arithmetic_expression 
+39: less_than_expression -> less_than_expression  . '<' '=' arithmetic_expression 
+  0:   On '<' to state 97
+  Reduce by 42: greater_than_expression -> greater_than_expression '>' '=' less_than_expression  . 
+
+
+State 141:
+39: less_than_expression -> less_than_expression '<' '=' arithmetic_expression  . 
+  Reduce by 39: less_than_expression -> less_than_expression '<' '=' arithmetic_expression  . 
+
+
+State 142:
+21: goto_statement -> GOTO '<' NAME INTEGER_NUMBER '>' ';'  . 
+  Reduce by 21: goto_statement -> GOTO '<' NAME INTEGER_NUMBER '>' ';'  . 
+
+
+State 143:
+28: ifelse_statement -> IF '(' boolean_expression ')' statement ELSE  . statement 
+  0:   On statement to state 149
+  1:   On selection_statement to state 33
+  2:   On iterative_statement to state 34
+  3:   On assignment_statement to state 35
+  4:   On condition_statement to state 36
+  5:   On compound_statement to state 37
+  6:   On goto_statement to state 38
+  7:   On return_statement to state 39
+  8:   On ifelse_statement to state 40
+  9:   On while_statement to state 41
+  10:   On for_statement to state 42
+  11:   On do_while_statement to state 43
+  12:   On identifier to state 44
+  13:   On '{' to state 45
+  14:   On GOTO to state 46
+  15:   On RETURN to state 47
+  16:   On IF to state 48
+  17:   On WHILE to state 49
+  18:   On FOR to state 50
+  19:   On DO to state 51
+  20:   On NAME to state 13
+  21:   On constant to state 14
+  22:   On INTEGER_NUMBER to state 15
+
+
+State 144:
+31: for_statement -> FOR '(' comma_separated_assignment comma_separated_booleans comma_separated_assignments_without_semicolon ')'  . statement 
+  0:   On statement to state 150
+  1:   On selection_statement to state 33
+  2:   On iterative_statement to state 34
+  3:   On assignment_statement to state 35
+  4:   On condition_statement to state 36
+  5:   On compound_statement to state 37
+  6:   On goto_statement to state 38
+  7:   On return_statement to state 39
+  8:   On ifelse_statement to state 40
+  9:   On while_statement to state 41
+  10:   On for_statement to state 42
+  11:   On do_while_statement to state 43
+  12:   On identifier to state 44
+  13:   On '{' to state 45
+  14:   On GOTO to state 46
+  15:   On RETURN to state 47
+  16:   On IF to state 48
+  17:   On WHILE to state 49
+  18:   On FOR to state 50
+  19:   On DO to state 51
+  20:   On NAME to state 13
+  21:   On constant to state 14
+  22:   On INTEGER_NUMBER to state 15
+
+
+State 145:
+36: comma_separated_assignments_without_semicolon -> assignment_statement ','  . comma_separated_assignments_without_semicolon 
+  0:   On comma_separated_assignments_without_semicolon to state 151
+  1:   On assignment_statement to state 131
+  2:   On identifier to state 86
+  3:   On NAME to state 13
+  4:   On constant to state 14
+  5:   On INTEGER_NUMBER to state 15
+
+
+State 146:
+35: comma_separated_booleans -> boolean_expression ',' comma_separated_booleans  . 
+  Reduce by 35: comma_separated_booleans -> boolean_expression ',' comma_separated_booleans  . 
+
+
+State 147:
+30: do_while_statement -> DO statement WHILE '(' boolean_expression ')'  . ';' 
+  0:   On ';' to state 152
+
+
+State 148:
+67: condition_statement -> identifier '=' '(' boolean_expression ')' '?' expression  . ':' expression ';' 
+  0:   On ':' to state 153
+
+
+State 149:
+28: ifelse_statement -> IF '(' boolean_expression ')' statement ELSE statement  . 
+  Reduce by 28: ifelse_statement -> IF '(' boolean_expression ')' statement ELSE statement  . 
+
+
+State 150:
+31: for_statement -> FOR '(' comma_separated_assignment comma_separated_booleans comma_separated_assignments_without_semicolon ')' statement  . 
+  Reduce by 31: for_statement -> FOR '(' comma_separated_assignment comma_separated_booleans comma_separated_assignments_without_semicolon ')' statement  . 
+
+
+State 151:
+36: comma_separated_assignments_without_semicolon -> assignment_statement ',' comma_separated_assignments_without_semicolon  . 
+  Reduce by 36: comma_separated_assignments_without_semicolon -> assignment_statement ',' comma_separated_assignments_without_semicolon  . 
+
+
+State 152:
+30: do_while_statement -> DO statement WHILE '(' boolean_expression ')' ';'  . 
+  Reduce by 30: do_while_statement -> DO statement WHILE '(' boolean_expression ')' ';'  . 
+
+
+State 153:
+67: condition_statement -> identifier '=' '(' boolean_expression ')' '?' expression ':'  . expression ';' 
+  0:   On expression to state 154
+  1:   On boolean_expression to state 64
+  2:   On or_expression to state 65
+  3:   On and_expression to state 66
+  4:   On comparison_expression to state 67
+  5:   On equality_expression to state 68
+  6:   On greater_than_expression to state 69
+  7:   On less_than_expression to state 70
+  8:   On arithmetic_expression to state 71
+  9:   On add_expression to state 72
+  10:   On mult_expression to state 73
+  11:   On not_expression to state 74
+  12:   On '!' to state 75
+  13:   On basic_expression to state 76
+  14:   On '(' to state 81
+  15:   On identifier to state 77
+  16:   On NAME to state 13
+  17:   On constant to state 14
+  18:   On INTEGER_NUMBER to state 15
+
+
+State 154:
+67: condition_statement -> identifier '=' '(' boolean_expression ')' '?' expression ':' expression  . ';' 
+  0:   On ';' to state 155
+
+
+State 155:
+67: condition_statement -> identifier '=' '(' boolean_expression ')' '?' expression ':' expression ';'  . 
+  Reduce by 67: condition_statement -> identifier '=' '(' boolean_expression ')' '?' expression ':' expression ';'  . 
+
+
+
