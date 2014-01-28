@@ -140,47 +140,45 @@ Relational_Expr_Ast::Relational_Expr_Ast(Ast* arg_lhs, Comparator c, Ast* arg_rh
 }
 
 void Relational_Expr_Ast::print_ast(ostream & file_buffer) {
-	file_buffer << AST_SPACE << "Relation:\n";
-
+	file_buffer << AST_SPACE << "Condition: "<<C<<"\n";
 	file_buffer << AST_NODE_SPACE << "LHS (";
 	lhs->print_ast(file_buffer);
 	file_buffer << ")\n";
-
-	file_buffer << AST_NODE_SPACE << "COMPARATOR " << C << "\n";
-	
 	file_buffer << AST_NODE_SPACE << "RHS (";
 	rhs->print_ast(file_buffer);
 	file_buffer << ")\n";
 }
 
 Data_Type Relational_Expr_Ast::get_data_type() {
-	return node_data_type; // ??
+	return node_data_type;
 }
 	
 bool Relational_Expr_Ast::check_ast(int line) {
 	if (lhs->get_data_type() == rhs->get_data_type()) {
 		node_data_type = lhs->get_data_type();
-		// can also be bool_data_type
 		return true;
 	}
 	report_error("Relational statement data type not compatible", line);
 }
 
 Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
-	Eval_Result & result = rhs->evaluate(eval_env, file_buffer);
+	
+	Eval_Result & result_lhs = lhs->evaluate(eval_env, file_buffer);
 
-	// if (result.is_variable_defined() == false)
-	// 	report_error("Variable should be defined to be on rhs", NOLINE);
+	Eval_Result & result_rhs = rhs->evaluate(eval_env, file_buffer);
 
-	// lhs->set_value_of_evaluation(eval_env, result);
+	int l = result_lhs->get_value();
+	int r = result_rhs->get_value();
 
-	// // Print the result
+	int ans = ; // answer
 
-	// print_ast(file_buffer);
+	Eval_Result * result = new Eval_Result_Value(ans);
 
-	// lhs->print_value(eval_env, file_buffer);
+	// Print the result
 
-	return result;
+	print_ast(file_buffer);
+
+	return *result;
 }
 
 Relational_Expr_Ast::~Relational_Expr_Ast() {
@@ -319,7 +317,8 @@ void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result
 	{
 		i = new Eval_Result_Value_Int();
 	 	i->set_value(result.get_value());
-	}
+	}	Eval_Result_Value * i;
+
 
 	if (eval_env.does_variable_exist(variable_name))
 		eval_env.put_variable_value(*i, variable_name);

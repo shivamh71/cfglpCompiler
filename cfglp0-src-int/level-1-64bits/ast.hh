@@ -83,7 +83,7 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
-enum Comparator {LE, LT, GE, GT, EQ};
+enum Comparator {LE, LT, GE, GT, EQ, NE};
 
 class Relational_Expr_Ast:public Ast {
 

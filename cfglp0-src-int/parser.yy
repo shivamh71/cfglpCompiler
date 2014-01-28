@@ -275,7 +275,7 @@ executable_statement_list:
 	#endif 
 	}
 |
-	assignment_statement_list 
+	assignment_statement_list RETURN ';'
 	{
 	#if 0
 		Ast * ret = new Return_Ast();
@@ -290,11 +290,6 @@ executable_statement_list:
 
 		$$->push_back(ret);
 	#endif 
-	}
-|
-	RETURN ';'
-	{
-	
 	}
 ;
 
