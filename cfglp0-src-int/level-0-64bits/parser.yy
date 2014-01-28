@@ -40,7 +40,7 @@
 
 %token <integer_value> INTEGER_NUMBER
 %token <string_value> NAME
-%token RETURN INTEGER WHILE IF ELSE DO FOR
+%token RETURN INTEGER WHILE IF ELSE DO FOR GOTO
 
 
 %start program
@@ -100,7 +100,13 @@ statement:
 |
 	compound_statement
 |
+	goto_statement	
+|
 	return_statement
+;
+
+goto_statement:
+	GOTO '<' NAME INTEGER_NUMBER '>' ';'
 ;
 
 compound_statement:
@@ -122,7 +128,7 @@ selection_statement:
 ifelse_statement:
 	IF '(' boolean_expression ')' statement
 |
-	IF '(' boolean_expression ')' ELSE statement
+	IF '(' boolean_expression ')' statement ELSE statement
 ;
 
 while_statement:

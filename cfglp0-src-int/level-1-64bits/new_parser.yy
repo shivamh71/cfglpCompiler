@@ -298,10 +298,18 @@ arithmetic_expression:
 
 assignment_statement:
 	identifier '=' expression ';'
+		{
+			$$ = new Assignment_Ast($1, $3);
+			int line = get_line_number();
+			$$->check_ast(line);
+		}
 ;
 
 return_statement:
 	RETURN ';'
+		{
+			
+		}
 ;
 
 identifier:

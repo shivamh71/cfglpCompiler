@@ -36,22 +36,6 @@ return	{
 			return Parser::RETURN; 
 		}
 
-while	{
-			std::cout << "something\n";
-			store_token_name("WHILE");
-			return Parser::WHILE;	
-		}
-
-do		{
-			store_token_name("DO");
-			return Parser::DO;	
-		}
-
-for		{
-			store_token_name("FOR");
-			return Parser::FOR;
-		}
-
 if		{
 			store_token_name("IF");
 			return Parser::IF;	
@@ -62,10 +46,14 @@ else	{
 			return Parser::ELSE;	
 		}	
 
-[<>:{}();=+]	{
-			store_token_name("META CHAR");
-			return matched()[0];
+goto	{
+			return Parser::GOTO;
 		}
+
+[-<>:{}();=+/*|&!]	{
+						store_token_name("META CHAR");
+						return matched()[0];
+					}
 
 [-]?[[:digit:]_]+ 	{ 
 				store_token_name("NUM");
