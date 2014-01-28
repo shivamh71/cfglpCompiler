@@ -185,7 +185,13 @@ basic_block_list:
 ;
 
 basic_block:
+<<<<<<< HEAD
 	'<' NAME INTEGER_NUMBER '>' ':'
+=======
+        '<' NAME INTEGER_NUMBER '>' ':'
+|
+        '<' NAME INTEGER_NUMBER '>' ':' statement_list
+>>>>>>> b527e032f1fff214ffd4936a257539beb52d1610
 |
 	'<' NAME INTEGER_NUMBER '>' ':' statement_list
 |
