@@ -69,8 +69,7 @@ void Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & re
 	report_internal_error("Should not reach, Ast : set_value_of_evaluation");
 }
 
-////////////////////////////////////////////////////////////////
-
+/*************************************************************************************************************/
 Assignment_Ast::Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs)
 {
 	lhs = temp_lhs;
@@ -129,10 +128,9 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 
 	return result;
 }
-/////////////////////////////////////////////////////////////////
+/*************************************************************************************************************/
 
-/////////////////////////////////////////////////////////////////
-
+/*************************************************************************************************************/
 Relational_Expr_Ast::Relational_Expr_Ast(Ast* arg_lhs, Comparator c, Ast* arg_rhs) {
 	lhs = arg_lhs;
 	rhs = arg_rhs;
@@ -163,16 +161,38 @@ bool Relational_Expr_Ast::check_ast(int line) {
 
 Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	
-	Eval_Result & result_lhs = lhs->evaluate(eval_env, file_buffer);
+	Eval_Result *result_lhs = new Eval_Result_Value_Int(); 
+	*result_lhs = lhs->evaluate(eval_env, file_buffer);
 
-	Eval_Result & result_rhs = rhs->evaluate(eval_env, file_buffer);
+	Eval_Result *result_rhs = new Eval_Result_Value_Int(); 
+	*result_rhs = rhs->evaluate(eval_env, file_buffer);
 
 	int l = result_lhs->get_value();
 	int r = result_rhs->get_value();
 
-	int ans = ; // answer
+	int ans;
 
-	Eval_Result * result = new Eval_Result_Value(ans);
+	if (C==LE) {
+		ans = (l <= r);
+	}
+	else if (C==LT) {
+		ans = (l < r);
+	}
+	else if (C==GE) {
+		ans = (l >= r);
+	}
+	else if (C==GT) {
+		ans = (l > r);
+	}
+	else if (C==EQ) {
+		ans = (l==r);
+	}
+	else {
+		ans = (l!=r);
+	}
+
+	Eval_Result * result = new Eval_Result_Value_Int();
+	result->set_value(ans);
 
 	// Print the result
 
@@ -186,66 +206,9 @@ Relational_Expr_Ast::~Relational_Expr_Ast() {
 	delete rhs;
 }
 
-/////////////////////////////////////////////////////////////////
+/*************************************************************************************************************/
 
-/////////////////////////////////////////////////////////////////
-
-Boolean_Expr_Ast::Boolean_Expr_Ast(Ast* arg_lhs, Bool c, Ast* arg_rhs) {
-	lhs = arg_lhs;
-	rhs = arg_rhs;
-	C = c;
-}
-
-void Boolean_Expr_Ast::print_ast(ostream & file_buffer) {
-	file_buffer << AST_SPACE << "Relation:\n";
-
-	file_buffer << AST_NODE_SPACE << "LHS (";
-	lhs->print_ast(file_buffer);
-	file_buffer << ")\n";
-
-	file_buffer << AST_NODE_SPACE << "OPERATOR " << C << "\n";
-	
-	file_buffer << AST_NODE_SPACE << "RHS (";
-	rhs->print_ast(file_buffer);
-	file_buffer << ")\n";
-}
-
-Data_Type Boolean_Expr_Ast::get_data_type() {
-	return node_data_type;
-}
-	
-bool Boolean_Expr_Ast::check_ast(int line) {
-	if (lhs->get_data_type() == rhs->get_data_type()) {
-		node_data_type = lhs->get_data_type();
-		return true;
-	}
-	report_error("Relational statement data type not compatible", line);
-}
-
-Eval_Result & Boolean_Expr_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
-	Eval_Result & result = rhs->evaluate(eval_env, file_buffer);
-
-	// if (result.is_variable_defined() == false)
-	// 	report_error("Variable should be defined to be on rhs", NOLINE);
-
-	// lhs->set_value_of_evaluation(eval_env, result);
-
-	// // Print the result
-
-	// print_ast(file_buffer);
-
-	// lhs->print_value(eval_env, file_buffer);
-
-	return result;
-}
-
-Boolean_Expr_Ast::~Boolean_Expr_Ast() {
-	delete lhs;
-	delete rhs;
-}
-
-/////////////////////////////////////////////////////////////////
-
+/*************************************************************************************************************/
 Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry)
 {
 	variable_name = name;
@@ -317,7 +280,7 @@ void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result
 	{
 		i = new Eval_Result_Value_Int();
 	 	i->set_value(result.get_value());
-	}	Eval_Result_Value * i;
+	}
 
 
 	if (eval_env.does_variable_exist(variable_name))
@@ -330,8 +293,7 @@ Eval_Result & Name_Ast::evaluate(Local_Environment & eval_env, ostream & file_bu
 {
 	return get_value_of_evaluation(eval_env);
 }
-
-///////////////////////////////////////////////////////////////////////////////
+/*************************************************************************************************************/
 
 template <class DATA_TYPE>
 Number_Ast<DATA_TYPE>::Number_Ast(DATA_TYPE number, Data_Type constant_data_type)

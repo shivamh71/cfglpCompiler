@@ -42,6 +42,18 @@
 %token <string_value> NAME
 %token RETURN INTEGER IF ELSE GOTO
 
+%type <symbol_table> declaration_statement_list
+%type <symbol_entry> declaration_statement
+%type <basic_block_list> basic_block_list
+%type <basic_block> basic_block
+%type <ast_list> statement_list
+%type <ast_list> assignment_statement_list
+%type <ast> assignment_statement
+%type <ast> statement
+%type <ast> identifier
+%type <ast> constant
+%type <ast> expression
+
 %start program
 
 %%
@@ -152,7 +164,7 @@ declaration_statement_list:
 ;
 
 declaration_statement:
-	INTEGER identifier ';'
+	INTEGER NAME ';'
 		{
 			$$ = new Symbol_Table_Entry(*$2, int_data_type);
 			delete $2;
@@ -197,19 +209,17 @@ basic_block:
 statement_list:
 	statement_list statement
 		{
-			Ast * stat = new Ast();
 			if ($1 != NULL)
 				$$ = $1;
 			else
 				$$ = new list<Ast *>;
-			$$->push_back(stat);
+			$$->push_back($2);
 		}
 |
 	statement
 		{
-			Ast * stat = new Ast();
 			$$ = new list<Ast *>;
-			$$->push_back(stat);
+			$$->push_back($1);
 		}
 ;
 
@@ -230,7 +240,7 @@ ifelse_statement:
 ;
 
 expression:
-	boolean_expression
+	comparison_expression
 ;
 
 less_than_expression:
@@ -271,25 +281,16 @@ basic_expression:
 
 not_expression:
 	'!' not_expression
+		{
+			$$ = new Relational_Ast($1, NULL);
+			$$->C = NE;
+			int line = get_line_number();
+			$$->check_ast(line);
+		}
 |
 	basic_expression
 ;
 
-and_expression:
-	and_expression '&' '&' comparison_expression
-|
-	comparison_expression
-;
-
-or_expression:
-	or_expression '|' '|' and_expression
-|
-	and_expression
-;
-
-boolean_expression:
-	or_expression
-;
 
 mult_expression:
 	mult_expression '*' not_expression
@@ -325,11 +326,7 @@ return_statement:
 		{
 			Ast * ret = new Return_Ast();
 			return_statement_used_flag = true; // Current procedure has an occurrence of return statement
-			if ($1 != NULL)
-				$$ = $1;
-			else
-				$$ = new list<Ast *>;
-			$$->push_back(ret);
+			$$ = $1;
 		}
 ;
 
