@@ -44,14 +44,80 @@ if		{
 else	{
 			store_token_name("ELSE");
 			return Parser::ELSE;	
-		}	
-
-goto	{
-			store_token_name("GOTO");
-			return Parser::GOTO;
 		}
 
-[-<>:{}();=+/*|&!]	{
+goto 	{
+			store_token_name("GOTO");
+			return Parser::GOTO; 
+		}
+
+\<bb\ [[:digit:]]+\>  	{
+							store_token_name("BASIC BLOCK");
+							ParserBase::STYPE__ * val = getSval();
+							string *s = new std::string(matched());
+							string string_value = *s;
+							string num = string_value.substr(4,string_value.length()-5);
+							val->integer_value = atoi(num.c_str());
+							return Parser::BASIC_BLOCK; 
+						}
+		
+
+"<="	{
+			store_token_name("LE");
+			return Parser::LE;	
+		}
+
+"<"	{
+			store_token_name("LT");
+			return Parser::LT;	
+		}
+
+">="	{
+			store_token_name("GE");
+			return Parser::GE;	
+		}
+
+">"		{
+			store_token_name("GT");
+			return Parser::GT;	
+		}
+
+"=="	{
+			store_token_name("EQ");
+			return Parser::EQ;	
+		}
+
+"!="	{
+			store_token_name("NE");
+			return Parser::NE;	
+		}
+
+"+"		{
+			store_token_name("ADDOP");
+			return Parser::ADDOP;	
+		}
+
+"-"		{
+			store_token_name("MINUSOP");
+			return Parser::MINUSOP;	
+		}
+
+"*"		{
+			store_token_name("MULTOP");
+			return Parser::MULTOP;
+		}
+
+"/"		{
+			store_token_name("DIVOP");
+			return Parser::DIVOP;
+		}
+
+"="		{
+			store_token_name("ASSIGN_OP");
+			return Parser::ASSIGN_OP;
+		}
+
+[-:{}();=|&!]	{
 						store_token_name("META CHAR");
 						return matched()[0];
 					}

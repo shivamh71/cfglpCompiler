@@ -38,17 +38,27 @@
 	Procedure * procedure;
 };
 
-%token <integer_value> INTEGER_NUMBER
+%token <integer_value> INTEGER_NUMBER 
+%token <integer_value> BASIC_BLOCK 
 %token <string_value> NAME
-%token RETURN INTEGER IF ELSE GOTO
+%token RETURN INTEGER IF ELSE GOTO ASSIGN_OP NE EQ LT LE GT GE ADDOP MINUSOP MULTOP DIVOP
 
 %type <symbol_table> declaration_statement_list
 %type <symbol_entry> declaration_statement
 %type <basic_block_list> basic_block_list
 %type <basic_block> basic_block
 %type <ast_list> statement_list
-%type <ast_list> assignment_statement_list
 %type <ast> assignment_statement
+%type <ast> return_statement
+%type <ast> equality_expression
+%type <ast> ifelse_statement
+%type <ast> goto_statement
+%type <ast> comparison_expression
+%type <ast> arithmetic_expression
+%type <ast> greater_than_expression
+%type <ast> add_expression
+%type <ast> mult_expression
+%type <ast> basic_expression
 %type <ast> statement
 %type <ast> identifier
 %type <ast> constant
@@ -197,13 +207,72 @@ basic_block_list:
 ;
 
 basic_block:
-	'<' NAME INTEGER_NUMBER '>' ':'
+	BASIC_BLOCK ':'
+		{
+			// if (*$2 != "bb") {
+			// 	int line = get_line_number();
+			// 	report_error("Not basic block lable", line);
+			// }
+			if ($1 < 2) {
+				int line = get_line_number();
+				report_error("Illegal basic block lable", line);
+			}
+			list<Ast *> * ast_list = new list<Ast *>;
+			$$ = new Basic_Block($1, *ast_list);
+		}
 |
-	'<' NAME INTEGER_NUMBER '>' ':' statement_list
+	BASIC_BLOCK ':' statement_list
+		{
+			// if (*$2 != "bb") {
+			// 	int line = get_line_number();
+			// 	report_error("Not basic block lable", line);
+			// }
+
+			if ($1 < 2) {
+				int line = get_line_number();
+				report_error("Illegal basic block lable", line);
+			}
+
+			$$ = new Basic_Block($1, *$3);
+
+			delete $3;
+		}
 |
-	'<' NAME INTEGER_NUMBER '>' ':' statement_list ifelse_statement
+	BASIC_BLOCK ':' statement_list ifelse_statement
+		{
+			// if (*$2 != "bb") {
+			// 	int line = get_line_number();
+			// 	report_error("Not basic block lable", line);
+			// }
+
+			if ($1 < 2) {
+				int line = get_line_number();
+				report_error("Illegal basic block lable", line);
+			}
+
+			$3->push_back($4);
+			$$ = new Basic_Block($1, *$3);
+
+			delete $3;
+		}
 |
-	'<' NAME INTEGER_NUMBER '>' ':' ifelse_statement
+	BASIC_BLOCK ':' ifelse_statement
+		{
+			// if (*$2 != "bb") {
+			// 	int line = get_line_number();
+			// 	report_error("Not basic block lable", line);
+			// }
+
+			if ($1 < 2) {
+				int line = get_line_number();
+				report_error("Illegal basic block lable", line);
+			}
+
+			list<Ast *> * ast_list = new list<Ast *>;
+			ast_list->push_back($3);
+			$$ = new Basic_Block($1, *ast_list);
+
+		}
 ;
 
 statement_list:
@@ -225,65 +294,136 @@ statement_list:
 
 statement:
 	assignment_statement
+		{
+			$$ = $1;
+		}
 |
-	goto_statement	
+	goto_statement
+		{
+			$$ = $1;
+		}
 |
 	return_statement
+		{
+			$$ = $1;
+		}
 ;
 
-goto_statement:
-	GOTO '<' NAME INTEGER_NUMBER '>' ';'
-;
- 
 ifelse_statement:
-	IF '(' expression ')' goto_statement ELSE goto_statement 
+	IF '(' expression ')' goto_statement ELSE goto_statement
+		{
+			$$ = new If_Else_Ast($3,$5,$7);
+		}
+;
+
+
+goto_statement:
+	GOTO BASIC_BLOCK ';'
+		{
+			$$ = new Goto_Ast($2);
+		}
 ;
 
 expression:
 	comparison_expression
+		{
+			$$ = $1;
+		}
 ;
 
-less_than_expression:
-	less_than_expression '<' arithmetic_expression
-|
-	less_than_expression '<' '=' arithmetic_expression
-|
-	arithmetic_expression
-;
 
 greater_than_expression:
-	greater_than_expression '>' less_than_expression
+	greater_than_expression GT arithmetic_expression
+		{
+			$$ = new Relational_Expr_Ast($1,GTOP,$3);
+			int line = get_line_number();
+			$$->check_ast(line);
+		}
 |
-	greater_than_expression '>' '=' less_than_expression
+	greater_than_expression GE arithmetic_expression
+		{
+			$$ = new Relational_Expr_Ast($1,GEOP,$3);
+			int line = get_line_number();
+			$$->check_ast(line);
+		}
 |
-	less_than_expression	
+	greater_than_expression LT arithmetic_expression
+		{
+			$$ = new Relational_Expr_Ast($1,LTOP,$3);
+			int line = get_line_number();
+			$$->check_ast(line);
+		}
+|
+	greater_than_expression LE arithmetic_expression
+		{
+			$$ = new Relational_Expr_Ast($1,LEOP,$3);
+			int line = get_line_number();
+			$$->check_ast(line);
+		}
+|
+	arithmetic_expression
+		{
+			$$ = $1;
+		}	
 ;
 
 equality_expression:
-	equality_expression '=' '=' greater_than_expression
+	equality_expression EQ greater_than_expression
+		{
+			$$ = new Relational_Expr_Ast($1,EQOP,$3);
+			int line = get_line_number();
+			$$->check_ast(line);
+		}
 |
-	equality_expression '!' '=' greater_than_expression
+	equality_expression NE greater_than_expression
+		{
+			$$ = new Relational_Expr_Ast($1,NEOP,$3);
+			int line = get_line_number();
+			$$->check_ast(line);
+		}
 |
 	greater_than_expression
+		{
+			$$ = $1;
+		}
 ;
 
 comparison_expression:
 	equality_expression
+		{
+			$$ = $1;
+		}
 ;
 
 basic_expression:
 	'(' expression ')'
+		{
+			$$ = $2;
+		}
 |
 	identifier
+		{
+			$$ = $1;
+		}
 |
 	constant
+		{
+			$$ = $1;
+		}
 ;
 
-not_expression:
-	'!' not_expression
+
+mult_expression:
+	mult_expression MULTOP basic_expression
 		{
-			$$ = new Relational_Ast($1, NULL);
-			$$->C = NE;
+			$$ = new Arithmetic_Expr_Ast($1,MUL,$3);
+			int line = get_line_number();
+			$$->check_ast(line);
+		}
+|
+	mult_expression DIVOP basic_expression
+		{
+			$$ = new Arithmetic_Expr_Ast($1,DIV,$3);
 			int line = get_line_number();
 			$$->check_ast(line);
 		}
@@ -291,29 +431,36 @@ not_expression:
 	basic_expression
 ;
 
-
-mult_expression:
-	mult_expression '*' not_expression
-|
-	mult_expression '/' not_expression
-|
-	not_expression
-;
-
 add_expression:
-	add_expression '+' mult_expression
+	add_expression ADDOP mult_expression
+		{
+			$$ = new Arithmetic_Expr_Ast($1,ADD,$3);
+			int line = get_line_number();
+			$$->check_ast(line);
+		}
 |
-	add_expression '-' mult_expression
+	add_expression MINUSOP mult_expression
+		{
+			$$ = new Arithmetic_Expr_Ast($1,SUB,$3);
+			int line = get_line_number();
+			$$->check_ast(line);
+		}
 |
 	mult_expression
+		{
+			$$ = $1;
+		}
 ;
 
 arithmetic_expression:
 	add_expression
+		{
+			$$ = $1;
+		}
 ;
 
 assignment_statement:
-	identifier '=' expression ';'
+	identifier ASSIGN_OP expression ';'
 		{
 			$$ = new Assignment_Ast($1, $3);
 			int line = get_line_number();
@@ -324,9 +471,8 @@ assignment_statement:
 return_statement:
 	RETURN ';'
 		{
-			Ast * ret = new Return_Ast();
+			$$ = new Return_Ast();
 			return_statement_used_flag = true; // Current procedure has an occurrence of return statement
-			$$ = $1;
 		}
 ;
 

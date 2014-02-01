@@ -2,7 +2,17 @@ main()
 {	
 	int a = 4;
 	int b = 3;
-	int c = 3;
-	// b 
+	if (a < b) {
+		b = a;
+	}
+	else {
+		b = (a == b);
+		b = (a != b);
+		b = (a >= b);
+		b = (a > b);
+		b = (a <= b);
+		b = (a < b);
+	}
+	int c = 5;
 	return;
 }

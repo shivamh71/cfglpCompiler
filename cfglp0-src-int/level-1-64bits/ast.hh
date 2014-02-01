@@ -40,6 +40,7 @@ protected:
 	Data_Type node_data_type; 	// Data_Type is defined in symbol-table.hh but this file in not included here
 								// rather it is included in ast.cc where node_data_type is actually used
 								// here its just declared but never used
+	int bb_number;
 
 public:
 
@@ -50,6 +51,8 @@ public:
 	// Following are pure virtual functions and hence should never be reached 
 
 	virtual Data_Type get_data_type();
+
+	int get_bb_number();
 	
 	virtual bool check_ast(int line);
 
@@ -83,15 +86,15 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
-enum Comparator {LE, LT, GE, GT, EQ, NE};
+enum Comparator {LEOP, LTOP, GEOP, GTOP, EQOP, NEOP};
 
 class Relational_Expr_Ast:public Ast {
+
+public:
 
 	Ast * lhs;
 	Ast * rhs;
 	Comparator C;
-
-public:
 
 	Relational_Expr_Ast(Ast* arg_lhs, Comparator c, Ast* arg_rhs);
 
@@ -105,6 +108,30 @@ public:
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
+
+enum Operator {ADD, SUB, MUL, DIV};
+
+class Arithmetic_Expr_Ast:public Ast {
+
+public:
+
+	Ast * lhs;
+	Ast * rhs;
+	Operator O;
+
+	Arithmetic_Expr_Ast(Ast* arg_lhs, Operator c, Ast* arg_rhs);
+
+	~Arithmetic_Expr_Ast();
+
+	Data_Type get_data_type();
+	
+	bool check_ast(int line);
+
+	void print_ast(ostream & file_buffer);
+
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
 
 class Name_Ast:public Ast
 {
@@ -141,16 +168,35 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
-template <class T>
-class Bool_Ast:public Ast
-{
-	T boolean;
+
+class Goto_Ast:public Ast {
 
 public:
-	Bool_Ast(T value, Data_Type boolean_data_type);
-	~Bool_Ast();
+
+	Goto_Ast(int bb_number);
+
+	~Goto_Ast();
+
+	int get_bb_number();
 
 	Data_Type get_data_type();
+
+	void print_ast(ostream & file_buffer);
+
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+	
+};
+
+class If_Else_Ast:public Ast
+{
+
+	Ast* cond;
+	Ast* true_successor;
+	Ast* false_successor;
+
+public:
+	If_Else_Ast(Ast* cond, Ast* true_successor, Ast* false_successor);
+	~If_Else_Ast();
 
 	void print_ast(ostream & file_buffer);
 

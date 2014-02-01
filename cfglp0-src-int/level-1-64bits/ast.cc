@@ -31,6 +31,7 @@ using namespace std;
 #include"local-environment.hh"
 #include"symbol-table.hh"
 #include"ast.hh"
+#include"basic-block.hh"
 
 Ast::Ast()
 {}
@@ -41,6 +42,10 @@ Ast::~Ast()
 bool Ast::check_ast(int line)
 {
 	report_internal_error("Should not reach, Ast : check_ast");
+}
+
+int Ast::get_bb_number() {
+	return bb_number;
 }
 
 Data_Type Ast::get_data_type()
@@ -57,12 +62,6 @@ Eval_Result & Ast::get_value_of_evaluation(Local_Environment & eval_env)
 {
 	report_internal_error("Should not reach, Ast : get_value_of_evaluation");
 }
-
-// // I added this function
-// Eval_Result & Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
-// {
-// 	report_internal_error("Should not reach, Ast : evaluate");
-// }
 
 void Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result)
 {
@@ -122,11 +121,15 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 
 	// Print the result
 
+	file_buffer << "\n";
 	print_ast(file_buffer);
 
 	lhs->print_value(eval_env, file_buffer);
 
-	return result;
+	Eval_Result * to_return = new Eval_Result_Value_Int();
+	to_return->set_value(0);
+
+	return *to_return;
 }
 /*************************************************************************************************************/
 
@@ -138,13 +141,19 @@ Relational_Expr_Ast::Relational_Expr_Ast(Ast* arg_lhs, Comparator c, Ast* arg_rh
 }
 
 void Relational_Expr_Ast::print_ast(ostream & file_buffer) {
-	file_buffer << AST_SPACE << "Condition: "<<C<<"\n";
-	file_buffer << AST_NODE_SPACE << "LHS (";
+	file_buffer << "\n";
+	if (C==LTOP) file_buffer << AST_NODE_SPACE << "Condition: "<<"LT"<<"\n";
+	if (C==LEOP) file_buffer << AST_NODE_SPACE << "Condition: "<<"LE"<<"\n";
+	if (C==GTOP) file_buffer << AST_NODE_SPACE << "Condition: "<<"GT"<<"\n";
+	if (C==GEOP) file_buffer << AST_NODE_SPACE << "Condition: "<<"GE"<<"\n";
+	if (C==NEOP) file_buffer << AST_NODE_SPACE << "Condition: "<<"NE"<<"\n";
+	if (C==EQOP) file_buffer << AST_NODE_SPACE << "Condition: "<<"EQ"<<"\n";
+	file_buffer << AST_NODE_SPACE << "   LHS (";
 	lhs->print_ast(file_buffer);
 	file_buffer << ")\n";
-	file_buffer << AST_NODE_SPACE << "RHS (";
+	file_buffer << AST_NODE_SPACE "   RHS (";
 	rhs->print_ast(file_buffer);
-	file_buffer << ")\n";
+	file_buffer << ")";
 }
 
 Data_Type Relational_Expr_Ast::get_data_type() {
@@ -161,6 +170,96 @@ bool Relational_Expr_Ast::check_ast(int line) {
 
 Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	
+	Eval_Result & result1 = lhs->evaluate(eval_env, file_buffer);
+
+	Eval_Result* result_lhs = new Eval_Result_Value_Int();
+
+	if (result1.is_variable_defined() == false)
+		report_error("Variable should be defined to be on lhs of condition", NOLINE);
+
+	Eval_Result & result2 = rhs->evaluate(eval_env, file_buffer);
+
+	Eval_Result* result_rhs = new Eval_Result_Value_Int();
+
+	if (result2.is_variable_defined() == false)
+		report_error("Variable should be defined to be on rhs of condition", NOLINE);
+
+	result_lhs = &(result1);
+	result_rhs = &(result2);
+
+	int l = result_lhs->get_value();
+	int r = result_rhs->get_value();
+
+	int ans;
+
+	if (C==LEOP) {
+		ans = (l <= r);
+	}
+	else if (C==LTOP) {
+		ans = (l < r);
+	}
+	else if (C==GEOP) {
+		ans = (l >= r);
+	}
+	else if (C==GTOP) {
+		ans = (l > r);
+	}
+	else if (C==EQOP) {
+		ans = (l==r);
+	}
+	else {
+		ans = (l!=r);
+	}
+
+
+
+	Eval_Result * result = new Eval_Result_Value_Int();
+	result->set_value(ans);
+
+	// Print the result
+
+
+	return *result;
+}
+
+Relational_Expr_Ast::~Relational_Expr_Ast() {
+	delete lhs;
+	delete rhs;
+}
+
+/*************************************************************************************************************/
+
+/*************************************************************************************************************/
+Arithmetic_Expr_Ast::Arithmetic_Expr_Ast(Ast* arg_lhs, Operator o, Ast* arg_rhs) {
+	lhs = arg_lhs;
+	rhs = arg_rhs;
+	O = o;
+}
+
+void Arithmetic_Expr_Ast::print_ast(ostream & file_buffer) {
+	file_buffer << AST_SPACE << "Operator: "<<O<<"\n";
+	file_buffer << AST_NODE_SPACE << "LHS (";
+	lhs->print_ast(file_buffer);
+	file_buffer << ")\n";
+	file_buffer << AST_NODE_SPACE << "RHS (";
+	rhs->print_ast(file_buffer);
+	file_buffer << ")\n";
+}
+
+Data_Type Arithmetic_Expr_Ast::get_data_type() {
+	return node_data_type;
+}
+	
+bool Arithmetic_Expr_Ast::check_ast(int line) {
+	if (lhs->get_data_type() == rhs->get_data_type()) {
+		node_data_type = lhs->get_data_type();
+		return true;
+	}
+	report_error("Arithmetic statement data type not compatible", line);
+}
+
+Eval_Result & Arithmetic_Expr_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+	
 	Eval_Result *result_lhs = new Eval_Result_Value_Int(); 
 	*result_lhs = lhs->evaluate(eval_env, file_buffer);
 
@@ -172,23 +271,17 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 
 	int ans;
 
-	if (C==LE) {
-		ans = (l <= r);
+	if (O==ADD) {
+		ans = (l + r);
 	}
-	else if (C==LT) {
-		ans = (l < r);
+	else if (O==SUB) {
+		ans = (l - r);
 	}
-	else if (C==GE) {
-		ans = (l >= r);
-	}
-	else if (C==GT) {
-		ans = (l > r);
-	}
-	else if (C==EQ) {
-		ans = (l==r);
+	else if (O==MUL) {
+		ans = (l * r);
 	}
 	else {
-		ans = (l!=r);
+		ans = (l/r);
 	}
 
 	Eval_Result * result = new Eval_Result_Value_Int();
@@ -201,7 +294,7 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	return *result;
 }
 
-Relational_Expr_Ast::~Relational_Expr_Ast() {
+Arithmetic_Expr_Ast::~Arithmetic_Expr_Ast() {
 	delete lhs;
 	delete rhs;
 }
@@ -233,7 +326,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 	Eval_Result_Value * loc_var_val = eval_env.get_variable_value(variable_name);
 	Eval_Result_Value * glob_var_val = interpreter_global_table.get_variable_value(variable_name);
 
-	file_buffer << "\n" << AST_SPACE << variable_name << " : ";
+	file_buffer << "" << AST_SPACE << variable_name << " : ";
 
 	if (!eval_env.is_variable_defined(variable_name) && !interpreter_global_table.is_variable_defined(variable_name))
 		file_buffer << "undefined";
@@ -293,8 +386,8 @@ Eval_Result & Name_Ast::evaluate(Local_Environment & eval_env, ostream & file_bu
 {
 	return get_value_of_evaluation(eval_env);
 }
-/*************************************************************************************************************/
 
+/*************************************************************************************************************/
 template <class DATA_TYPE>
 Number_Ast<DATA_TYPE>::Number_Ast(DATA_TYPE number, Data_Type constant_data_type)
 {
@@ -329,49 +422,97 @@ Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostr
 		return result;
 	}
 }
+/*************************************************************************************************************/
 
-///////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////
-
-template <class DATA_TYPE>
-Bool_Ast<DATA_TYPE>::Bool_Ast(DATA_TYPE value, Data_Type boolean_data_type)
-{
-	boolean = value;
-	node_data_type = boolean_data_type;
+/*************************************************************************************************************/
+Goto_Ast::Goto_Ast(int bb_number) {
+	this->bb_number = bb_number;
 }
 
-template <class DATA_TYPE>
-Bool_Ast<DATA_TYPE>::~Bool_Ast()
+Goto_Ast::~Goto_Ast()
 {}
 
-template <class DATA_TYPE>
-Data_Type Bool_Ast<DATA_TYPE>::get_data_type()
-{
+Data_Type Goto_Ast::get_data_type() {
 	return node_data_type;
 }
 
-template <class DATA_TYPE>
-void Bool_Ast<DATA_TYPE>::print_ast(ostream & file_buffer)
-{
-	file_buffer << "Boolean : " << boolean;
+int Goto_Ast::get_bb_number() {
+	return bb_number;
 }
 
-template <class DATA_TYPE>
-Eval_Result & Bool_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostream & file_buffer)
-{
-	if (node_data_type == bool_data_type)
-	{
-		Eval_Result & result = *new Eval_Result_Value_Int(); // this needs to be changed
-		result.set_value(boolean);
+void Goto_Ast::print_ast(ostream & file_buffer) {
+	file_buffer << AST_SPACE << "Goto statement:\n";
+	file_buffer << AST_NODE_SPACE << "Successor: " << get_bb_number() << "\n";
+}
 
-		return result;
+Eval_Result & Goto_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+	Eval_Result * result = new Eval_Result_Value_Int();
+	result->set_value(bb_number);
+	file_buffer << "\n";
+	print_ast(file_buffer);
+	file_buffer << AST_SPACE << "GOTO (BB "<<bb_number<<")"; 
+	file_buffer << "\n";
+	
+	return *result;
+}
+/*************************************************************************************************************/
+
+/*************************************************************************************************************/
+If_Else_Ast::If_Else_Ast(Ast* cond, Ast* true_successor, Ast* false_successor) {
+	this->cond = cond;
+	this->true_successor = true_successor;
+	this->false_successor = false_successor;
+}
+
+If_Else_Ast::~If_Else_Ast() {
+	delete cond;
+	delete true_successor;
+	delete false_successor;
+}
+
+void If_Else_Ast::print_ast(ostream & file_buffer) {
+	file_buffer << AST_SPACE << "If_Else statement:";
+	cond->print_ast(file_buffer);
+	file_buffer << "\n";
+	file_buffer << AST_NODE_SPACE << "True Successor: " << true_successor->get_bb_number();
+	file_buffer << "\n";
+	file_buffer << AST_NODE_SPACE << "False Successor: " << false_successor->get_bb_number();
+	file_buffer << "\n";
+}
+
+Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+	file_buffer << "\n";
+	file_buffer << AST_SPACE << "If_Else statement:";
+	cond->print_ast(file_buffer);
+
+	Eval_Result & result1 = cond->evaluate(eval_env, file_buffer);
+
+	Eval_Result* result = new Eval_Result_Value_Int();
+	file_buffer << "\n";
+	file_buffer << AST_NODE_SPACE << "True Successor: " << true_successor->get_bb_number();
+	file_buffer << "\n";
+	file_buffer << AST_NODE_SPACE << "False Successor: " << false_successor->get_bb_number();
+	file_buffer << "\n";
+
+	// print_ast(file_buffer);
+
+	result = &(result1);
+	
+	int flag = result->get_value();
+	if (flag) {
+		file_buffer << AST_SPACE << "Condition True : Goto (BB " << true_successor->get_bb_number() <<")";
+		result->set_value(true_successor->get_bb_number());
 	}
+	else {
+		file_buffer << AST_SPACE << "Condition False : Goto (BB " << false_successor->get_bb_number() <<")";
+		result->set_value(false_successor->get_bb_number());
+	}
+	file_buffer<<"\n";
+	return *result;
 }
+/*************************************************************************************************************/
 
-///////////////////////////////////////////////////////////////////////////////
-
-
+/*************************************************************************************************************/
 Return_Ast::Return_Ast()
 {}
 
@@ -386,7 +527,10 @@ void Return_Ast::print_ast(ostream & file_buffer)
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
 	Eval_Result & result = *new Eval_Result_Value_Int();
+	file_buffer << "\n";
+	print_ast(file_buffer);
 	return result;
 }
+/*************************************************************************************************************/
 
 template class Number_Ast<int>;

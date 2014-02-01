@@ -82,7 +82,7 @@ Symbol_Table_Entry & Procedure::get_symbol_table_entry(string variable_name)
 
 void Procedure::print_ast(ostream & file_buffer)
 {
-	file_buffer << PROC_SPACE << "Procedure: main" << "\n";
+	file_buffer << PROC_SPACE << "Procedure: main" << "\n\n";
 
 	list<Basic_Block *>::iterator i;
 	for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
@@ -131,7 +131,19 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer)
 	while (current_bb)
 	{
 		result = &(current_bb->evaluate(eval_env, file_buffer));
-		current_bb = get_next_bb(*current_bb);		
+		Eval_Result * temp = new Eval_Result_Value_Int();
+		temp = result;
+		int new_bb_number = temp->get_value();
+		if (new_bb_number != 0) {
+			list<Basic_Block *>::iterator i;
+			for(i = basic_block_list.begin(); i != basic_block_list.end(); i++) {
+				if((*i)->get_bb_number() == new_bb_number) {
+					current_bb = *i;
+					break;
+				}
+			}
+		}
+		else current_bb = get_next_bb(*current_bb);		
 	}
 
 	file_buffer << "\n\n";
