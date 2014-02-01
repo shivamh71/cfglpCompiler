@@ -43,6 +43,7 @@ class Procedure
 	list<Basic_Block *> basic_block_list;
 
 public:
+	
 	Procedure(Data_Type proc_return_type, string proc_name);
 	~Procedure();
 

@@ -1,0 +1,6 @@
+comment out return statement [no statement in program] // probably it adds up a return statement by itself
+variable declared twice // handled
+main shoud not be a variable // handled
+goto can only be a last statement of a basic block just like an if-else statement // handled
+there can't be more than one goto statements in a basic block // handled
+there can't be more than one return statements in a basic block // handled

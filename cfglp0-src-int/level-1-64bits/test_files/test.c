@@ -2,7 +2,7 @@ main()
 {	
 	int a = 4;
 	int b = 3;
-	if (a < b) {
+	if (!(a < b)) {
 		b = a;
 	}
 	else {
@@ -14,5 +14,4 @@ main()
 		b = (a < b);
 	}
 	int c = 5;
-	return;
 }

@@ -209,10 +209,7 @@ basic_block_list:
 basic_block:
 	BASIC_BLOCK ':'
 		{
-			// if (*$2 != "bb") {
-			// 	int line = get_line_number();
-			// 	report_error("Not basic block lable", line);
-			// }
+
 			if ($1 < 2) {
 				int line = get_line_number();
 				report_error("Illegal basic block lable", line);
@@ -256,7 +253,79 @@ basic_block:
 			delete $3;
 		}
 |
+	BASIC_BLOCK ':' statement_list return_statement
+		{
+			// if (*$2 != "bb") {
+			// 	int line = get_line_number();
+			// 	report_error("Not basic block lable", line);
+			// }
+
+			if ($1 < 2) {
+				int line = get_line_number();
+				report_error("Illegal basic block lable", line);
+			}
+
+			$3->push_back($4);
+			$$ = new Basic_Block($1, *$3);
+
+			delete $3;
+		}
+|
+	BASIC_BLOCK ':' statement_list goto_statement
+		{
+			// if (*$2 != "bb") {
+			// 	int line = get_line_number();
+			// 	report_error("Not basic block lable", line);
+			// }
+			
+			if ($1 < 2) {
+				int line = get_line_number();
+				report_error("Illegal basic block lable", line);
+			}
+
+			$3->push_back($4);
+			$$ = new Basic_Block($1, *$3);
+
+			delete $3;
+		}
+|
 	BASIC_BLOCK ':' ifelse_statement
+		{
+			// if (*$2 != "bb") {
+			// 	int line = get_line_number();
+			// 	report_error("Not basic block lable", line);
+			// }
+
+			if ($1 < 2) {
+				int line = get_line_number();
+				report_error("Illegal basic block lable", line);
+			}
+
+			list<Ast *> * ast_list = new list<Ast *>;
+			ast_list->push_back($3);
+			$$ = new Basic_Block($1, *ast_list);
+
+		}
+|
+	BASIC_BLOCK ':' return_statement
+		{
+			// if (*$2 != "bb") {
+			// 	int line = get_line_number();
+			// 	report_error("Not basic block lable", line);
+			// }
+
+			if ($1 < 2) {
+				int line = get_line_number();
+				report_error("Illegal basic block lable", line);
+			}
+
+			list<Ast *> * ast_list = new list<Ast *>;
+			ast_list->push_back($3);
+			$$ = new Basic_Block($1, *ast_list);
+
+		}
+|
+	BASIC_BLOCK ':' goto_statement
 		{
 			// if (*$2 != "bb") {
 			// 	int line = get_line_number();
@@ -297,16 +366,6 @@ statement:
 		{
 			$$ = $1;
 		}
-|
-	goto_statement
-		{
-			$$ = $1;
-		}
-|
-	return_statement
-		{
-			$$ = $1;
-		}
 ;
 
 ifelse_statement:
@@ -321,6 +380,8 @@ goto_statement:
 	GOTO BASIC_BLOCK ';'
 		{
 			$$ = new Goto_Ast($2);
+			list<Basic_Block *>::iterator i;
+			
 		}
 ;
 
@@ -396,11 +457,6 @@ comparison_expression:
 ;
 
 basic_expression:
-	'(' expression ')'
-		{
-			$$ = $2;
-		}
-|
 	identifier
 		{
 			$$ = $1;
