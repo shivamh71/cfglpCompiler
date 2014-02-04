@@ -56,12 +56,14 @@ using namespace std;
 class Parser: public ParserBase
 {
 	Scanner d_scanner;
+  list<int> * goto_bb_num ; 
 
     public:
 	Parser(string input_file_name)
 	{
-		d_scanner.switchStreams(input_file_name, "");
-		d_scanner.setSval(&d_val__);
+    goto_bb_num = new list<int>; 
+    d_scanner.switchStreams(input_file_name, "");
+    d_scanner.setSval(&d_val__);
 	}
 
         int parse();
@@ -74,7 +76,8 @@ class Parser: public ParserBase
         int lex();
 
 	bool return_statement_used_flag;				// Keeps track that atleast a procedure has atleast 1 return statement
-	void bb_strictly_increasing_order_check(list<Basic_Block *> * bb_list, int bb_number); 
+  void bb_strictly_increasing_order_check(list<Basic_Block *> * bb_list, int bb_number); 
+	void goto_bb_exist_check(list<Basic_Block *> bb_list, list<int>* goto_bb_num); 
         
 	void executeAction(int ruleNr);
         void errorRecovery();

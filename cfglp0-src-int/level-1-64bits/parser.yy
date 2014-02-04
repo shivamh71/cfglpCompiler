@@ -35,6 +35,7 @@
 	Symbol_Table_Entry * symbol_entry;
 	Basic_Block * basic_block;
 	list<Basic_Block *> * basic_block_list;
+	list<int> * goto_bb_num ; 
 	Procedure * procedure;
 };
 
@@ -103,6 +104,7 @@ procedure_body:
 	'{' declaration_statement_list	
 		{
 			current_procedure->set_local_list(*$2);
+
 			delete $2;
 		}
 	basic_block_list '}'
@@ -113,6 +115,8 @@ procedure_body:
 				report_error("Atleast 1 basic block should have a return statement", line);
 			}
 			current_procedure->set_basic_block_list(*$4);
+			goto_bb_exist_check(*$4, goto_bb_num);
+			std::cout<<goto_bb_num->size()<<"fhdjhfjshkjdkj"<<endl;
 			delete $4;
 		}
 |
@@ -381,6 +385,7 @@ goto_statement:
 		{
 			$$ = new Goto_Ast($2);
 			list<Basic_Block *>::iterator i;
+			goto_bb_num->push_back($2);
 			
 		}
 ;
