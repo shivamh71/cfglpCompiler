@@ -116,7 +116,6 @@ procedure_body:
 			}
 			current_procedure->set_basic_block_list(*$4);
 			goto_bb_exist_check(*$4, goto_bb_num);
-			std::cout<<goto_bb_num->size()<<"fhdjhfjshkjdkj"<<endl;
 			delete $4;
 		}
 |

@@ -1,17 +1,9 @@
 main()
-{	
-	int a = 4;
-	int b = 3;
-	if (!(a < b)) {
-		b = a;
-	}
-	else {
-		b = (a == b);
-		b = (a != b);
-		b = (a >= b);
-		b = (a > b);
-		b = (a <= b);
-		b = (a < b);
-	}
-	int c = 5;
+{    
+    int a = 4;
+    int b = 3;
+    int c = 3;
+
+    c = a && b;
+    b = a && c;
 }
