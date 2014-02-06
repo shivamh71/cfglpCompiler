@@ -109,11 +109,11 @@ procedure_body:
 		}
 	basic_block_list '}'
 		{
-			if (return_statement_used_flag == false)
-			{
-				int line = get_line_number();
-				report_error("Atleast 1 basic block should have a return statement", line);
-			}
+			// if (return_statement_used_flag == false)
+			// {
+			// 	int line = get_line_number();
+			// 	report_error("Atleast 1 basic block should have a return statement", line);
+			// }
 			current_procedure->set_basic_block_list(*$4);
 			goto_bb_exist_check(*$4, goto_bb_num);
 			delete $4;
@@ -121,12 +121,14 @@ procedure_body:
 |
 	'{' basic_block_list '}'
 		{
-			if (return_statement_used_flag == false)
-			{
-				int line = get_line_number();
-				report_error("Atleast 1 basic block should have a return statement", line);
-			}
+			// if (return_statement_used_flag == false)
+			// {
+			// 	int line = get_line_number();
+			// 	report_error("Atleast 1 basic block should have a return statement", line);
+			// }
 			current_procedure->set_basic_block_list(*$2);
+			goto_bb_exist_check(*$2, goto_bb_num);
+
 			delete $2;
 		}
 ;
@@ -194,6 +196,7 @@ basic_block_list:
 			}
 			bb_strictly_increasing_order_check($$, $2->get_bb_number());
 			$$ = $1;
+			$$->back()->set_has_successor(true);
 			$$->push_back($2);
 		}
 |
@@ -234,6 +237,7 @@ basic_block:
 			}
 
 			$$ = new Basic_Block($1, *$3);
+			$$->set_has_successor(false);
 
 			delete $3;
 		}
@@ -252,6 +256,8 @@ basic_block:
 
 			$3->push_back($4);
 			$$ = new Basic_Block($1, *$3);
+			$$->set_has_successor(true);
+
 
 			delete $3;
 		}
@@ -270,6 +276,7 @@ basic_block:
 
 			$3->push_back($4);
 			$$ = new Basic_Block($1, *$3);
+			$$->set_has_successor(true);
 
 			delete $3;
 		}
@@ -288,6 +295,7 @@ basic_block:
 
 			$3->push_back($4);
 			$$ = new Basic_Block($1, *$3);
+			$$->set_has_successor(true);
 
 			delete $3;
 		}
@@ -307,6 +315,8 @@ basic_block:
 			list<Ast *> * ast_list = new list<Ast *>;
 			ast_list->push_back($3);
 			$$ = new Basic_Block($1, *ast_list);
+			$$->set_has_successor(true);
+
 
 		}
 |
@@ -325,6 +335,7 @@ basic_block:
 			list<Ast *> * ast_list = new list<Ast *>;
 			ast_list->push_back($3);
 			$$ = new Basic_Block($1, *ast_list);
+			$$->set_has_successor(true);
 
 		}
 |
@@ -343,6 +354,7 @@ basic_block:
 			list<Ast *> * ast_list = new list<Ast *>;
 			ast_list->push_back($3);
 			$$ = new Basic_Block($1, *ast_list);
+			$$->set_has_successor(true);
 
 		}
 ;

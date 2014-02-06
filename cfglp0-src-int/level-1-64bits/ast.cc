@@ -529,7 +529,12 @@ Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 	Eval_Result & result = *new Eval_Result_Value_Int();
 	file_buffer << "\n";
 	print_ast(file_buffer);
-	return result;
+
+	Eval_Result * to_return = new Eval_Result_Value_Int();
+	to_return->set_value(-1);
+
+	return *to_return;
+	// return result;
 }
 /*************************************************************************************************************/
 

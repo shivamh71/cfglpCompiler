@@ -37,7 +37,7 @@ class Basic_Block
 {
 	int id_number;
 	list<Ast *> statement_list;
-
+  bool has_successor;
 public:
 	Basic_Block(int basic_block_number, list<Ast *> & ast_list);
 	~Basic_Block();
@@ -45,7 +45,8 @@ public:
 	int get_bb_number();
 
 	void print_bb(ostream & file_buffer);
-
+  void set_has_successor(bool );
+  bool get_has_successor();
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 

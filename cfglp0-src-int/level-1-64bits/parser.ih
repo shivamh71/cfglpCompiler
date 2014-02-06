@@ -99,10 +99,13 @@ inline void Parser::goto_bb_exist_check(list<Basic_Block *>bb_list,list<int>* go
 
   for(i = goto_bb_num->begin(); i != goto_bb_num->end(); i++)
   {
-    if((*i) < 2 || (*i) > basic_block_range){
+    if((*i) > basic_block_range){
       char* error_string;
       sprintf(error_string,"bb %d doesn't exist",(*i));
       report_error(error_string,NOLINE);
+    }
+    if((*i)<2){
+      report_error("Illegal basic block lable",NOLINE);
     }
   }
 }
