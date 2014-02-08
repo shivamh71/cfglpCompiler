@@ -28,6 +28,7 @@
 
 %union {
 	int integer_value;
+	float float_value;
 	std::string * string_value;
 	list<Ast *> * ast_list;
 	Ast * ast;
@@ -39,10 +40,11 @@
 	Procedure * procedure;
 };
 
-%token <integer_value> INTEGER_NUMBER 
+%token <integer_value> INTEGER_NUMBER
 %token <integer_value> BASIC_BLOCK 
+%token <float_value> FLOAT_NUMBER 
 %token <string_value> NAME
-%token RETURN INTEGER IF ELSE GOTO ASSIGN_OP NE EQ LT LE GT GE ADDOP MINUSOP MULTOP DIVOP
+%token RETURN INTEGER FLOAT DOUBLE IF ELSE GOTO ASSIGN_OP NE EQ LT LE GT GE
 
 %type <symbol_table> declaration_statement_list
 %type <symbol_entry> declaration_statement
@@ -60,6 +62,7 @@
 %type <ast> add_expression
 %type <ast> mult_expression
 %type <ast> basic_expression
+%type <ast> unary_expression
 %type <ast> statement
 %type <ast> identifier
 %type <ast> constant
@@ -109,11 +112,6 @@ procedure_body:
 		}
 	basic_block_list '}'
 		{
-			// if (return_statement_used_flag == false)
-			// {
-			// 	int line = get_line_number();
-			// 	report_error("Atleast 1 basic block should have a return statement", line);
-			// }
 			current_procedure->set_basic_block_list(*$4);
 			goto_bb_exist_check(*$4, goto_bb_num);
 			delete $4;
@@ -121,11 +119,6 @@ procedure_body:
 |
 	'{' basic_block_list '}'
 		{
-			// if (return_statement_used_flag == false)
-			// {
-			// 	int line = get_line_number();
-			// 	report_error("Atleast 1 basic block should have a return statement", line);
-			// }
 			current_procedure->set_basic_block_list(*$2);
 			goto_bb_exist_check(*$2, goto_bb_num);
 
@@ -226,11 +219,6 @@ basic_block:
 |
 	BASIC_BLOCK ':' statement_list
 		{
-			// if (*$2 != "bb") {
-			// 	int line = get_line_number();
-			// 	report_error("Not basic block lable", line);
-			// }
-
 			if ($1 < 2) {
 				int line = get_line_number();
 				report_error("Illegal basic block lable", line);
@@ -244,11 +232,6 @@ basic_block:
 |
 	BASIC_BLOCK ':' statement_list ifelse_statement
 		{
-			// if (*$2 != "bb") {
-			// 	int line = get_line_number();
-			// 	report_error("Not basic block lable", line);
-			// }
-
 			if ($1 < 2) {
 				int line = get_line_number();
 				report_error("Illegal basic block lable", line);
@@ -408,7 +391,6 @@ expression:
 		}
 ;
 
-
 greater_than_expression:
 	greater_than_expression GT arithmetic_expression
 		{
@@ -472,7 +454,7 @@ comparison_expression:
 		}
 ;
 
-basic_expression:
+unary_expression:
 	identifier
 		{
 			$$ = $1;
@@ -484,16 +466,21 @@ basic_expression:
 		}
 ;
 
+basic_expression:
+	'-' unary_expression
+|
+	unary_expression
+;
 
 mult_expression:
-	mult_expression MULTOP basic_expression
+	mult_expression '*' basic_expression
 		{
 			$$ = new Arithmetic_Expr_Ast($1,MUL,$3);
 			int line = get_line_number();
 			$$->check_ast(line);
 		}
 |
-	mult_expression DIVOP basic_expression
+	mult_expression '/' basic_expression
 		{
 			$$ = new Arithmetic_Expr_Ast($1,DIV,$3);
 			int line = get_line_number();
@@ -504,14 +491,14 @@ mult_expression:
 ;
 
 add_expression:
-	add_expression ADDOP mult_expression
+	add_expression '+' mult_expression
 		{
 			$$ = new Arithmetic_Expr_Ast($1,ADD,$3);
 			int line = get_line_number();
 			$$->check_ast(line);
 		}
 |
-	add_expression MINUSOP mult_expression
+	add_expression '-' mult_expression
 		{
 			$$ = new Arithmetic_Expr_Ast($1,SUB,$3);
 			int line = get_line_number();
@@ -574,5 +561,10 @@ constant:
 	INTEGER_NUMBER
 		{
 			$$ = new Number_Ast<int>($1, int_data_type);
+		}
+|
+	FLOAT_NUMBER
+		{
+			// $$ = new 
 		}
 ;

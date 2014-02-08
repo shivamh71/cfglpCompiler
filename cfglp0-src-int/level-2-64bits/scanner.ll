@@ -31,7 +31,12 @@ int		{
 			return Parser::INTEGER; 
 		}
 
-return	{ 
+float		{
+			store_token_name("FLOAT");
+			return Parser::FLOAT; 
+		}
+
+return	{
 			store_token_name("RETURN");
 			return Parser::RETURN; 
 		}
@@ -93,29 +98,34 @@ goto 	{
 		}
 
 "+"		{
-			store_token_name("ADDOP");
-			return Parser::ADDOP;	
+			store_token_name("ARITHOP");
+			return matched()[0];
 		}
 
 "-"		{
-			store_token_name("MINUSOP");
-			return Parser::MINUSOP;	
+			store_token_name("ARITHOP");
+			return matched()[0];
 		}
 
 "*"		{
-			store_token_name("MULTOP");
-			return Parser::MULTOP;
+			store_token_name("ARITHOP");
+			return matched()[0];
 		}
 
 "/"		{
-			store_token_name("DIVOP");
-			return Parser::DIVOP;
+			store_token_name("ARITHOP");
+			return matched()[0];
 		}
 
 "="		{
 			store_token_name("ASSIGN_OP");
 			return Parser::ASSIGN_OP;
 		}
+
+"double"	{
+				store_token_name("META CHAR");
+				return Parser::DOUBLE;
+			}
 
 [-:{}();=|&!]	{
 						store_token_name("META CHAR");
@@ -130,6 +140,15 @@ goto 	{
 
 				return Parser::INTEGER_NUMBER; 
 			}
+
+[-]?[[:digit:]_]+[.][[:digit:]_]+  {
+				store_token_name("FNUM");
+
+				ParserBase::STYPE__ * val = getSval();
+				val->float_value = atof(matched().c_str());
+
+				return Parser::FLOAT_NUMBER; 
+}			
 
 [[:alpha:]_][[:alpha:][:digit:]_]* {
 					store_token_name("NAME");
