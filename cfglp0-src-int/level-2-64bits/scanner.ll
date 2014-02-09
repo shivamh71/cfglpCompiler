@@ -32,8 +32,13 @@ int		{
 		}
 
 float		{
-			store_token_name("FLOAT");
+			store_token_name("META CHAR");
 			return Parser::FLOAT; 
+		}
+
+double	{
+			store_token_name("META CHAR");
+			return Parser::DOUBLE; 
 		}
 
 return	{
@@ -122,17 +127,12 @@ goto 	{
 			return Parser::ASSIGN_OP;
 		}
 
-"double"	{
-				store_token_name("META CHAR");
-				return Parser::DOUBLE;
-			}
-
 [-:{}();=|&!]	{
 						store_token_name("META CHAR");
 						return matched()[0];
 					}
 
-[-]?[[:digit:]_]+ 	{ 
+[-]?[[:digit:]]+ 	{ 
 				store_token_name("NUM");
 
 				ParserBase::STYPE__ * val = getSval();
@@ -141,7 +141,7 @@ goto 	{
 				return Parser::INTEGER_NUMBER; 
 			}
 
-[-]?[[:digit:]_]+[.][[:digit:]_]+  {
+[-]?[[:digit:]]+[.][[:digit:]]+  {
 				store_token_name("FNUM");
 
 				ParserBase::STYPE__ * val = getSval();
@@ -164,9 +164,10 @@ goto 	{
 				ignore_token();
 		}    
 
-";;".*  	|
-[ \t]		|
-[ \t]*"//".*			{
+[ \t]*";;".*  	|
+[ \t]*"//".*  	|
+[\t]+			|
+[ ]				{
 			if (command_options.is_show_tokens_selected())
 				ignore_token();
 		}
