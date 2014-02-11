@@ -32,12 +32,12 @@ int		{
 		}
 
 float		{
-			store_token_name("META CHAR");
+			store_token_name("FLOAT");
 			return Parser::FLOAT; 
 		}
 
 double	{
-			store_token_name("META CHAR");
+			store_token_name("DOUBLE");
 			return Parser::DOUBLE; 
 		}
 
@@ -166,7 +166,7 @@ goto 	{
 
 [ \t]*";;".*  	|
 [ \t]*"//".*  	|
-[\t]+			|
+[\t]			|
 [ ]				{
 			if (command_options.is_show_tokens_selected())
 				ignore_token();

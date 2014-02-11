@@ -381,7 +381,7 @@ comparison_expression
 greater_than_expression:
 	greater_than_expression GT arithmetic_expression
 		{
-			single_var_in_expr_check = true;
+			// // single_var_in_expr_check = true;
 			// $$ = new Relational_Expr_Ast($1,GTOP,$3);
 			// int line = get_line_number();
 			// $$->check_ast(line);
@@ -389,7 +389,7 @@ greater_than_expression:
 |
 	greater_than_expression GE arithmetic_expression
 		{
-			single_var_in_expr_check = true;
+			// // single_var_in_expr_check = true;
 			// $$ = new Relational_Expr_Ast($1,GEOP,$3);
 			// int line = get_line_number();
 			// $$->check_ast(line);
@@ -397,7 +397,7 @@ greater_than_expression:
 |
 	greater_than_expression LT arithmetic_expression
 		{
-			single_var_in_expr_check = true;
+			// // single_var_in_expr_check = true;
 			// $$ = new Relational_Expr_Ast($1,LTOP,$3);
 			// int line = get_line_number();
 			// $$->check_ast(line);
@@ -405,7 +405,7 @@ greater_than_expression:
 |
 	greater_than_expression LE arithmetic_expression
 		{
-			single_var_in_expr_check = true;
+			// // single_var_in_expr_check = true;
 			// $$ = new Relational_Expr_Ast($1,LEOP,$3);
 			// int line = get_line_number();
 			// $$->check_ast(line);
@@ -420,7 +420,7 @@ greater_than_expression:
 equality_expression:
 	equality_expression EQ greater_than_expression
 		{
-			single_var_in_expr_check = true;
+			// // single_var_in_expr_check = true;
 			// $$ = new Relational_Expr_Ast($1,EQOP,$3);
 			// int line = get_line_number();
 			// $$->check_ast(line);
@@ -428,7 +428,7 @@ equality_expression:
 |
 	equality_expression NE greater_than_expression
 		{
-			single_var_in_expr_check = true;
+			// // single_var_in_expr_check = true;
 			// $$ = new Relational_Expr_Ast($1,NEOP,$3);
 			// int line = get_line_number();
 			// $$->check_ast(line);
@@ -450,10 +450,10 @@ comparison_expression:
 unary_expression:
 	'(' type_name ')' '(' expression ')'
 		{
-			if (!single_var_in_expr_check) {
-				int line = get_line_number();
-				report_error("Cannot parse the input program",line);
-			}
+			// if (!single_var_in_expr_check) {
+			// 	int line = get_line_number();
+			// 	report_error("Cannot parse the input program",line);
+			// }
 		}
 |
 	'(' type_name ')' identifier
@@ -475,6 +475,11 @@ unary_expression:
 		{
 			// $$ = $1;
 		}
+|
+	'(' expression ')'
+		{
+			
+		}
 ;
 
 type_name:
@@ -494,7 +499,7 @@ basic_expression:
 mult_expression:
 	mult_expression '*' basic_expression
 		{
-			single_var_in_expr_check = true;
+			// // single_var_in_expr_check = true;
 			// $$ = new Arithmetic_Expr_Ast($1,MUL,$3);
 			// int line = get_line_number();
 			// $$->check_ast(line);
@@ -502,7 +507,7 @@ mult_expression:
 |
 	mult_expression '/' basic_expression
 		{
-			single_var_in_expr_check = true;
+			// // single_var_in_expr_check = true;
 			// $$ = new Arithmetic_Expr_Ast($1,DIV,$3);
 			// int line = get_line_number();
 			// $$->check_ast(line);
@@ -514,7 +519,7 @@ mult_expression:
 add_expression:
 	add_expression '+' mult_expression
 		{
-			single_var_in_expr_check = true;
+			// // single_var_in_expr_check = true;
 			// $$ = new Arithmetic_Expr_Ast($1,ADD,$3);
 			// int line = get_line_number();
 			// $$->check_ast(line);
@@ -522,7 +527,7 @@ add_expression:
 |
 	add_expression '-' mult_expression
 		{
-			single_var_in_expr_check = true;
+			// // single_var_in_expr_check = true;
 			// $$ = new Arithmetic_Expr_Ast($1,SUB,$3);
 			// int line = get_line_number();
 			// $$->check_ast(line);
@@ -561,7 +566,7 @@ return_statement:
 identifier:
 	NAME
 		{
-			single_var_in_expr_check = false;
+			// // single_var_in_expr_check = false;
 			// Symbol_Table_Entry var_table_entry;
 
 			// if (current_procedure->variable_in_symbol_list_check(*$1))
@@ -584,12 +589,12 @@ identifier:
 constant:
 	INTEGER_NUMBER
 		{
-			single_var_in_expr_check = false;
+			// // single_var_in_expr_check = false;
 			// $$ = new Number_Ast<int>($1, int_data_type);
 		}
 |
 	FLOAT_NUMBER
 		{
-			single_var_in_expr_check = false;
+			// // single_var_in_expr_check = false;
 		}
 ;
