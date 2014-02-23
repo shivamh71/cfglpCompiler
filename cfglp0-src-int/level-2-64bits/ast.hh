@@ -41,6 +41,7 @@ protected:
 								// rather it is included in ast.cc where node_data_type is actually used
 								// here its just declared but never used
 	int bb_number;
+	int is_constant;
 
 public:
 

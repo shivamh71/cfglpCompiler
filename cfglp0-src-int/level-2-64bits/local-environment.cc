@@ -239,6 +239,7 @@ Eval_Result_Value * Local_Environment::get_variable_value(string name)
 void Local_Environment::put_variable_value(Eval_Result_Value & i, string name)
 {
 	variable_table[name] = &i;
+	// cout<<i.get_result_enum() <<"	" << i.get_value()<<endl;
 }
 
 bool Local_Environment::does_variable_exist(string name)

@@ -106,8 +106,15 @@ void Assignment_Ast::set_data_type(string type) {
 
 bool Assignment_Ast::check_ast(int line)
 {
-	// if (lhs->get_data_type() == float_data_type || lhs->)
-	if (lhs->get_data_type() == rhs->get_data_type())
+	if (lhs->get_data_type() == double_data_type && (rhs->get_data_type() == double_data_type || rhs->get_data_type() == float_data_type || rhs->get_data_type() == int_data_type)) {
+		node_data_type = lhs->get_data_type();
+		return true;
+	}
+	if (lhs->get_data_type() == float_data_type && (rhs->get_data_type() == float_data_type || rhs->get_data_type() == int_data_type)) {
+		node_data_type = lhs->get_data_type();
+		return true;
+	}
+	if (lhs->get_data_type() == int_data_type && rhs->get_data_type() == int_data_type)
 	{
 		node_data_type = lhs->get_data_type();
 		return true;
@@ -137,7 +144,7 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 		report_error("Variable should be defined to be on rhs", NOLINE);
 
 	lhs->set_value_of_evaluation(eval_env, result);
-
+	// cout<<"data type is "<<lhs->get_data_type()<<endl;
 	// Print the result
 	// cout<<lhs->get_data_type()<<endl;
 	file_buffer << "\n";
@@ -528,17 +535,17 @@ Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env)
 void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result)
 {
 	Eval_Result_Value * i;
-	if (result.get_result_enum() == int_result)
+	if (get_data_type() == int_data_type)
 	{
 		i = new Eval_Result_Value_Int();
 	 	i->set_value(result.get_value());
 	}
-	else if (result.get_result_enum() == float_result)
+	else if (get_data_type() == float_data_type)
 	{
 		i = new Eval_Result_Value_Float();
 	 	i->set_value(result.get_value());
 	}
-	else if (result.get_result_enum() == double_result)
+	else if (get_data_type() == double_data_type)
 	{
 		i = new Eval_Result_Value_Double();
 	 	i->set_value(result.get_value());
