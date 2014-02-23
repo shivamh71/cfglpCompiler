@@ -22,6 +22,7 @@
 ***********************************************************************************************/
 
 #include<iostream>
+#include <cstdio>
 #include<fstream>
 
 using namespace std;
@@ -123,9 +124,9 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 
 	file_buffer << "\n";
 	print_ast(file_buffer);
-
+	cout<<"print vale\n";
 	lhs->print_value(eval_env, file_buffer);
-
+	cout<<"print value\n";
 	Eval_Result * to_return = new Eval_Result_Value_Int();
 	to_return->set_value(0);
 
@@ -237,13 +238,17 @@ Arithmetic_Expr_Ast::Arithmetic_Expr_Ast(Ast* arg_lhs, Operator o, Ast* arg_rhs)
 }
 
 void Arithmetic_Expr_Ast::print_ast(ostream & file_buffer) {
-	file_buffer << AST_SPACE << "Operator: "<<O<<"\n";
-	file_buffer << AST_NODE_SPACE << "LHS (";
+	file_buffer << "\n";
+	if (O==ADD) file_buffer << AST_NODE_SPACE << "Arith: "<<"PLUS"<<"\n";
+	if (O==SUB) file_buffer << AST_NODE_SPACE << "Arith: "<<"MINUS"<<"\n";
+	if (O==MUL) file_buffer << AST_NODE_SPACE << "Arith: "<<"MULT"<<"\n";
+	if (O==DIV) file_buffer << AST_NODE_SPACE << "Arith: "<<"DIV"<<"\n";
+	file_buffer << AST_NODE_SPACE << "   LHS (";
 	lhs->print_ast(file_buffer);
 	file_buffer << ")\n";
-	file_buffer << AST_NODE_SPACE << "RHS (";
+	file_buffer << AST_NODE_SPACE "   RHS (";
 	rhs->print_ast(file_buffer);
-	file_buffer << ")\n";
+	file_buffer << ")";
 }
 
 Data_Type Arithmetic_Expr_Ast::get_data_type() {
@@ -260,17 +265,21 @@ bool Arithmetic_Expr_Ast::check_ast(int line) {
 
 Eval_Result & Arithmetic_Expr_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	
-	Eval_Result *result_lhs = new Eval_Result_Value_Int(); 
-	*result_lhs = lhs->evaluate(eval_env, file_buffer);
+	Eval_Result & result1 = lhs->evaluate(eval_env, file_buffer);
 
-	Eval_Result *result_rhs = new Eval_Result_Value_Int(); 
-	*result_rhs = rhs->evaluate(eval_env, file_buffer);
+	if (result1.is_variable_defined() == false)
+		report_error("Variable should be defined to be on lhs of condition", NOLINE);
 
-	int l = result_lhs->get_value();
-	int r = result_rhs->get_value();
+	Eval_Result & result2 = rhs->evaluate(eval_env, file_buffer);
 
-	int ans;
+	if (result2.is_variable_defined() == false)
+		report_error("Variable should be defined to be on rhs of condition", NOLINE);
 
+	float l = result1.get_value();
+	float r = result2.get_value();
+
+	cout<<"l = "<<l<<" r = "<<r<<endl;
+	float ans;
 	if (O==ADD) {
 		ans = (l + r);
 	}
@@ -280,18 +289,26 @@ Eval_Result & Arithmetic_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	else if (O==MUL) {
 		ans = (l * r);
 	}
-	else {
-		ans = (l/r);
+	else if (O==DIV) {
+		ans = (l / r);
 	}
 
-	Eval_Result * result = new Eval_Result_Value_Int();
-	result->set_value(ans);
+	if (node_data_type == int_data_type) {
+		Eval_Result * result = new Eval_Result_Value_Int();
+		result->set_value((int)ans);
+		return *result;
+	}
+	else if (node_data_type == float_data_type) {
+		Eval_Result * result = new Eval_Result_Value_Float();
+		result->set_value(ans);
+		return *result;
+	}
+	else {
+		Eval_Result * result = new Eval_Result_Value_Double();
+		result->set_value((double)ans);
+		return *result;
+	}
 
-	// Print the result
-
-	print_ast(file_buffer);
-
-	return *result;
 }
 
 Arithmetic_Expr_Ast::~Arithmetic_Expr_Ast() {
@@ -328,12 +345,13 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 
 	file_buffer << "" << AST_SPACE << variable_name << " : ";
 
-	if (!eval_env.is_variable_defined(variable_name) && !interpreter_global_table.is_variable_defined(variable_name))
+	if (!eval_env.is_variable_defined(variable_name) && !interpreter_global_table.is_variable_defined(variable_name)) {
 		file_buffer << "undefined";
+	}
 
 	else if (eval_env.is_variable_defined(variable_name) && loc_var_val != NULL)
 	{
-		if (loc_var_val->get_result_enum() == int_result)
+		if (loc_var_val->get_result_enum() == int_result || loc_var_val->get_result_enum() == float_result || loc_var_val->get_result_enum() == double_result)
 			file_buffer << loc_var_val->get_value() << "\n";
 		else
 			report_internal_error("Result type can only be int and float");
@@ -341,7 +359,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 
 	else
 	{
-		if (glob_var_val->get_result_enum() == int_result)
+		if (glob_var_val->get_result_enum() == int_result || glob_var_val->get_result_enum() == float_result || glob_var_val->get_result_enum() == double_result)
 		{
 			if (glob_var_val == NULL)
 				file_buffer << "0\n";
@@ -408,7 +426,21 @@ Data_Type Number_Ast<DATA_TYPE>::get_data_type()
 template <class DATA_TYPE>
 void Number_Ast<DATA_TYPE>::print_ast(ostream & file_buffer)
 {
-	file_buffer << "Num : " << constant;
+	if (node_data_type == int_data_type) {
+		file_buffer << "Num : " << constant;	
+	}
+
+	else if (node_data_type == float_data_type) {
+		char str[100];
+		sprintf(str,"Num : %.2f",(float)constant);
+		file_buffer << str;
+	}
+
+	else if (node_data_type == double_data_type) {
+		char str[100];
+		sprintf(str,"Num : %.2lf",(double)constant);
+		file_buffer << str;
+	}
 }
 
 template <class DATA_TYPE>
@@ -417,6 +449,22 @@ Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostr
 	if (node_data_type == int_data_type)
 	{
 		Eval_Result & result = *new Eval_Result_Value_Int();
+		result.set_value(constant);
+
+		return result;
+	}
+
+	else if (node_data_type == float_data_type)
+	{
+		Eval_Result & result = *new Eval_Result_Value_Float();
+		result.set_value(constant);
+
+		return result;
+	}
+
+	else if (node_data_type == double_data_type)
+	{
+		Eval_Result & result = *new Eval_Result_Value_Double();
 		result.set_value(constant);
 
 		return result;
@@ -538,4 +586,6 @@ Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 }
 /*************************************************************************************************************/
 
+template class Number_Ast<float>;
 template class Number_Ast<int>;
+template class Number_Ast<double>;

@@ -67,7 +67,7 @@
 %type <ast> identifier
 %type <ast> constant
 %type <ast> expression
-%type <string> type_name
+%type <string_value> type_name
 
 %start program
 
@@ -493,17 +493,23 @@ unary_expression:
 type_name:
 	FLOAT
 		{
-			$$ = $1;
+			string *t;
+			*t = "FLOAT";
+			$$ = t;
 		}
 |
 	DOUBLE
 		{
-			$$ = $1;
+			string *t;
+			*t = "DOUBLE";
+			$$ = t;
 		}
 |
 	INTEGER
 		{
-			$$ = $1;
+			string *t;
+			*t = "INTEGER";
+			$$ = t;
 		}
 ;
 
@@ -613,10 +619,5 @@ constant:
 	FLOAT_NUMBER
 		{
 			$$ = new Number_Ast<float>($1, float_data_type);
-		}
-|
-	DOUBLE_NUMBER
-		{
-			$$ = new Number_Ast<double>($1, double_data_type);
 		}
 ;
