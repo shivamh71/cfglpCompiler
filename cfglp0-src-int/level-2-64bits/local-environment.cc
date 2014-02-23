@@ -64,7 +64,7 @@ Eval_Result_Value_Int::~Eval_Result_Value_Int()
 
 void Eval_Result_Value_Int::set_value(float number)
 {
-	value = (int) number;
+	value = number;
 	defined = true;
 }
 
@@ -150,7 +150,7 @@ Eval_Result_Value_Double::~Eval_Result_Value_Double()
 
 void Eval_Result_Value_Double::set_value(float number)
 {
-	value = (double) number;
+	value = number;
 	defined = true;
 }
 
@@ -162,6 +162,7 @@ float Eval_Result_Value_Double::get_value()
 void Eval_Result_Value_Double::set_variable_status(bool def)
 {
 	defined = def;
+	result_type = double_result;
 }
 
 bool Eval_Result_Value_Double::is_variable_defined()
@@ -207,8 +208,11 @@ void Local_Environment::print(ostream & file_buffer)
 bool Local_Environment::is_variable_defined(string name)
 {
 	Eval_Result_Value * i = variable_table[name];
+	// cout<<i->get_value()<<endl;
+
 	if (i != NULL)
 		return i->is_variable_defined();
+		// return true;
 	else
 		return false;
 }

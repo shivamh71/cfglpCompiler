@@ -124,9 +124,7 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 
 	file_buffer << "\n";
 	print_ast(file_buffer);
-	cout<<"print vale\n";
 	lhs->print_value(eval_env, file_buffer);
-	cout<<"print value\n";
 	Eval_Result * to_return = new Eval_Result_Value_Int();
 	to_return->set_value(0);
 
@@ -212,13 +210,9 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 		ans = (l!=r);
 	}
 
-
-
 	Eval_Result * result = new Eval_Result_Value_Int();
+	
 	result->set_value(ans);
-
-	// Print the result
-
 
 	return *result;
 }
@@ -278,7 +272,6 @@ Eval_Result & Arithmetic_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	float l = result1.get_value();
 	float r = result2.get_value();
 
-	cout<<"l = "<<l<<" r = "<<r<<endl;
 	float ans;
 	if (O==ADD) {
 		ans = (l + r);
