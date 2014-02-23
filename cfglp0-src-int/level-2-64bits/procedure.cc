@@ -124,6 +124,7 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer)
 
 	file_buffer << PROC_SPACE << "Evaluating Procedure " << name << "\n";
 	file_buffer << LOC_VAR_SPACE << "Local Variables (before evaluating):\n";
+	eval_env.flag = 1;
 	eval_env.print(file_buffer);
 	file_buffer << "\n";
 	
@@ -153,6 +154,7 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer)
 
 	file_buffer << "\n\n";
 	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating):\n";
+	eval_env.flag = 1;
 	eval_env.print(file_buffer);
 
 	return *result;

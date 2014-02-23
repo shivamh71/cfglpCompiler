@@ -457,21 +457,20 @@ comparison_expression:
 unary_expression:
 	'(' type_name ')' '(' expression ')'
 		{
-			// if (!single_var_in_expr_check) {
-			// 	int line = get_line_number();
-			// 	report_error("Cannot parse the input program",line);
-			// }
 			$$ = $5;
+			$$->set_data_type(*$2);
 		}
 |
 	'(' type_name ')' identifier
 		{
 			$$ = $4;
+			$$->set_data_type(*$2);
 		}
 |
 	'(' type_name ')' constant
 		{
 			$$ = $4;
+			$$->set_data_type(*$2);
 		}
 |
 	identifier
@@ -493,21 +492,21 @@ unary_expression:
 type_name:
 	FLOAT
 		{
-			string *t;
+			string *t = new string;
 			*t = "FLOAT";
 			$$ = t;
 		}
 |
 	DOUBLE
 		{
-			string *t;
-			*t = "DOUBLE";
+			string *t = new string;
+			*t = "FLOAT"; // changed
 			$$ = t;
 		}
 |
 	INTEGER
 		{
-			string *t;
+			string *t = new string;
 			*t = "INTEGER";
 			$$ = t;
 		}
@@ -516,7 +515,16 @@ type_name:
 basic_expression:
 	'-' unary_expression
 		{
-			$$ = $2;
+			$$ = new Negation_Expr_Ast($2);
+			if ($2->get_data_type()==1) {
+				$$->set_data_type("INTEGER");
+			}
+			else if ($2->get_data_type()==3) {
+				$$->set_data_type("FLOAT");
+			}
+			else if ($2->get_data_type()==4) {
+				$$->set_data_type("DOUBLE");
+			}
 		}
 |
 	unary_expression

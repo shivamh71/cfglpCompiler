@@ -21,8 +21,8 @@
 
 ***********************************************************************************************/
 
-#include<string>
-#include<fstream>
+#include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -97,7 +97,7 @@ Result_Enum Eval_Result_Value_Int::get_result_enum()
 
 Eval_Result_Value_Float::Eval_Result_Value_Float()
 {
-	value = 0.0;
+	value = 0;
 	defined = false;
 	result_type = float_result;
 }
@@ -140,7 +140,7 @@ Result_Enum Eval_Result_Value_Float::get_result_enum()
 
 Eval_Result_Value_Double::Eval_Result_Value_Double()
 {
-	value = 0.0;
+	value = 0;
 	defined = false;
 	result_type = double_result;
 }
@@ -183,7 +183,9 @@ Result_Enum Eval_Result_Value_Double::get_result_enum()
 ///////////////////////////////////////////////////////////////////////////////////
 
 Local_Environment::Local_Environment()
-{}
+{
+	flag = 0;
+}
 
 Local_Environment::~Local_Environment()
 {}
@@ -199,8 +201,20 @@ void Local_Environment::print(ostream & file_buffer)
 			if (vi->is_variable_defined() == false)
 				file_buffer << VAR_SPACE << (*i).first << " : undefined" << "\n";
 		
-			else
-				file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value() << "\n";
+			else {
+				char str[100];
+				// cout<< vi->get_result_enum() << "  " << vi->get_value() << endl; 
+				if (vi->get_result_enum() == float_result || vi->get_result_enum() == double_result) {
+					sprintf(str,"%.2f",(float)vi->get_value());
+				}
+				else {
+					sprintf(str,"%d",(int)vi->get_value());
+				}
+				if (flag)
+					file_buffer << VAR_SPACE << (*i).first << " : " << str << "\n";
+				else
+					file_buffer << VAR_SPACE << (*i).first << " : " << 0 << "\n";
+			}
 		}
 	}
 }
@@ -208,11 +222,10 @@ void Local_Environment::print(ostream & file_buffer)
 bool Local_Environment::is_variable_defined(string name)
 {
 	Eval_Result_Value * i = variable_table[name];
-	// cout<<i->get_value()<<endl;
 
-	if (i != NULL)
+	if (i != NULL) {
 		return i->is_variable_defined();
-		// return true;
+	}
 	else
 		return false;
 }

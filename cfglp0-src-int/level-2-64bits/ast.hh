@@ -52,8 +52,10 @@ public:
 
 	virtual Data_Type get_data_type();
 
+	virtual void set_data_type(string type);
+
 	int get_bb_number();
-	
+
 	virtual bool check_ast(int line);
 
 	virtual void print_ast(ostream & file_buffer) = 0;
@@ -78,6 +80,8 @@ public:
 	~Assignment_Ast();
 
 	Data_Type get_data_type();
+
+	void set_data_type(string type);
 	
 	bool check_ast(int line);
 
@@ -101,6 +105,8 @@ public:
 	~Relational_Expr_Ast();
 
 	Data_Type get_data_type();
+
+	void set_data_type(string type);
 	
 	bool check_ast(int line);
 
@@ -124,6 +130,29 @@ public:
 	~Arithmetic_Expr_Ast();
 
 	Data_Type get_data_type();
+
+	void set_data_type(string type);
+	
+	bool check_ast(int line);
+
+	void print_ast(ostream & file_buffer);
+
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
+class Negation_Expr_Ast:public Ast {
+
+public:
+
+	Ast * lhs;
+
+	Negation_Expr_Ast(Ast* arg_lhs);
+
+	~Negation_Expr_Ast();
+
+	Data_Type get_data_type();
+
+	void set_data_type(string type);
 	
 	bool check_ast(int line);
 
@@ -136,6 +165,7 @@ public:
 class Name_Ast:public Ast
 {
 	string variable_name;
+	Data_Type node_data_type;
 	Symbol_Table_Entry variable_symbol_entry;
 
 public:
@@ -143,6 +173,8 @@ public:
 	~Name_Ast();
 
 	Data_Type get_data_type();
+
+	void set_data_type(string type);
 
 	void print_ast(ostream & file_buffer);
 
@@ -163,6 +195,8 @@ public:
 
 	Data_Type get_data_type();
 
+	void set_data_type(string type);
+
 	void print_ast(ostream & file_buffer);
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
@@ -180,6 +214,8 @@ public:
 	int get_bb_number();
 
 	Data_Type get_data_type();
+
+	void set_data_type(string type);
 
 	void print_ast(ostream & file_buffer);
 

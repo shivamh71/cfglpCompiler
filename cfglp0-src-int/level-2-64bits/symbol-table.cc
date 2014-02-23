@@ -100,7 +100,7 @@ void Symbol_Table::create(Local_Environment & local_global_variables_table)
 	{
 		string name = (*i)->get_variable_name();
 		if ((*i)->get_data_type()==int_data_type) {
-			Eval_Result_Value_Int * j = new Eval_Result_Value_Int();
+			Eval_Result_Value * j = new Eval_Result_Value_Int();
 			if (scope == global)
 			{
 				j->set_variable_status(true);
@@ -109,16 +109,17 @@ void Symbol_Table::create(Local_Environment & local_global_variables_table)
 			local_global_variables_table.put_variable_value(*j, name);
 		}
 		else if ((*i)->get_data_type()==float_data_type) {
-			Eval_Result_Value_Float * j = new Eval_Result_Value_Float();
+			Eval_Result_Value * j = new Eval_Result_Value_Float();
 			if (scope == global)
 			{
 				j->set_variable_status(true);
+				j->set_result_enum(float_result);
 				j->set_value(0);
 			}
 			local_global_variables_table.put_variable_value(*j, name);
 		}
 		else if ((*i)->get_data_type()==double_data_type) {
-			Eval_Result_Value_Double * j = new Eval_Result_Value_Double();
+			Eval_Result_Value * j = new Eval_Result_Value_Double();
 			if (scope == global)
 			{
 				j->set_variable_status(true);
