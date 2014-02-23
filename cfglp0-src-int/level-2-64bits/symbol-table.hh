@@ -38,7 +38,9 @@ typedef enum
 {
 	void_data_type,
 	int_data_type,
-	bool_data_type
+	bool_data_type,
+	float_data_type,
+	double_data_type
 } Data_Type;
 
 // typedef for variable scope -- can be global or local
