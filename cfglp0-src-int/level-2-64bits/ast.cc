@@ -106,12 +106,12 @@ void Assignment_Ast::set_data_type(string type) {
 
 bool Assignment_Ast::check_ast(int line)
 {
-	if (lhs->get_data_type() == double_data_type && (rhs->get_data_type() == double_data_type || rhs->get_data_type() == float_data_type || rhs->get_data_type() == int_data_type)) {
-		node_data_type = lhs->get_data_type();
+	if (lhs->get_data_type() == double_data_type && (rhs->get_data_type() == double_data_type || rhs->get_data_type() == float_data_type)) {
+		node_data_type = float_data_type;
 		return true;
 	}
-	if (lhs->get_data_type() == float_data_type && (rhs->get_data_type() == float_data_type || rhs->get_data_type() == int_data_type)) {
-		node_data_type = lhs->get_data_type();
+	if (lhs->get_data_type() == float_data_type && (rhs->get_data_type() == double_data_type || rhs->get_data_type() == float_data_type)) {
+		node_data_type = float_data_type;
 		return true;
 	}
 	if (lhs->get_data_type() == int_data_type && rhs->get_data_type() == int_data_type)
@@ -119,7 +119,6 @@ bool Assignment_Ast::check_ast(int line)
 		node_data_type = lhs->get_data_type();
 		return true;
 	}
-
 	report_error("Assignment statement data type not compatible", line);
 }
 
@@ -322,10 +321,10 @@ Eval_Result & Arithmetic_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	if (result2.is_variable_defined() == false)
 		report_error("Variable should be defined to be on rhs of condition", NOLINE);
 
-	float l = result1.get_value();
-	float r = result2.get_value();
+	double l = result1.get_value();
+	double r = result2.get_value();
 
-	float ans;
+	double ans;
 	if (O==ADD) {
 		ans = (l + r);
 	}
@@ -343,13 +342,13 @@ Eval_Result & Arithmetic_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	}
 
 	if (lhs->get_data_type() == int_data_type)
-		ans = (int) ans;
+		ans = ans;
 	else if (lhs->get_data_type() == double_data_type)
-		ans = (double) ans;
+		ans = ans;
 
 	if (node_data_type == int_data_type) {
 		Eval_Result * result = new Eval_Result_Value_Int();
-		result->set_value((int)ans);
+		result->set_value(ans);
 		return *result;
 	}
 	else if (node_data_type == float_data_type) {
@@ -359,7 +358,7 @@ Eval_Result & Arithmetic_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	}
 	else {
 		Eval_Result * result = new Eval_Result_Value_Double();
-		result->set_value((double)ans);
+		result->set_value(ans);
 		return *result;
 	}
 
