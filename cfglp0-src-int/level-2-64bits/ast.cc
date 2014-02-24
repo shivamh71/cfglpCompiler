@@ -199,10 +199,10 @@ void Relational_Expr_Ast::set_data_type(string type) {
 }
 
 bool Relational_Expr_Ast::check_ast(int line) {
-	// if (lhs->get_data_type() == rhs->get_data_type()) {
-		node_data_type = lhs->get_data_type();
+	if (lhs->get_data_type() == rhs->get_data_type()) {
+		node_data_type = int_data_type;
 		return true;
-	// }
+	}
 	report_error("Relational statement data type not compatible", line);
 }
 
