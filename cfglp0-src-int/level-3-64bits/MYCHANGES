@@ -1,0 +1,26 @@
+Submitted by : 
+	Shubham Mehta - 110050013
+	Shivam H Prasad - 110050041
+
+1)  ast.hh & ast.cc
+	-> created class Arithmetic_Expr_Ast to handle arithmetic expressions (wrote print, evaluate and other functions for it)
+	-> created class Negation_Expr_Ast to handle arithmetic expressions (wrote print, evaluate and other functions for it)
+	-> added function to set node_data_type in all the ast (inherited as well) classes to handle typecast operations
+	-> handled type checking in Relational as well as Arithmetic Expression
+	-> updated print function of Name_Ast to handle printing of different data types appropriately
+
+2)	parser.yy
+	-> added c++ code to handle arithmetic expressions, unary expression and type cast operations
+	-> added action routines to handle float data types (updated declaration statement and constant tokens)
+
+3)	local-environment.hh and local-environment.cc
+	-> added classes to handle Eval result of type float and double
+	-> updated Eval_Result and Eval_Result_Value to handle changes in reference implementation
+	-> updated print function of local-environment.cc to handle printing of different data types appropriately
+
+4)	procedure.hh and procedure.cc
+	-> updated evaluate function to handle symbol-table creation
+
+Corner cases handled
+	-> handled printing of float and double variables appropriately (it behaves during global declrataion and after that anywhere in evaluation)
+	-> handled type checking as handled by reference implementation
