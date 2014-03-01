@@ -44,7 +44,7 @@
 %token <integer_value> BASIC_BLOCK 
 %token <float_value> FLOAT_NUMBER 
 %token <string_value> NAME
-%token RETURN INTEGER FLOAT DOUBLE IF ELSE GOTO ASSIGN_OP NE EQ LT LE GT GE
+%token RETURN INTEGER FLOAT DOUBLE VOID IF ELSE GOTO ASSIGN_OP NE EQ LT LE GT GE
 
 /*
 %type <symbol_table> declaration_statement_list
@@ -76,19 +76,42 @@
 %%
 
 program:
-	declaration_statement_list	procedure_name	
+	declaration_statement_list function_declaration_list procedure_list	
 		{
 			// program_object.set_global_table(*$1);
 			// return_statement_used_flag = false;	// No return statement in the current procedure till now
 		}
-		procedure_body
+
+|
+	function_declaration_list procedure_list	
 		{
-			// program_object.set_procedure_map(*current_procedure);
-			// if ($1)
-			// 	$1->global_list_in_proc_map_check(get_line_number());
-			// delete $1;
+
 		}
 |
+	declaration_statement_list procedure_list
+		{
+
+		}
+|
+	procedure_list
+		{
+
+		}	
+;
+
+procedure_list:
+	procedure_list procedure_statement
+	{
+
+	}
+|
+	procedure_statement
+	{
+
+	}
+;
+
+procedure_statement:
 	procedure_name	
 		{
 			// return_statement_used_flag = false;	// No return statement in the current procedure till now
@@ -100,9 +123,14 @@ program:
 ;
 
 procedure_name:
-	NAME '(' ')'
+	NAME '(' comma_separated_declaration_list ')'
 		{
 			// current_procedure = new Procedure(void_data_type, *$1);
+		}
+|
+	NAME '(' ')'
+		{
+
 		}
 ;
 
@@ -127,6 +155,71 @@ procedure_body:
 		}
 ;
 
+function_declaration_list:
+	function_declaration_list function_declaration_statement
+		{
+
+		}
+|
+	function_declaration_statement
+		{
+
+		}
+;
+
+function_declaration_statement:
+	INTEGER NAME '(' comma_separated_declaration_list ')' ';'
+		{
+
+		}
+|
+	FLOAT NAME '(' comma_separated_declaration_list ')' ';'
+		{
+
+		}
+|
+	DOUBLE NAME '(' comma_separated_declaration_list ')' ';'
+		{
+
+		}
+|
+	VOID NAME '(' comma_separated_declaration_list ')' ';'
+		{
+
+		}
+|
+	INTEGER NAME '(' ')' ';'
+		{
+
+		}
+|
+	FLOAT NAME '(' ')' ';'
+		{
+
+		}
+|
+	DOUBLE NAME '(' ')' ';'
+		{
+
+		}
+|
+	VOID NAME '(' ')' ';'
+		{
+
+		}
+;
+
+comma_separated_declaration_list:
+	comma_separated_declaration_list ',' func_arguement_statement
+		{
+
+		}
+|
+	func_arguement_statement
+		{
+
+		}
+;
 declaration_statement_list:
 	declaration_statement_list declaration_statement
 		{
@@ -172,6 +265,26 @@ declaration_statement_list:
 
 			// $$ = new Symbol_Table();
 			// $$->push_symbol($1);
+		}
+;
+
+func_arguement_statement:
+	INTEGER NAME
+		{
+			// $$ = new Symbol_Table_Entry(*$2, int_data_type);
+			// delete $2;
+		}
+|
+	FLOAT NAME
+		{
+			// $$ = new Symbol_Table_Entry(*$2, float_data_type);
+			// delete $2;
+		}
+|
+	DOUBLE NAME
+		{
+			// $$ = new Symbol_Table_Entry(*$2, double_data_type);
+			// delete $2;
 		}
 ;
 
@@ -357,6 +470,11 @@ statement:
 		{
 			// $$ = $1;
 		}
+|
+	function_call_statement ';'
+		{
+
+		}
 ;
 
 ifelse_statement:
@@ -480,6 +598,16 @@ unary_expression:
 			// $$ = $1;
 		}
 |
+	'(' type_name ')' function_call_statement
+		{
+
+		}
+|
+	function_call_statement
+		{
+
+		}
+|
 	constant
 		{
 			// $$ = $1;
@@ -593,6 +721,11 @@ assignment_statement:
 return_statement:
 	RETURN ';'
 		{
+
+		}
+|
+	RETURN  expression ';'
+		{
 			// $$ = new Return_Ast();
 			// return_statement_used_flag = true; // Current procedure has an occurrence of return statement
 		}
@@ -617,6 +750,30 @@ identifier:
 
 			// $$ = new Name_Ast(*$1, var_table_entry);
 			// delete $1;
+		}
+;
+
+function_call_statement:
+	NAME '(' comma_separated_expression_list ')'
+		{
+
+		}
+|
+	NAME '(' ')'
+		{
+
+		}
+;
+
+comma_separated_expression_list:
+	comma_separated_expression_list ',' expression
+		{
+
+		}
+|
+	expression
+		{
+
 		}
 ;
 
