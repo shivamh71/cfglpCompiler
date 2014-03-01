@@ -17,19 +17,19 @@ do
 	echo $file
 	f=`echo $file | cut -d '/' -f2`
 	f=`echo $f | cut -d '.' -f1`
-	./cfglp $file -tokens -ast -eval -d > tmpUs/$f.cfg
-	./run $file -tokens -ast -eval -d > tmpSir/$f.cfg
+	./cfglp $file -tokens -d > tmpUs/$f.cfg
+	./run $file -tokens -d > tmpSir/$f.cfg
 done
 
-echo "\n\nProcessing error files"
-echo "-----------------------\n"
+# echo "\n\nProcessing error files"
+# echo "-----------------------\n"
 
-for file in "test_files"/*.e* 
-do
-	echo $file
-	f=`echo $file | cut -d '/' -f2`
-	f=`echo $f | cut -d '.' -f1`
-	./cfglp $file -tokens -d > tmpUs/$f.ecfg
-	./run $file -tokens -d > tmpSir/$f.ecfg
-	echo "-------------------------------------------"
-done
+# for file in "test_files"/*.e* 
+# do
+# 	echo $file
+# 	f=`echo $file | cut -d '/' -f2`
+# 	f=`echo $f | cut -d '.' -f1`
+# 	./cfglp $file -tokens -d > tmpUs/$f.ecfg
+# 	./run $file -tokens -d > tmpSir/$f.ecfg
+# 	echo "-------------------------------------------"
+# done
