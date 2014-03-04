@@ -254,4 +254,20 @@ public:
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 };
 
+class Function_Call_Ast:public Ast
+{
+public:
+	string func_name;
+	list<Ast*> arg_list;
+
+	Function_Call_Ast(list<Ast*> arguments);
+	~Function_Call_Ast();
+
+	void set_name(string name);
+
+	void print_ast(ostream & file_buffer);
+
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+};
+
 #endif

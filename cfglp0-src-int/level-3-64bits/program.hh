@@ -27,6 +27,7 @@
 #include<string>
 #include<map>
 #include<list>
+#include <vector>
 
 #define GLOB_SPACE "   "
 
@@ -42,6 +43,7 @@ public:
 
 	Symbol_Table global_symbol_table;
 	map<string, Procedure *> procedure_map;
+	vector<string> procedure_list;
 	Program();
 	~Program();
 	void delete_all();

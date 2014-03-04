@@ -158,8 +158,14 @@ procedure_name:
 		{
 			current_procedure = program_object.get_procedure(*$1);
 			if (current_procedure == NULL) {
-				int line = get_line_number();
-				report_error("Procedure corresponding to the name is not found", line);
+				if (*$1=="main") {
+					current_procedure = new Procedure(float_data_type, *$1);
+					program_object.set_procedure_map(*current_procedure);
+				}
+				else {
+					int line = get_line_number();
+					report_error("Procedure corresponding to the name is not found", line);
+				}
 			}
 			if (!current_procedure->local_arg_table.variable_table.empty()) {
 				int line = get_line_number();
@@ -244,6 +250,7 @@ function_declaration_statement:
 			Procedure * new_proc = new Procedure(void_data_type, *$2);
 			new_proc->set_arg_list(*$4);
 			program_object.set_procedure_map(*new_proc);
+			// cout<<"i wa here\n";
 		}
 |
 	INTEGER NAME '(' ')' ';'
@@ -295,8 +302,7 @@ comma_separated_declaration_list:
 			// program_object.variable_in_proc_map_check($2->get_variable_name(), line);
 
 			string var_name = $3->get_variable_name();
-			// if (current_procedure && current_procedure->get_proc_name() == var_name)
-			if (current_procedure)
+			if (current_procedure && current_procedure->get_proc_name() == var_name)
 			{
 				int line = get_line_number();
 				report_error("Variable name cannot be same as procedure name", line);
@@ -862,17 +868,21 @@ function_call_statement:
 			list<Ast*> arg_list = *$3;
 			list<Ast*>::iterator it_t;
 			list<Symbol_Table_Entry*>::iterator it_s;
+			// cout<<"agr list size : "<<call_proc->local_arg_table.variable_table.size()<<endl;
+			// cout<<"args size : "<<arg_list.size()<<endl;
 			for (it_s=call_proc->local_arg_table.variable_table.begin(),it_t=arg_list.begin();it_s!=call_proc->local_arg_table.variable_table.end() && it_t!=arg_list.end();it_t++,it_s++) {
 				if ((*it_t)->get_data_type() != (*it_s)->get_data_type()) {
 					int line = get_line_number();
 					report_error("Actual and formal parameters data types are not matching", line);
 				}
 			}
-			if (!(it_t==arg_list.end() && it_s==call_proc->local_arg_table.variable_table.end())) {
+			if (arg_list.size()!=call_proc->local_arg_table.variable_table.size()) {
 				int line = get_line_number();
 				report_error("Actual and formal parameter count do not match", line);
 			}
-			$$ = new Function_Call_Ast(*$3);
+			Function_Call_Ast * func = new Function_Call_Ast(*$3);
+			func->set_name(*$1);
+			$$ = func;
 		}
 |
 	NAME '(' ')'
@@ -884,15 +894,17 @@ function_call_statement:
 				report_error("Actual and formal parameter count do not match", line);
 			}
 			list<Ast*> arg_list;
-			$$ = new Function_Call_Ast(arg_list);
+			Function_Call_Ast * func = new Function_Call_Ast(arg_list);
+			func->set_name(*$1);
+			$$ = func;
 		}
 ;
 
 comma_separated_expression_list:
 	comma_separated_expression_list ',' expression
 		{
-			$$ = new list<Ast *>;
-			$$->push_back($2);
+			$$ = $1;
+			$$->push_back($3);
 		}
 |
 	expression

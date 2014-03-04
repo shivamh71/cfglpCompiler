@@ -61,6 +61,7 @@ void Program::set_global_table(Symbol_Table & new_global_table)
 void Program::set_procedure_map(Procedure & proc)
 {
 	procedure_map[proc.get_proc_name()] = &proc;
+	procedure_list.push_back(proc.get_proc_name());
 }
 
 bool Program::variable_in_symbol_list_check(string variable)
@@ -108,13 +109,20 @@ void Program::print_ast()
 
 	ast_buffer << "Program:\n";
 
-	Procedure * main = get_main_procedure(ast_buffer);
+	for (int i=0;i<procedure_list.size();i++) {
+		if (procedure_list[i]!="main") {
+			procedure_map[procedure_list[i]]->print_ast(ast_buffer);
+			ast_buffer << "\n";
+		}
+	}
+	Procedure * main = get_procedure("main");
 	if (main == NULL)
 		report_error("No main function found in the program", NOLINE);
 
 	else
 	{
 		main->print_ast(ast_buffer);
+		ast_buffer << "\n";
 	}
 }
 
