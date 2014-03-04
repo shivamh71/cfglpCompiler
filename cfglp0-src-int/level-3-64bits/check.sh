@@ -18,7 +18,7 @@ mkdir tmpUs tmpSir
 # 	f=`echo $file | cut -d '/' -f2`
 # 	f=`echo $f | cut -d '.' -f1`
 # 	./cfglp $file -tokens -d > tmpUs/$f.cfg
-# 	./run $file -tokens -d > tmpSir/$f.cfg
+# 	./run $file -tokens -parse -d > tmpSir/$f.cfg
 # done
 
 echo "\n\nProcessing error files"
@@ -30,6 +30,6 @@ do
 	f=`echo $file | cut -d '/' -f2`
 	f=`echo $f | cut -d '.' -f1`
 	./cfglp $file -tokens -d > tmpUs/$f.ecfg
-	./run $file -tokens -d > tmpSir/$f.ecfg
+	./run $file -tokens -parse -d > tmpSir/$f.ecfg
 	echo "-------------------------------------------"
 done
