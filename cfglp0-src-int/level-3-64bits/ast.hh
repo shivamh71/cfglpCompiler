@@ -242,9 +242,11 @@ public:
 
 class Return_Ast:public Ast
 {
-
 public:
-	Return_Ast();
+	
+	Ast* to_return;
+
+	Return_Ast(Ast* to_return);
 	~Return_Ast();
 
 	void print_ast(ostream & file_buffer);

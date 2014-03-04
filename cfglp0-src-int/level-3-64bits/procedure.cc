@@ -65,6 +65,12 @@ void Procedure::set_local_list(Symbol_Table & new_list)
 	local_symbol_table.set_table_scope(local);
 }
 
+void Procedure::set_arg_list(Symbol_Table & new_list)
+{
+	local_arg_table = new_list;
+	local_arg_table.set_table_scope(local);
+}
+
 Data_Type Procedure::get_return_type()
 {
 	return return_type;
@@ -78,6 +84,11 @@ bool Procedure::variable_in_symbol_list_check(string variable)
 Symbol_Table_Entry & Procedure::get_symbol_table_entry(string variable_name)
 {
 	return local_symbol_table.get_symbol_table_entry(variable_name);
+}
+
+Symbol_Table_Entry & Procedure::get_arg_table_entry(string variable_name)
+{
+	return local_arg_table.get_symbol_table_entry(variable_name);
 }
 
 void Procedure::print_ast(ostream & file_buffer)

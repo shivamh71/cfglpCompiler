@@ -52,10 +52,10 @@ typedef enum
 
 class Symbol_Table {
 
+public:
+
 	list<Symbol_Table_Entry *> variable_table; // list to hold all symbols
 	Table_Scope scope; // scope of symbols in this table
-
-public:
 
 	Symbol_Table();
 

@@ -746,8 +746,12 @@ Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval_env, ostream & file
 /*************************************************************************************************************/
 
 /*************************************************************************************************************/
-Return_Ast::Return_Ast()
-{}
+Return_Ast::Return_Ast(Ast* to_return) {
+	this->to_return = to_return;
+	if (to_return!=NULL) {
+		node_data_type = to_return->get_data_type();
+	}
+}
 
 Return_Ast::~Return_Ast()
 {}
