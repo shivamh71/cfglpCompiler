@@ -81,6 +81,7 @@
 program:
 	declaration_statement_list function_declaration_list procedure_list	
 		{
+			cout<<$1->variable_table.size()<<endl;
 			program_object.set_global_table(*$1);
 			return_statement_used_flag = false;
 		}
@@ -156,16 +157,17 @@ procedure_name:
 |
 	NAME '(' ')'
 		{
-			current_procedure = program_object.get_procedure(*$1);
+			if (*$1=="main") {
+				current_procedure = new Procedure(void_data_type, *$1);
+				program_object.set_procedure_map(*current_procedure);
+				current_procedure = program_object.get_procedure("main");
+			}
+			else {
+				current_procedure = program_object.get_procedure(*$1);	
+			}
 			if (current_procedure == NULL) {
-				if (*$1=="main") {
-					current_procedure = new Procedure(float_data_type, *$1);
-					program_object.set_procedure_map(*current_procedure);
-				}
-				else {
-					int line = get_line_number();
-					report_error("Procedure corresponding to the name is not found", line);
-				}
+				int line = get_line_number();
+				report_error("Procedure corresponding to the name is not found", line);
 			}
 			if (!current_procedure->local_arg_table.variable_table.empty()) {
 				int line = get_line_number();
@@ -250,7 +252,6 @@ function_declaration_statement:
 			Procedure * new_proc = new Procedure(void_data_type, *$2);
 			new_proc->set_arg_list(*$4);
 			program_object.set_procedure_map(*new_proc);
-			// cout<<"i wa here\n";
 		}
 |
 	INTEGER NAME '(' ')' ';'
@@ -369,6 +370,9 @@ declaration_statement_list:
 			else
 				$$ = new Symbol_Table();
 			$$->push_symbol($2);
+			if (current_procedure==NULL) {
+				program_object.set_global_table(*$$);
+			}
 		}
 |
 	declaration_statement
@@ -385,6 +389,9 @@ declaration_statement_list:
 
 			$$ = new Symbol_Table();
 			$$->push_symbol($1);
+			if (current_procedure==NULL) {
+				program_object.set_global_table(*$$);
+			}
 		}
 ;
 
@@ -411,18 +418,30 @@ func_arguement_statement:
 declaration_statement:
 	INTEGER NAME ';'
 		{
+			if (current_procedure && current_procedure->variable_in_arg_list_check(*$2)) {
+				int line = get_line_number();
+				report_error("Formal parameter and local variable name cannot be same", line);	
+			}
 			$$ = new Symbol_Table_Entry(*$2, int_data_type);
 			delete $2;
 		}
 |
 	FLOAT NAME ';'
 		{
+			if (current_procedure && current_procedure->variable_in_arg_list_check(*$2)) {
+				int line = get_line_number();
+				report_error("Formal parameter and local variable name cannot be same", line);	
+			}
 			$$ = new Symbol_Table_Entry(*$2, float_data_type);
 			delete $2;
 		}
 |
 	DOUBLE NAME ';'
 		{
+			if (current_procedure && current_procedure->variable_in_arg_list_check(*$2)) {
+				int line = get_line_number();
+				report_error("Formal parameter and local variable name cannot be same", line);	
+			}
 			$$ = new Symbol_Table_Entry(*$2, double_data_type);
 			delete $2;
 		}
@@ -847,11 +866,20 @@ identifier:
 	NAME
 		{
 			Symbol_Table_Entry var_table_entry;
-			if (current_procedure->variable_in_symbol_list_check(*$1))
+			if (current_procedure->variable_in_symbol_list_check(*$1)) {
 				 var_table_entry = current_procedure->get_symbol_table_entry(*$1);
-			else if (program_object.variable_in_symbol_list_check(*$1))
+
+			}
+			else if (current_procedure->variable_in_arg_list_check(*$1)) {
+				var_table_entry = current_procedure->get_arg_table_entry(*$1);
+
+			}
+			else if (program_object.variable_in_symbol_list_check(*$1)) {
 				var_table_entry = program_object.get_symbol_table_entry(*$1);
+
+			}
 			else {
+				cout<<program_object.global_symbol_table.variable_table.size()<<endl;
 				int line = get_line_number();
 				report_error("Variable has not been declared", line);
 			}
@@ -868,8 +896,6 @@ function_call_statement:
 			list<Ast*> arg_list = *$3;
 			list<Ast*>::iterator it_t;
 			list<Symbol_Table_Entry*>::iterator it_s;
-			// cout<<"agr list size : "<<call_proc->local_arg_table.variable_table.size()<<endl;
-			// cout<<"args size : "<<arg_list.size()<<endl;
 			for (it_s=call_proc->local_arg_table.variable_table.begin(),it_t=arg_list.begin();it_s!=call_proc->local_arg_table.variable_table.end() && it_t!=arg_list.end();it_t++,it_s++) {
 				if ((*it_t)->get_data_type() != (*it_s)->get_data_type()) {
 					int line = get_line_number();
@@ -882,6 +908,20 @@ function_call_statement:
 			}
 			Function_Call_Ast * func = new Function_Call_Ast(*$3);
 			func->set_name(*$1);
+			switch (program_object.get_procedure(*$1)->get_return_type()) {
+				case 0:
+					func->set_data_type("VOID");
+					break;
+				case 1:
+					func->set_data_type("INTEGER");
+					break;
+				case 3:
+					func->set_data_type("FLOAT");
+					break;
+				case 4:
+					func->set_data_type("DOUBLE");
+					break;
+			}
 			$$ = func;
 		}
 |
@@ -896,6 +936,20 @@ function_call_statement:
 			list<Ast*> arg_list;
 			Function_Call_Ast * func = new Function_Call_Ast(arg_list);
 			func->set_name(*$1);
+			switch (program_object.get_procedure(*$1)->get_return_type()) {
+				case 0:
+					func->set_data_type("VOID");
+					break;
+				case 1:
+					func->set_data_type("INTEGER");
+					break;
+				case 3:
+					func->set_data_type("FLOAT");
+					break;
+				case 4:
+					func->set_data_type("DOUBLE");
+					break;
+			}
 			$$ = func;
 		}
 ;

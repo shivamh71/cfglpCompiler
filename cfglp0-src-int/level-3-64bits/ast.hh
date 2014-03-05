@@ -249,6 +249,10 @@ public:
 	Return_Ast(Ast* to_return);
 	~Return_Ast();
 
+	Data_Type get_data_type();
+
+	void set_data_type(string type);
+
 	void print_ast(ostream & file_buffer);
 
 	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
@@ -262,6 +266,10 @@ public:
 
 	Function_Call_Ast(list<Ast*> arguments);
 	~Function_Call_Ast();
+
+	Data_Type get_data_type();
+
+	void set_data_type(string type);
 
 	void set_name(string name);
 

@@ -64,6 +64,7 @@ public:
 	Eval_Result & evaluate(ostream & file_buffer);
 
 	bool variable_in_symbol_list_check(string variable);
+	bool variable_in_arg_list_check(string variable);
 };
 
 #endif

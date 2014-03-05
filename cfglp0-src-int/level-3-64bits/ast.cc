@@ -756,6 +756,25 @@ Return_Ast::Return_Ast(Ast* to_return) {
 Return_Ast::~Return_Ast()
 {}
 
+Data_Type Return_Ast::get_data_type()
+{
+	return node_data_type;
+}
+
+void Return_Ast::set_data_type(string type) {
+	if (type == "FLOAT") {
+		node_data_type = float_data_type;
+	}
+	else if (type == "INTEGER") {
+
+		node_data_type = int_data_type;
+
+	}
+	else if (type == "DOUBLE") {
+		node_data_type = double_data_type;
+	}
+}
+
 void Return_Ast::print_ast(ostream & file_buffer)
 {
 	file_buffer << AST_SPACE << "RETURN <NOTHING>\n";
@@ -785,15 +804,36 @@ Function_Call_Ast::~Function_Call_Ast()
 
 void Function_Call_Ast::print_ast(ostream & file_buffer)
 {
-	file_buffer << AST_SPACE << "FN CALL: "<<func_name<<"("<<endl;
+	file_buffer << AST_SPACE << "FN CALL: "<<func_name<<"(";
 	list<Ast*>::iterator it;
-	for (it=arg_list.begin();it!=arg_list.end();) {
+	for (it=arg_list.begin();it!=arg_list.end();it++) {
+		file_buffer << endl;
 		file_buffer << AST_NODE_SPACE;
 		(*it)->print_ast(file_buffer);
-		it++;
-		if (it!=arg_list.end()) file_buffer << endl;
 	}
 	file_buffer << ")\n";
+}
+
+Data_Type Function_Call_Ast::get_data_type()
+{
+	return node_data_type;
+}
+
+void Function_Call_Ast::set_data_type(string type) {
+	if (type == "FLOAT") {
+		node_data_type = float_data_type;
+	}
+	else if (type == "INTEGER") {
+
+		node_data_type = int_data_type;
+
+	}
+	else if (type == "DOUBLE") {
+		node_data_type = double_data_type;
+	}
+	else {
+		node_data_type = void_data_type;
+	}
 }
 
 void Function_Call_Ast::set_name(string name) {

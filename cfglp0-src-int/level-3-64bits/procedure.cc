@@ -81,6 +81,11 @@ bool Procedure::variable_in_symbol_list_check(string variable)
 	return local_symbol_table.variable_in_symbol_list_check(variable);
 }
 
+bool Procedure::variable_in_arg_list_check(string variable)
+{
+	return local_arg_table.variable_in_symbol_list_check(variable);
+}
+
 Symbol_Table_Entry & Procedure::get_symbol_table_entry(string variable_name)
 {
 	return local_symbol_table.get_symbol_table_entry(variable_name);
