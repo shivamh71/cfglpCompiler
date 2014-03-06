@@ -33,6 +33,8 @@ using namespace std;
 #include"symbol-table.hh"
 #include"ast.hh"
 #include"basic-block.hh"
+#include"procedure.hh"
+#include"program.hh"
 
 Ast::Ast()
 {}
@@ -473,7 +475,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 	Eval_Result_Value * loc_var_val = eval_env.get_variable_value(variable_name);
 	Eval_Result_Value * glob_var_val = interpreter_global_table.get_variable_value(variable_name);
 
-	file_buffer << "" << AST_SPACE << variable_name << " : ";
+	file_buffer << "\n" << AST_SPACE << variable_name << " : ";
 
 	if (!eval_env.is_variable_defined(variable_name) && !interpreter_global_table.is_variable_defined(variable_name)) {
 		file_buffer << "undefined";
@@ -489,7 +491,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 			else if (node_data_type==int_data_type){
 				sprintf(str,"%d",(int)loc_var_val->get_value());
 			}
-			file_buffer << str << "\n";
+			file_buffer << str << "";
 
 		}
 		else
@@ -800,10 +802,19 @@ Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 	file_buffer << "\n";
 	print_ast(file_buffer);
 
-	Eval_Result * to_return = new Eval_Result_Value_Int();
-	to_return->set_value(-1);
+	Eval_Result * final_return = new Eval_Result_Value_Int();
 
-	return *to_return;
+	switch (node_data_type) {
+		case void_data_type:
+			final_return->set_value(-1);
+			break;
+		default:
+			Eval_Result & result = to_return->evaluate(eval_env,file_buffer);
+			eval_env.return_value = result.get_value();
+			final_return->set_value(-1);
+			break;
+	}
+	return *final_return;
 	// return result;
 }
 /*************************************************************************************************************/
@@ -859,11 +870,37 @@ Eval_Result & Function_Call_Ast::evaluate(Local_Environment & eval_env, ostream 
 	// Eval_Result & result = *new Eval_Result_Value_Int();
 	// file_buffer << "\n";
 	// print_ast(file_buffer);
+	Procedure* func = program_object.get_procedure(func_name);
+	list<Ast*>::iterator it ;
+	list<Symbol_Table_Entry*>::iterator sit;
+	for (it=arg_list.begin(),sit=func->local_arg_table.variable_table.begin(); it != arg_list.end() && sit!=func->local_arg_table.variable_table.end(); it++,sit++)
+	{	
+		Eval_Result & result = (*it)->evaluate(eval_env, file_buffer);
 
-	Eval_Result * to_return = new Eval_Result_Value_Int();
+		string name = (*sit)->get_variable_name();
+		if ((*sit)->get_data_type()==int_data_type) {
+			Eval_Result_Value * j = new Eval_Result_Value_Int();
+			j->set_value(result.get_value());
+			arg_value_table[name] = j;
+		}
+		else if ((*sit)->get_data_type()==float_data_type) {
+			Eval_Result_Value * j = new Eval_Result_Value_Float();
+			j->set_value(result.get_value());
+			arg_value_table[name] = j;
+		}
+		else if ((*sit)->get_data_type()==double_data_type) {
+			Eval_Result_Value * j = new Eval_Result_Value_Double();
+			j->set_value(result.get_value());
+			arg_value_table[name] = j;
+		}
+	}
+
+	Eval_Result & result = func->evaluate(file_buffer,arg_value_table);
+
+	// Eval_Result * to_return = new Eval_Result_Value_Int();
 	// to_return->set_value(-1);
 
-	return *to_return;
+	return result;
 	// return result;
 }
 /*************************************************************************************************************/

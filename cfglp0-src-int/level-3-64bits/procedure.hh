@@ -61,7 +61,7 @@ public:
 	Basic_Block * get_next_bb(Basic_Block & current_bb);
 	Basic_Block & get_start_basic_block();
 
-	Eval_Result & evaluate(ostream & file_buffer);
+	Eval_Result & evaluate(ostream & file_buffer,map<string, Eval_Result_Value *> arg_value_table);
 
 	bool variable_in_symbol_list_check(string variable);
 	bool variable_in_arg_list_check(string variable);

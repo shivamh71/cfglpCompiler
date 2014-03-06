@@ -78,10 +78,10 @@ public:
 
 class Symbol_Table_Entry {
 
-	string variable_name; // name of symbol
-	Data_Type variable_data_type; // data type of symbol
 
 public:
+	string variable_name; // name of symbol
+	Data_Type variable_data_type; // data type of symbol
 
 	Symbol_Table_Entry();
 

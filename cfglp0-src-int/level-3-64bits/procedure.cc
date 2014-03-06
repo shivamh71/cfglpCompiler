@@ -35,6 +35,7 @@ using namespace std;
 #include"basic-block.hh"
 #include"procedure.hh"
 #include"program.hh"
+#define AST_SPACE "         "
 
 Procedure::Procedure(Data_Type proc_return_type, string proc_name)
 {
@@ -131,14 +132,20 @@ Basic_Block * Procedure::get_next_bb(Basic_Block & current_bb)
 	return NULL;
 }
 
-Eval_Result & Procedure::evaluate(ostream & file_buffer)
+Eval_Result & Procedure::evaluate(ostream & file_buffer,map<string, Eval_Result_Value *> arg_value_table)
 {
 	Local_Environment & eval_env = *new Local_Environment();
 	local_symbol_table.create(eval_env);
 	
+	map<string, Eval_Result_Value *>::iterator i;
+
+	for (i = arg_value_table.begin(); i != arg_value_table.end(); i++){
+		eval_env.put_variable_value(*(*i).second, (*i).first);
+	}
+
 	Eval_Result * result = NULL;
 
-	file_buffer << PROC_SPACE << "Evaluating Procedure " << name << "\n";
+	file_buffer <<"\n" PROC_SPACE << "Evaluating Procedure << " << name << " >>\n";
 	file_buffer << LOC_VAR_SPACE << "Local Variables (before evaluating):\n";
 	eval_env.flag = 1;
 	eval_env.print(file_buffer);
@@ -169,10 +176,34 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer)
 	}
 
 	file_buffer << "\n\n";
-	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating):\n";
+	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating) Function: << "<< name << " >>\n";
 	eval_env.flag = 1;
 	eval_env.print(file_buffer);
 
-	return *result;
+	Eval_Result* final_return = NULL;
+	switch(return_type){
+		case int_data_type:
+			final_return = new Eval_Result_Value_Int();
+			final_return->set_value((int)eval_env.return_value);
+			file_buffer<<AST_SPACE<<"return : "<<(int)eval_env.return_value;
+			break;
+		case float_data_type:
+			final_return = new Eval_Result_Value_Float();
+			final_return->set_value((double)eval_env.return_value);
+			file_buffer<<AST_SPACE<<"return : "<<(double)eval_env.return_value;
+			break;
+		case double_data_type:
+			final_return = new Eval_Result_Value_Double();
+			final_return->set_value((double)eval_env.return_value);
+			file_buffer<<AST_SPACE<<"return : "<<(double)eval_env.return_value;
+			break;
+		default:
+			final_return = new Eval_Result_Value_Int();
+			break;
+
+	}
+
+
+	return *final_return;
 }
 

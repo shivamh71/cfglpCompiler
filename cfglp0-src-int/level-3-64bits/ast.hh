@@ -263,6 +263,7 @@ class Function_Call_Ast:public Ast
 public:
 	string func_name;
 	list<Ast*> arg_list;
+	map<string, Eval_Result_Value *> arg_value_table;
 
 	Function_Call_Ast(list<Ast*> arguments);
 	~Function_Call_Ast();

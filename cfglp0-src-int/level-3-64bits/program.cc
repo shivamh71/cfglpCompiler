@@ -133,6 +133,7 @@ void Program::print_ast()
 Eval_Result & Program::evaluate()
 {
 	Procedure * main = get_main_procedure(command_options.get_output_buffer());
+	map<string, Eval_Result_Value *> arg_value_table;
 	if (main == NULL)
 		report_error("No main function found in the program", NOLINE);
 
@@ -141,10 +142,10 @@ Eval_Result & Program::evaluate()
 	command_options.create_output_buffer();
 	ostream & file_buffer = command_options.get_output_buffer();
 	file_buffer << "Evaluating Program\n";
-	file_buffer << GLOB_SPACE << "Global Variables (before evaluating):\n";
+	file_buffer << GLOB_SPACE << "Global Variables (before evaluating):";
 	interpreter_global_table.print(file_buffer);
 
-	Eval_Result & result = main->evaluate(file_buffer);
+	Eval_Result & result = main->evaluate(file_buffer,arg_value_table);
 
 	file_buffer << GLOB_SPACE << "Global Variables (after evaluating):\n";
 	interpreter_global_table.flag = 1;
