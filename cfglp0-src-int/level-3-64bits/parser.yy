@@ -81,8 +81,6 @@
 program:
 	declaration_statement_list function_declaration_list procedure_list	
 		{
-			cout<<$1->variable_table.size()<<endl;
-			program_object.set_global_table(*$1);
 			return_statement_used_flag = false;
 		}
 |
@@ -93,7 +91,6 @@ program:
 |
 	declaration_statement_list procedure_list
 		{
-			program_object.set_global_table(*$1);
 			return_statement_used_flag = false;
 		}
 |
@@ -129,6 +126,10 @@ procedure_statement:
 procedure_name:
 	NAME '(' comma_separated_declaration_list ')'
 		{
+			if (program_object.variable_in_symbol_list_check(*$1)) {
+				int line = get_line_number();
+				report_error("Procedure name cannot be same as global variable", line);
+			}
 			current_procedure = program_object.get_procedure(*$1);
 			if (current_procedure == NULL) {
 				int line = get_line_number();
@@ -153,10 +154,17 @@ procedure_name:
 				int line = get_line_number();
 				report_error("Procedure and its prototype parameter f_list length doens't match",line);	
 			}
+			program_object.procedure_list.push_back(*$1);
+			// empty basic block num list
+			goto_bb_num->clear();
 		}
 |
 	NAME '(' ')'
 		{
+			if (program_object.variable_in_symbol_list_check(*$1)) {
+				int line = get_line_number();
+				report_error("Procedure name cannot be same as global variable", line);
+			}
 			if (*$1=="main") {
 				current_procedure = new Procedure(void_data_type, *$1);
 				program_object.set_procedure_map(*current_procedure);
@@ -173,6 +181,9 @@ procedure_name:
 				int line = get_line_number();
 				report_error("Procedure and its prototype parameter f_list length doens't match",line);	
 			}
+			program_object.procedure_list.push_back(*$1);
+			// empty basic block num list
+			goto_bb_num->clear();
 		}
 ;
 
@@ -357,7 +368,6 @@ declaration_statement_list:
 				int line = get_line_number();
 				report_error("Variable name cannot be same as procedure name", line);
 			}
-
 			if ($1 != NULL)
 			{
 				if($1->variable_in_symbol_list_check(var_name))
@@ -848,6 +858,7 @@ return_statement:
 				report_error("Return type of procedure and its prototype should match", line);
 			}
 			$$ = new Return_Ast(NULL);
+			$$->set_data_type("VOID");
 			return_statement_used_flag = true; // Current procedure has an occurrence of return statement
 		}
 |
@@ -858,6 +869,17 @@ return_statement:
 				report_error("Return type of procedure and its prototype should match", line);
 			}
 			$$ = new Return_Ast($2);
+			switch ($2->get_data_type()) {
+				case 1:
+					$$->set_data_type("INTEGER");
+					break;
+				case 3:
+					$$->set_data_type("FLOAT");
+					break;
+				case 4:
+					$$->set_data_type("DOUBLE");
+					break;
+			}
 			return_statement_used_flag = true; // Current procedure has an occurrence of return statement
 		}
 ;
@@ -879,7 +901,6 @@ identifier:
 
 			}
 			else {
-				cout<<program_object.global_symbol_table.variable_table.size()<<endl;
 				int line = get_line_number();
 				report_error("Variable has not been declared", line);
 			}

@@ -61,7 +61,7 @@ void Program::set_global_table(Symbol_Table & new_global_table)
 void Program::set_procedure_map(Procedure & proc)
 {
 	procedure_map[proc.get_proc_name()] = &proc;
-	procedure_list.push_back(proc.get_proc_name());
+	// procedure_list.push_back(proc.get_proc_name());
 }
 
 bool Program::variable_in_symbol_list_check(string variable)
@@ -76,8 +76,9 @@ Symbol_Table_Entry & Program::get_symbol_table_entry(string variable_name)
 
 void Program::variable_in_proc_map_check(string variable, int line)
 {
-	if(procedure_map[variable] != NULL)
+	if (procedure_map.find(variable)!=procedure_map.end()) {
 		report_error("Variable name cannot be same as procedure name", line);
+	}
 }
 
 Procedure * Program::get_main_procedure(ostream & file_buffer)
@@ -109,21 +110,24 @@ void Program::print_ast()
 
 	ast_buffer << "Program:\n";
 
+	// for (int i=0;i<procedure_list.size();i++)
+	// 	cout<<procedure_list[i]<<" ";
+	// cout<<endl;
 	for (int i=0;i<procedure_list.size();i++) {
-		if (procedure_list[i]!="main") {
+		// if (procedure_list[i]!="main") {
 			procedure_map[procedure_list[i]]->print_ast(ast_buffer);
 			ast_buffer << "\n";
-		}
+		// }
 	}
 	Procedure * main = get_procedure("main");
 	if (main == NULL)
 		report_error("No main function found in the program", NOLINE);
 
-	else
-	{
-		main->print_ast(ast_buffer);
-		ast_buffer << "\n";
-	}
+	// else
+	// {
+	// 	main->print_ast(ast_buffer);
+	// 	ast_buffer << "\n";
+	// }
 }
 
 Eval_Result & Program::evaluate()

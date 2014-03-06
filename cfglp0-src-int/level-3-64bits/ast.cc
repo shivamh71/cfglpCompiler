@@ -124,7 +124,7 @@ bool Assignment_Ast::check_ast(int line)
 
 void Assignment_Ast::print_ast(ostream & file_buffer)
 {
-	file_buffer << AST_SPACE << "Asgn:\n";
+	file_buffer << endl << AST_SPACE << "Asgn:\n";
 
 	file_buffer << AST_NODE_SPACE"LHS (";
 	lhs->print_ast(file_buffer);
@@ -132,7 +132,7 @@ void Assignment_Ast::print_ast(ostream & file_buffer)
 
 	file_buffer << AST_NODE_SPACE << "RHS (";
 	rhs->print_ast(file_buffer);
-	file_buffer << ")\n";
+	file_buffer << ")";
 }
 
 Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
@@ -674,8 +674,9 @@ int Goto_Ast::get_bb_number() {
 }
 
 void Goto_Ast::print_ast(ostream & file_buffer) {
+	file_buffer << endl;
 	file_buffer << AST_SPACE << "Goto statement:\n";
-	file_buffer << AST_NODE_SPACE << "Successor: " << get_bb_number() << "\n";
+	file_buffer << AST_NODE_SPACE << "Successor: " << get_bb_number();
 }
 
 Eval_Result & Goto_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
@@ -704,13 +705,14 @@ If_Else_Ast::~If_Else_Ast() {
 }
 
 void If_Else_Ast::print_ast(ostream & file_buffer) {
+	file_buffer << endl;
 	file_buffer << AST_SPACE << "If_Else statement:";
 	cond->print_ast(file_buffer);
 	file_buffer << "\n";
 	file_buffer << AST_NODE_SPACE << "True Successor: " << true_successor->get_bb_number();
 	file_buffer << "\n";
 	file_buffer << AST_NODE_SPACE << "False Successor: " << false_successor->get_bb_number();
-	file_buffer << "\n";
+	file_buffer << "";
 }
 
 Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
@@ -773,11 +775,23 @@ void Return_Ast::set_data_type(string type) {
 	else if (type == "DOUBLE") {
 		node_data_type = double_data_type;
 	}
+	else {
+		node_data_type = void_data_type;
+	}
 }
 
 void Return_Ast::print_ast(ostream & file_buffer)
 {
-	file_buffer << AST_SPACE << "RETURN <NOTHING>\n";
+	switch (node_data_type) {
+		case void_data_type:
+			file_buffer << endl << AST_SPACE << "RETURN <NOTHING>\n";
+			break;
+		default:
+			file_buffer << endl << AST_SPACE << "RETURN ";
+			to_return->print_ast(file_buffer);
+			file_buffer << endl;
+			break;
+	}
 }
 
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
@@ -804,14 +818,14 @@ Function_Call_Ast::~Function_Call_Ast()
 
 void Function_Call_Ast::print_ast(ostream & file_buffer)
 {
-	file_buffer << AST_SPACE << "FN CALL: "<<func_name<<"(";
+	file_buffer << endl << AST_SPACE << "FN CALL: "<<func_name<<"(";
 	list<Ast*>::iterator it;
 	for (it=arg_list.begin();it!=arg_list.end();it++) {
 		file_buffer << endl;
 		file_buffer << AST_NODE_SPACE;
 		(*it)->print_ast(file_buffer);
 	}
-	file_buffer << ")\n";
+	file_buffer << ")";
 }
 
 Data_Type Function_Call_Ast::get_data_type()

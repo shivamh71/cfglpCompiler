@@ -98,7 +98,7 @@ Symbol_Table_Entry & Procedure::get_arg_table_entry(string variable_name)
 
 void Procedure::print_ast(ostream & file_buffer)
 {
-	file_buffer << PROC_SPACE << "Procedure: "<<name << "\n\n";
+	file_buffer << PROC_SPACE << "Procedure: "<<name << "\n";
 
 	list<Basic_Block *>::iterator i;
 	for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
