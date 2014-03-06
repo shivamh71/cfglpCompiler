@@ -3,12 +3,10 @@ main()
 	int a = 3;
 	int b = 5;
 
-	int d = fn(a);
+	fn();
 }
 
-fn( int d)
+fn()
 {
-	int c = d;
-	
-	return c*10;
+	int c = 4;
 }

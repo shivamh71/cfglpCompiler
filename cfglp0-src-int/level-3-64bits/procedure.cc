@@ -27,6 +27,7 @@
 
 using namespace std;
 
+#include <stdio.h>
 #include"error-display.hh"
 #include"local-environment.hh"
 
@@ -142,7 +143,6 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer,map<string, Eval_Result_
 	for (i = arg_value_table.begin(); i != arg_value_table.end(); i++){
 		eval_env.put_variable_value(*(*i).second, (*i).first);
 	}
-
 	Eval_Result * result = NULL;
 
 	file_buffer <<"\n" PROC_SPACE << "Evaluating Procedure << " << name << " >>\n";
@@ -175,34 +175,40 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer,map<string, Eval_Result_
 		}		
 	}
 
-	file_buffer << "\n\n";
-	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating) Function: << "<< name << " >>\n";
-	eval_env.flag = 1;
-	eval_env.print(file_buffer);
-
 	Eval_Result* final_return = NULL;
+	Eval_Result_Value* to_return = NULL;
+	char str[100];
+	string temp_string  = "return";
 	switch(return_type){
 		case int_data_type:
 			final_return = new Eval_Result_Value_Int();
+			to_return = new Eval_Result_Value_Int();
 			final_return->set_value((int)eval_env.return_value);
-			file_buffer<<AST_SPACE<<"return : "<<(int)eval_env.return_value;
+			to_return->set_value((int)eval_env.return_value);
+			eval_env.put_variable_value(*to_return, temp_string);
 			break;
 		case float_data_type:
 			final_return = new Eval_Result_Value_Float();
+			to_return = new Eval_Result_Value_Float();
 			final_return->set_value((double)eval_env.return_value);
-			file_buffer<<AST_SPACE<<"return : "<<(double)eval_env.return_value;
+			to_return->set_value((double)eval_env.return_value);
+			eval_env.put_variable_value(*to_return, temp_string);
 			break;
 		case double_data_type:
 			final_return = new Eval_Result_Value_Double();
+			to_return = new Eval_Result_Value_Double();
 			final_return->set_value((double)eval_env.return_value);
-			file_buffer<<AST_SPACE<<"return : "<<(double)eval_env.return_value;
+			to_return->set_value((double)eval_env.return_value);
+			eval_env.put_variable_value(*to_return, temp_string);
 			break;
 		default:
 			final_return = new Eval_Result_Value_Int();
 			break;
-
 	}
-
+	file_buffer << "\n\n";
+	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating) Function: << "<< name << " >>\n";
+	eval_env.flag = 1;
+	eval_env.print(file_buffer);
 
 	return *final_return;
 }

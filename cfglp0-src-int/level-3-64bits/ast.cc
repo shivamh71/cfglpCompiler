@@ -148,11 +148,11 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 	// cout<<"data type is "<<lhs->get_data_type()<<endl;
 	// Print the result
 	// cout<<lhs->get_data_type()<<endl;
-	file_buffer << "\n";
 	print_ast(file_buffer);
 	lhs->print_value(eval_env, file_buffer);
 	Eval_Result * to_return = new Eval_Result_Value_Float();
 	to_return->set_value(0);
+	file_buffer << "\n";
 
 	return *to_return;
 }
@@ -344,7 +344,7 @@ Eval_Result & Arithmetic_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	}
 
 	if (lhs->get_data_type() == int_data_type)
-		ans = ans;
+		ans = (int) ans;
 	else if (lhs->get_data_type() == double_data_type)
 		ans = ans;
 
@@ -528,7 +528,6 @@ Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env)
 		Eval_Result * result = eval_env.get_variable_value(variable_name);
 		return *result;
 	}
-
 	Eval_Result * result = interpreter_global_table.get_variable_value(variable_name);
 	return *result;
 }
@@ -684,8 +683,9 @@ void Goto_Ast::print_ast(ostream & file_buffer) {
 Eval_Result & Goto_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	Eval_Result * result = new Eval_Result_Value_Int();
 	result->set_value(bb_number);
-	file_buffer << "\n";
-	print_ast(file_buffer);
+	file_buffer << endl;
+	file_buffer << AST_SPACE << "Goto statement:\n";
+	file_buffer << AST_NODE_SPACE << "Successor: " << get_bb_number() << endl;
 	file_buffer << AST_SPACE << "GOTO (BB "<<bb_number<<")"; 
 	file_buffer << "\n";
 	
@@ -799,7 +799,6 @@ void Return_Ast::print_ast(ostream & file_buffer)
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
 	Eval_Result & result = *new Eval_Result_Value_Int();
-	file_buffer << "\n";
 	print_ast(file_buffer);
 
 	Eval_Result * final_return = new Eval_Result_Value_Int();
@@ -810,6 +809,8 @@ Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 			break;
 		default:
 			Eval_Result & result = to_return->evaluate(eval_env,file_buffer);
+			if (result.is_variable_defined() == false)
+				report_error("Variable should be defined before its use", NOLINE);
 			eval_env.return_value = result.get_value();
 			final_return->set_value(-1);
 			break;
@@ -867,9 +868,6 @@ void Function_Call_Ast::set_name(string name) {
 
 Eval_Result & Function_Call_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
-	// Eval_Result & result = *new Eval_Result_Value_Int();
-	// file_buffer << "\n";
-	// print_ast(file_buffer);
 	Procedure* func = program_object.get_procedure(func_name);
 	list<Ast*>::iterator it ;
 	list<Symbol_Table_Entry*>::iterator sit;
@@ -880,16 +878,19 @@ Eval_Result & Function_Call_Ast::evaluate(Local_Environment & eval_env, ostream 
 		string name = (*sit)->get_variable_name();
 		if ((*sit)->get_data_type()==int_data_type) {
 			Eval_Result_Value * j = new Eval_Result_Value_Int();
+			j->set_variable_status(true);
 			j->set_value(result.get_value());
 			arg_value_table[name] = j;
 		}
 		else if ((*sit)->get_data_type()==float_data_type) {
 			Eval_Result_Value * j = new Eval_Result_Value_Float();
+			j->set_variable_status(true);
 			j->set_value(result.get_value());
 			arg_value_table[name] = j;
 		}
 		else if ((*sit)->get_data_type()==double_data_type) {
 			Eval_Result_Value * j = new Eval_Result_Value_Double();
+			j->set_variable_status(true);
 			j->set_value(result.get_value());
 			arg_value_table[name] = j;
 		}

@@ -3,11 +3,11 @@
 rm -rf tmpUs tmpSir
 mkdir tmpUs tmpSir
 
-for file in "test_files"/*.c 
-do
-	file=`echo $file | cut -d '/' -f2`
-	make -f Makefile.cfg FILE=$file
-done
+# for file in "test_files"/*.c 
+# do
+# 	file=`echo $file | cut -d '/' -f2`
+# 	make -f Makefile.cfg FILE=$file
+# done
 
 echo "\nProcessing correct files"
 echo "-------------------------\n"
@@ -19,8 +19,7 @@ do
 	f=`echo $f | cut -d '.' -f1`
 	./cfglp $file -eval -d > tmpUs/$f.cfg
 	./run $file -eval -d > tmpSir/$f.cfg
-	diff tmpUs/$f.cfg tmpSir/$f.cfg
-	# ./run $file -ast -d
+	diff -b -B tmpUs/$f.cfg tmpSir/$f.cfg
 done
 
 # echo "\n\nProcessing error files"

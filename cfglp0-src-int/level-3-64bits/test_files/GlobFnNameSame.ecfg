@@ -1,11 +1,10 @@
 int a;
-int a(int b, int c);
+int a(int b);
 
-a (int b, int c) {
-	int h;
+a(int b)
+{
 <bb 2>:
-	h = 3;
-	return 0;
+	return b;
 }
 
 main()
@@ -13,5 +12,6 @@ main()
 	int h;
 <bb 2>:
 	h = 3;
+	a(h);
 	return;
 }
