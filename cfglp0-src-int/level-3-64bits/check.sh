@@ -17,8 +17,8 @@ do
 	echo $file
 	f=`echo $file | cut -d '/' -f2`
 	f=`echo $f | cut -d '.' -f1`
-	./cfglp $file -eval -d > tmpUs/$f.cfg
-	./run $file -eval -d > tmpSir/$f.cfg
+	./cfglp $file -tokens -ast -eval -d > tmpUs/$f.cfg
+	./run $file -tokens -ast -eval -d > tmpSir/$f.cfg
 	diff -b -B tmpUs/$f.cfg tmpSir/$f.cfg
 done
 
