@@ -245,8 +245,9 @@ class Return_Ast:public Ast
 public:
 	
 	Ast* to_return;
+	Data_Type function_return_type;
 
-	Return_Ast(Ast* to_return);
+	Return_Ast(Ast* to_return, Data_Type T);
 	~Return_Ast();
 
 	Data_Type get_data_type();

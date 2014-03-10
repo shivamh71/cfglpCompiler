@@ -176,30 +176,30 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer,map<string, Eval_Result_
 	}
 
 	Eval_Result* final_return = NULL;
-	Eval_Result_Value* to_return = NULL;
-	char str[100];
+	// Eval_Result_Value* to_return = NULL;
+	// char str[100];
 	string temp_string  = "return";
 	switch(return_type){
 		case int_data_type:
 			final_return = new Eval_Result_Value_Int();
-			to_return = new Eval_Result_Value_Int();
+			// to_return = new Eval_Result_Value_Int();
 			final_return->set_value((int)eval_env.return_value);
-			to_return->set_value((int)eval_env.return_value);
-			eval_env.put_variable_value(*to_return, temp_string);
+			// to_return->set_value((int)eval_env.return_value);
+			// eval_env.put_variable_value(*to_return, temp_string);
 			break;
 		case float_data_type:
 			final_return = new Eval_Result_Value_Float();
-			to_return = new Eval_Result_Value_Float();
+			// to_return = new Eval_Result_Value_Float();
 			final_return->set_value((double)eval_env.return_value);
-			to_return->set_value((double)eval_env.return_value);
-			eval_env.put_variable_value(*to_return, temp_string);
+			// to_return->set_value((double)eval_env.return_value);
+			// eval_env.put_variable_value(*to_return, temp_string);
 			break;
 		case double_data_type:
 			final_return = new Eval_Result_Value_Double();
-			to_return = new Eval_Result_Value_Double();
+			// to_return = new Eval_Result_Value_Double();
 			final_return->set_value((double)eval_env.return_value);
-			to_return->set_value((double)eval_env.return_value);
-			eval_env.put_variable_value(*to_return, temp_string);
+			// to_return->set_value((double)eval_env.return_value);
+			// eval_env.put_variable_value(*to_return, temp_string);
 			break;
 		default:
 			final_return = new Eval_Result_Value_Int();

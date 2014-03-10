@@ -68,10 +68,10 @@ void Basic_Block::print_bb(ostream & file_buffer)
 
 Eval_Result & Basic_Block::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
-	Eval_Result * result = NULL;
+	Eval_Result * result = new Eval_Result_Value_Int();
 
 	file_buffer << "\n" << BB_SPACE << "Basic Block: " << id_number << "\n";
-
+	if (statement_list.size()==0) return *result;
 	list <Ast *>::iterator i;
 	for (i = statement_list.begin(); i != statement_list.end(); i++)
 	{

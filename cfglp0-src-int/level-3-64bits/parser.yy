@@ -81,22 +81,22 @@
 program:
 	declaration_statement_list function_declaration_list procedure_list	
 		{
-			return_statement_used_flag = false;
+			// nothing to be done here
 		}
 |
 	function_declaration_list procedure_list	
 		{
-			return_statement_used_flag = false;
+			// nothing to be done here
 		}
 |
 	declaration_statement_list procedure_list
 		{
-			return_statement_used_flag = false;
+			// nothing to be done here
 		}
 |
 	procedure_list
 		{
-			return_statement_used_flag = false;
+			// nothing to be done here
 		}	
 ;
 
@@ -113,13 +113,12 @@ procedure_list:
 ;
 
 procedure_statement:
-	procedure_name	
+	procedure_name	procedure_body
 		{
-			return_statement_used_flag = false;
-		}
-	procedure_body
-		{
-			// nothing to be done
+			if (return_statement_used_flag == false) {
+				int line = get_line_number();
+				report_error("Last return statement type, of procedure, and its prototype should match", line);
+			}
 		}
 ;
 
@@ -164,6 +163,10 @@ procedure_name:
 			}
 			program_object.procedure_list.push_back(*$1);
 			goto_bb_num->clear();
+			if (current_procedure->get_return_type() == void_data_type)
+				return_statement_used_flag = true;
+			else
+				return_statement_used_flag = false;
 		}
 |
 	NAME '(' ')'
@@ -191,6 +194,10 @@ procedure_name:
 			program_object.procedure_list.push_back(*$1);
 			// empty basic block num list
 			goto_bb_num->clear();
+			if (current_procedure->get_return_type() == void_data_type)
+				return_statement_used_flag = true;
+			else
+				return_statement_used_flag = false;
 		}
 ;
 
@@ -234,6 +241,10 @@ function_declaration_statement:
 				int line = get_line_number();
 				report_error("Overloading of the procedure is not allowed", line);
 			}
+			if ($4->variable_in_symbol_list_check(*$2)) {
+				int line = get_line_number();
+				report_error(" Procedure name cannot be same as formal parameter name", line);
+			}
 			Procedure * new_proc = new Procedure(int_data_type, *$2);
 			new_proc->set_arg_list(*$4);
 			program_object.set_procedure_map(*new_proc);
@@ -244,6 +255,10 @@ function_declaration_statement:
 			if (program_object.procedure_map.find(*$2)!=program_object.procedure_map.end()) {
 				int line = get_line_number();
 				report_error("Overloading of the procedure is not allowed", line);
+			}
+			if ($4->variable_in_symbol_list_check(*$2)) {
+				int line = get_line_number();
+				report_error(" Procedure name cannot be same as formal parameter name", line);
 			}
 			Procedure * new_proc = new Procedure(float_data_type, *$2);
 			new_proc->set_arg_list(*$4);
@@ -256,6 +271,10 @@ function_declaration_statement:
 				int line = get_line_number();
 				report_error("Overloading of the procedure is not allowed", line);
 			}
+			if ($4->variable_in_symbol_list_check(*$2)) {
+				int line = get_line_number();
+				report_error(" Procedure name cannot be same as formal parameter name", line);
+			}
 			Procedure * new_proc = new Procedure(double_data_type, *$2);
 			new_proc->set_arg_list(*$4);
 			program_object.set_procedure_map(*new_proc);
@@ -266,6 +285,10 @@ function_declaration_statement:
 			if (program_object.procedure_map.find(*$2)!=program_object.procedure_map.end()) {
 				int line = get_line_number();
 				report_error("Overloading of the procedure is not allowed", line);
+			}
+			if ($4->variable_in_symbol_list_check(*$2)) {
+				int line = get_line_number();
+				report_error(" Procedure name cannot be same as formal parameter name", line);
 			}
 			Procedure * new_proc = new Procedure(void_data_type, *$2);
 			new_proc->set_arg_list(*$4);
@@ -860,22 +883,24 @@ assignment_statement:
 return_statement:
 	RETURN ';'
 		{
-			if (current_procedure->get_return_type()!=void_data_type) {
-				int line = get_line_number();
-				report_error("Return type of procedure and its prototype should match", line);
-			}
-			$$ = new Return_Ast(NULL);
+			// if (current_procedure->get_return_type()!=void_data_type) {
+			// 	int line = get_line_number();
+			// 	report_error("Return type of procedure and its prototype should match", line);
+			// }
+			$$ = new Return_Ast(NULL,current_procedure->get_return_type());
 			$$->set_data_type("VOID");
-			return_statement_used_flag = true; // Current procedure has an occurrence of return statement
 		}
 |
 	RETURN  expression ';'
 		{
-			if ($2->get_data_type()!=current_procedure->get_return_type()) {
+			if (current_procedure->get_proc_name()!="main" && $2->get_data_type()!=current_procedure->get_return_type()) {
 				int line = get_line_number();
-				report_error("Return type of procedure and its prototype should match", line);
+				report_error("Last return statement type, of procedure, and its prototype should match", line);
 			}
-			$$ = new Return_Ast($2);
+			else {
+				return_statement_used_flag = true;
+			}
+			$$ = new Return_Ast($2,current_procedure->get_return_type());
 			switch ($2->get_data_type()) {
 				case 1:
 					$$->set_data_type("INTEGER");
@@ -887,7 +912,6 @@ return_statement:
 					$$->set_data_type("DOUBLE");
 					break;
 			}
-			return_statement_used_flag = true; // Current procedure has an occurrence of return statement
 		}
 ;
 

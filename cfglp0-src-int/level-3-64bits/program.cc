@@ -110,24 +110,15 @@ void Program::print_ast()
 
 	ast_buffer << "Program:\n";
 
-	// for (int i=0;i<procedure_list.size();i++)
-	// 	cout<<procedure_list[i]<<" ";
-	// cout<<endl;
-	for (int i=0;i<procedure_list.size();i++) {
-		// if (procedure_list[i]!="main") {
-			procedure_map[procedure_list[i]]->print_ast(ast_buffer);
-			ast_buffer << "\n";
-		// }
+	map<string,Procedure *>::iterator it;
+	for (it=procedure_map.begin();it!=procedure_map.end();it++) {
+		it->second->print_ast(ast_buffer);
+		ast_buffer << "\n";
 	}
+
 	Procedure * main = get_procedure("main");
 	if (main == NULL)
 		report_error("No main function found in the program", NOLINE);
-
-	// else
-	// {
-	// 	main->print_ast(ast_buffer);
-	// 	ast_buffer << "\n";
-	// }
 }
 
 Eval_Result & Program::evaluate()
@@ -143,6 +134,7 @@ Eval_Result & Program::evaluate()
 	ostream & file_buffer = command_options.get_output_buffer();
 	file_buffer << "Evaluating Program\n";
 	file_buffer << GLOB_SPACE << "Global Variables (before evaluating):\n";
+	interpreter_global_table.flag = 1;
 	interpreter_global_table.print(file_buffer);
 
 	Eval_Result & result = main->evaluate(file_buffer,arg_value_table);
