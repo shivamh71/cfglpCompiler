@@ -129,38 +129,46 @@ procedure_name:
 				int line = get_line_number();
 				report_error("Procedure name cannot be same as global variable", line);
 			}
-			if (*$1=="main") {
-				current_procedure = new Procedure(void_data_type, *$1);
-				program_object.set_procedure_map(*current_procedure);
-				current_procedure = program_object.get_procedure("main");
-			}
-			else {
-				current_procedure = program_object.get_procedure(*$1);
-				if (current_procedure == NULL) {
+			// check if parameter name is same as some procedure name
+			list<Symbol_Table_Entry*>::iterator it;
+			for (it=$3->variable_table.begin();it!=$3->variable_table.end();it++) {
+				if (program_object.procedure_map.find((*it)->variable_name)!=program_object.procedure_map.end()) {
 					int line = get_line_number();
-					report_error("Procedure corresponding to the name is not found", line);
+					report_error("Formal parameter list cannot be same as function name", line);
 				}
+			}
+			// if (*$1=="main") {
+			// 	current_procedure = new Procedure(void_data_type, *$1);
+			// 	program_object.set_procedure_map(*current_procedure);
+			// 	current_procedure = program_object.get_procedure("main");
+			// }
+			// else {
+			current_procedure = program_object.get_procedure(*$1);
+			if (current_procedure == NULL) {
+				int line = get_line_number();
+				report_error("Procedure corresponding to the name is not found", line);
+			}
 
-				// check if variables in definition are consistent with variables in declaration
-				list<Symbol_Table_Entry*> temp_list = $3->variable_table;
-				list<Symbol_Table_Entry*> arg_list = current_procedure->local_arg_table.variable_table;
-				list<Symbol_Table_Entry*>::iterator it_s, it_t;
-				for (it_s=arg_list.begin(),it_t=temp_list.begin();it_s!=arg_list.end() && it_t!=temp_list.end();it_s++,it_t++) {
-					if ((*it_s)->get_variable_name()!=(*it_t)->get_variable_name()) {
-						int line = get_line_number();
-						report_error("Variable name of one of the parameters of the procedre and its prototypes doesn't match",line);
-					}
-					if ((*it_s)->get_data_type()!=(*it_t)->get_data_type()) {
-						int line = get_line_number();
-						report_error("Formal parameter list of the procedure and its prototype should match",line);
-					}
-				}
-				if (!(it_s==arg_list.end() && it_t==temp_list.end())) {
+			// check if variables in definition are consistent with variables in declaration
+			list<Symbol_Table_Entry*> temp_list = $3->variable_table;
+			list<Symbol_Table_Entry*> arg_list = current_procedure->local_arg_table.variable_table;
+			list<Symbol_Table_Entry*>::iterator it_s, it_t;
+			for (it_s=arg_list.begin(),it_t=temp_list.begin();it_s!=arg_list.end() && it_t!=temp_list.end();it_s++,it_t++) {
+				if ((*it_s)->get_variable_name()!=(*it_t)->get_variable_name()) {
 					int line = get_line_number();
-					report_error("Procedure and its prototype parameter f_list length doens't match",line);	
+					report_error("Variable name of one of the parameters of the procedre and its prototypes doesn't match",line);
 				}
-				// empty basic block num list
+				if ((*it_s)->get_data_type()!=(*it_t)->get_data_type()) {
+					int line = get_line_number();
+					report_error("Formal parameter list of the procedure and its prototype should match",line);
+				}
 			}
+			if (!(it_s==arg_list.end() && it_t==temp_list.end())) {
+				int line = get_line_number();
+				report_error("Procedure and its prototype parameter f_list length doens't match",line);	
+			}
+				// empty basic block num list
+			// }
 			program_object.procedure_list.push_back(*$1);
 			goto_bb_num->clear();
 			if (current_procedure->get_return_type() == void_data_type)
@@ -175,14 +183,14 @@ procedure_name:
 				int line = get_line_number();
 				report_error("Procedure name cannot be same as global variable", line);
 			}
-			if (*$1=="main") {
-				current_procedure = new Procedure(void_data_type, *$1);
-				program_object.set_procedure_map(*current_procedure);
-				current_procedure = program_object.get_procedure("main");
-			}
-			else {
-				current_procedure = program_object.get_procedure(*$1);	
-			}
+			// if (*$1=="main") {
+			// 	current_procedure = new Procedure(void_data_type, *$1);
+			// 	program_object.set_procedure_map(*current_procedure);
+			// 	current_procedure = program_object.get_procedure("main");
+			// }
+			// else {
+			current_procedure = program_object.get_procedure(*$1);	
+			// }
 			if (current_procedure == NULL) {
 				int line = get_line_number();
 				report_error("Procedure corresponding to the name is not found", line);
@@ -893,7 +901,7 @@ return_statement:
 |
 	RETURN  expression ';'
 		{
-			if (current_procedure->get_proc_name()!="main" && $2->get_data_type()!=current_procedure->get_return_type()) {
+			if ($2->get_data_type()!=current_procedure->get_return_type()) {
 				int line = get_line_number();
 				report_error("Last return statement type, of procedure, and its prototype should match", line);
 			}

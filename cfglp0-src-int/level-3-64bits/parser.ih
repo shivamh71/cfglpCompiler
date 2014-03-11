@@ -93,15 +93,22 @@ inline void Parser::bb_strictly_increasing_order_check(list<Basic_Block *> * bb_
 
 ////////////////// Parser goto_bb_check function ////////////////////////
 inline void Parser::goto_bb_exist_check(list<Basic_Block *>bb_list,list<int>* goto_bb_num) {
-    int basic_block_range = bb_list.size()+1;
+    // int basic_block_range = bb_list.size()+1;
     list<int >::iterator i;
     for(i = goto_bb_num->begin(); i != goto_bb_num->end(); i++) {
         if((*i)<2) {
             report_error("Illegal basic block lable",NOLINE);
         }
-        if((*i) > basic_block_range) {
+        int bb_num = *i;
+        list<Basic_Block*>::iterator sit;
+        int flag = 0;
+        for (sit=bb_list.begin();sit!=bb_list.end();sit++) {
+          if ((*sit)->get_bb_number()==bb_num)
+            flag = 1;
+        }
+        if(flag == 0) {
             char* error_string;
-            sprintf(error_string,"bb %d doesn't exist",(*i));
+            sprintf(error_string,"bb %d doesn't exist",bb_num);
             report_error(error_string,NOLINE);
         }
     }

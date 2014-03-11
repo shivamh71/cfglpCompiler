@@ -3,8 +3,24 @@ Submitted by :
 	Shivam H Prasad - 110050041
 
 1) parser.yy
-	-> modified grammar to allow function declarations, multiple procedure definitions
-	-> modified grammar to different return types for procedures
+	-> added action routines to handle function declarations, return statements of type other than void
+	-> added action routines to allow multiple procedures in a program
+	-> added checks for return type validation in procedures
 
-2) scanner.ll
-	-> updated scanner.ll to allow void types
+2) ast.hh and ast.cc
+	-> added Function_Call_Ast class to handle function call statements
+	-> modified print_ast function of various classes to match reference implementation output
+	-> modified Return_Ast to allow return types other than void
+	-> modified evaluate function of Relation_Expression_Ast to correct mistakes from previous implementations
+	-> added code in evaluate of Function_Call_Ast to evaluate parameters of function and add them to environment
+
+3) procedure.hh and procedure.cc
+	-> modified evaluate function to handle recursive procedure calls
+	-> added to code to first create an environment for new procedure call and then evaluate procedure in that environment
+
+4) program.hh and program.cc
+	-> modified print_ast and added some global variables to handle return values of procedures
+
+Corner cases handled:
+	-> we have done semantics check exhaustively
+	-> name checking regarding function name, formal parameter name, global name, variable name etc have been carefully handled 
