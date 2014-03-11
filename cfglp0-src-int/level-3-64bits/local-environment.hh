@@ -132,6 +132,7 @@ class Local_Environment
 public:
 	map<string, Eval_Result_Value *> variable_table;
 	double return_value;
+	int return_type;
 	int flag;
 	Local_Environment();
 	~Local_Environment();

@@ -205,6 +205,8 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer,map<string, Eval_Result_
 			final_return = new Eval_Result_Value_Int();
 			break;
 	}
+	if (eval_env.return_type == 0)
+		final_return->set_variable_status(false);
 	file_buffer << "\n\n";
 	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating) Function: << "<< name << " >>\n";
 	eval_env.flag = 1;

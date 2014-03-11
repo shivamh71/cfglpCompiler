@@ -827,12 +827,14 @@ Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 	switch (node_data_type) {
 		case void_data_type:
 			final_return->set_value(-1);
+			eval_env.return_type = 0;
 			break;
 		default:
 			Eval_Result & result = to_return->evaluate(eval_env,file_buffer);
 			if (result.is_variable_defined() == false)
 				report_error("Variable should be defined before its use", NOLINE);
 			eval_env.return_value = result.get_value();
+			eval_env.return_type = 1;
 			final_return->set_value(-1);
 			break;
 	}
@@ -853,6 +855,9 @@ Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 			to_return = new Eval_Result_Value_Double();
 			to_return->set_value((double)eval_env.return_value);
 			eval_env.put_variable_value(*to_return, temp_string);
+			break;
+		default:
+			final_return->set_variable_status(false);
 			break;
 	}
 
