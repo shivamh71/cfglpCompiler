@@ -27,7 +27,7 @@
 #include "local-environment.hh"
 #include "error-display.hh"
 #include "user-options.hh"
-
+#include <vector>
 #include "symbol-table.hh"
 
 #include "ast.hh"
@@ -42,6 +42,9 @@
 bool bb_repeat_check(list<Basic_Block *> * bb_list, int bb_number);
 
 Procedure * current_procedure;
+
+vector<string> called_procedures;
+vector<string> defined_procedures;
 
 //////////////////////////////////////////////////////////////////////
 

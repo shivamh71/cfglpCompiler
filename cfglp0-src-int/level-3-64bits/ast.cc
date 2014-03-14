@@ -205,7 +205,7 @@ bool Relational_Expr_Ast::check_ast(int line) {
 }
 
 Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
-	
+
 	Eval_Result & result1 = lhs->evaluate(eval_env, file_buffer);
 
 	Eval_Result* result_lhs = new Eval_Result_Value_Double();
@@ -524,7 +524,7 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 			else {
 				char str[100];
 				if (node_data_type==float_data_type || node_data_type==double_data_type) {
-					sprintf(str,"%.2f",(float)glob_var_val->get_value());	
+					sprintf(str,"%.2f",(float)glob_var_val->get_value());
 				}
 				else if (node_data_type==int_data_type){
 					sprintf(str,"%d",(int)glob_var_val->get_value());
@@ -876,6 +876,10 @@ Function_Call_Ast::~Function_Call_Ast()
 
 void Function_Call_Ast::print_ast(ostream & file_buffer)
 {
+	Procedure * cur_proc = program_object.get_procedure(func_name);
+	if (cur_proc->basic_block_list.size() == 0) {
+		report_error("Called procedure is not defined", NOLINE);
+	}
 	file_buffer << endl << AST_SPACE << "FN CALL: "<<func_name<<"(";
 	list<Ast*>::iterator it;
 	for (it=arg_list.begin();it!=arg_list.end();it++) {
@@ -915,11 +919,17 @@ void Function_Call_Ast::set_name(string name) {
 Eval_Result & Function_Call_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
 	Procedure* func = program_object.get_procedure(func_name);
+	if (func->basic_block_list.size() == 0) {
+		report_error("Called procedure is not defined", NOLINE);
+	}
 	list<Ast*>::iterator it ;
 	list<Symbol_Table_Entry*>::iterator sit;
 	for (it=arg_list.begin(),sit=func->local_arg_table.variable_table.begin(); it != arg_list.end() && sit!=func->local_arg_table.variable_table.end(); it++,sit++)
-	{	
+	{
 		Eval_Result & result = (*it)->evaluate(eval_env, file_buffer);
+		if (!result.is_variable_defined()) {
+			report_error("Variable should be defined before its use", NOLINE);
+		}
 
 		string name = (*sit)->get_variable_name();
 		if ((*sit)->get_data_type()==int_data_type) {

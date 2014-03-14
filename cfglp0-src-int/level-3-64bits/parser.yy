@@ -79,25 +79,61 @@
 %%
 
 program:
-	declaration_statement_list function_declaration_list procedure_list	
+	declaration_statement_list function_declaration_list procedure_list
 		{
-			// nothing to be done here
+			for (int i=0;i<called_procedures.size();i++) {
+				int check_flag = 1;
+				for (int j=0;j<defined_procedures.size();j++) {
+					if (defined_procedures[j] == called_procedures[i]) {
+						check_flag = 0;
+						break;
+					}
+				}
+				if (check_flag) report_error("Called procedure is not defined", -1);
+			}
 		}
 |
-	function_declaration_list procedure_list	
+	function_declaration_list procedure_list
 		{
-			// nothing to be done here
+			for (int i=0;i<called_procedures.size();i++) {
+				int check_flag = 1;
+				for (int j=0;j<defined_procedures.size();j++) {
+					if (defined_procedures[j] == called_procedures[i]) {
+						check_flag = 0;
+						break;
+					}
+				}
+				if (check_flag) report_error("Called procedure is not defined", -1);
+			}
 		}
 |
 	declaration_statement_list procedure_list
 		{
-			// nothing to be done here
+			for (int i=0;i<called_procedures.size();i++) {
+				int check_flag = 1;
+				for (int j=0;j<defined_procedures.size();j++) {
+					if (defined_procedures[j] == called_procedures[i]) {
+						check_flag = 0;
+						break;
+					}
+				}
+				if (check_flag) report_error("Called procedure is not defined", -1);
+			}
 		}
 |
 	procedure_list
 		{
-			// nothing to be done here
-		}	
+			for (int i=0;i<called_procedures.size();i++) {
+				int check_flag = 1;
+				for (int j=0;j<defined_procedures.size();j++) {
+					if (defined_procedures[j] == called_procedures[i]) {
+						check_flag = 0;
+						break;
+					}
+				}
+				if (check_flag) report_error("Called procedure is not defined", -1);
+			}
+		}
 ;
 
 procedure_list:
@@ -167,9 +203,9 @@ procedure_name:
 				int line = get_line_number();
 				report_error("Procedure and its prototype parameter f_list length doens't match",line);	
 			}
-				// empty basic block num list
-			// }
 			program_object.procedure_list.push_back(*$1);
+			defined_procedures.push_back(*$1);
+			// empty basic block list
 			goto_bb_num->clear();
 			if (current_procedure->get_return_type() == void_data_type)
 				return_statement_used_flag = true;
@@ -200,6 +236,7 @@ procedure_name:
 				report_error("Procedure and its prototype parameter f_list length doens't match",line);	
 			}
 			program_object.procedure_list.push_back(*$1);
+			defined_procedures.push_back(*$1);
 			// empty basic block num list
 			goto_bb_num->clear();
 			if (current_procedure->get_return_type() == void_data_type)
@@ -982,6 +1019,7 @@ function_call_statement:
 					func->set_data_type("DOUBLE");
 					break;
 			}
+			called_procedures.push_back(*$1);
 			$$ = func;
 		}
 |
@@ -1010,6 +1048,7 @@ function_call_statement:
 					func->set_data_type("DOUBLE");
 					break;
 			}
+			called_procedures.push_back(*$1);
 			$$ = func;
 		}
 ;
