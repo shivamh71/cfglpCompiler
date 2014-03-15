@@ -158,5 +158,5 @@ goto 	{
 			error_message += "' on line " + lineNr();
 			
 			int line_number = lineNr();
-			report_error(error_message, line_number);
+			CHECK_INPUT(false, error_message, line_number);
 		}

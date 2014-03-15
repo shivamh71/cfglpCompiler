@@ -1,37 +1,52 @@
 # !/bin/bash
 
-rm -rf tmp
-mkdir tmp
+if [ $1 -eq 1 ]
+then
+	echo "\nCreating cfg files"
+	echo "-------------------------\n"
+	for file in "test_files"/*.c
+	do
+		file=`echo $file | cut -d '/' -f2`
+		make -f Makefile.cfg FILE=$file
+	done
+fi
 
-for file in "test_files"/*.c 
-do
-	file=`echo $file | cut -d '/' -f2`
-	make -f Makefile.cfg FILE=$file
-done
+if [ $1 -eq 2 ]
+then
 
-# echo "\nProcessing correct files"
-# echo "-------------------------\n"
+	rm -rf tmpUs tmpSir
+	mkdir tmpUs tmpSir
 
-# for file in "test_files"/*.cs306.cfg 
-# do
-# 	echo $file
-# 	f=`echo $file | cut -d '/' -f2`
-# 	f=`echo $f | cut -d '.' -f1`
-# 	./cfglp $file -tokens -ast -eval -d > out1
-# 	./run $file -tokens -ast -eval -d > out2
-# 	diff out1 out2 > tmp/$f
-# done
+	echo "\nProcessing correct files"
+	echo "-------------------------\n"
 
-# echo "\n\nProcessing error files"
-# echo "-----------------------\n"
+	for file in "test_files"/*.cs306.cfg
+	do
+		echo $file
+		f=`echo $file | cut -d '/' -f2`
+		f=`echo $f | cut -d '.' -f1`
+		./cfglp64 $file -tokens -d > tmpUs/$f.cfg
+		./run $file -tokens -d > tmpSir/$f.cfg
+		# diff -b -B tmpUs/$f.cfg tmpSir/$f.cfg
+	done
+fi
 
-# for file in "test_files"/*.e* 
-# do
-# 	echo $file
-# 	f=`echo $file | cut -d '/' -f2`
-# 	f=`echo $f | cut -d '.' -f1`
-# 	./cfglp $file -tokens -d > out1
-# 	./run $file -tokens -d > out2
-# 	diff out1 out2 > tmp/$f
-# 	echo "-------------------------------------------"
-# done
+if [ $1 -eq 3 ]
+then
+
+	rm -rf tmpUs tmpSir
+	mkdir tmpUs tmpSir
+
+	echo "\n\nProcessing error files"
+	echo "-----------------------\n"
+
+	for file in "test_files"/*.e*
+	do
+		echo $file
+		f=`echo $file | cut -d '/' -f2`
+		f=`echo $f | cut -d '.' -f1`
+		./cfglp $file -ast -tokens -d > tmpUs/$f.ecfg
+		./run $file -ast -tokens -d > tmpSir/$f.ecfg
+		echo "-------------------------------------------"
+	done
+fi

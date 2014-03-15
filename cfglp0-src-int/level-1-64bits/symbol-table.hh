@@ -24,13 +24,14 @@
 #ifndef SYMBOL_TABLE_HH
 #define SYMBOL_TABLE_HH
 
-#include<string>
-#include<list>
+#include <string>
+#include <list>
+#include "common-classes.hh"
+
 
 using namespace std;
 
 class Symbol_Table; // table of all symbols in a scope and corresponding scope -- can be global or local
-
 class Symbol_Table_Entry; // a single entry in symbol table -- has data type and name
 
 // typedef for data type -- can be int or void
@@ -49,47 +50,64 @@ typedef enum
 } Table_Scope;
 
 class Symbol_Table {
-
-	list<Symbol_Table_Entry *> variable_table; // list to hold all symbols
 	Table_Scope scope; // scope of symbols in this table
 
+	int size_in_bytes; // size of list
+	int start_offset_of_first_symbol;
+private:
+
+	int get_size_of_value_type(Data_Type dt);
 public:
-
+	list<Symbol_Table_Entry *> variable_table; // list to hold all symbols
 	Symbol_Table();
-
 	~Symbol_Table();
-
+	bool is_empty();
 	Table_Scope get_table_scope(); // return table scope
-
 	void set_table_scope(Table_Scope list_scope); // sets table scope
-
 	void push_symbol(Symbol_Table_Entry * variable); // push a symbol in list of symbols
-
 	bool variable_in_symbol_list_check(string variable); // check if a symbol is already present in symbol list
-
 	Symbol_Table_Entry & get_symbol_table_entry(string variable_name); // get symbol with given name
+	void global_list_in_proc_map_check();
+	void create(Local_Environment & local_global_variables_table);
 
-	void global_list_in_proc_map_check(int line); // ??
-
-	void create(Local_Environment & local_global_variables_table); // ??
+	void print(ostream & file_buffer);
+	void set_start_offset_of_first_symbol(int n);
+	int get_start_offset_of_first_symbol();
+	void assign_offsets();
+	int get_size();
+	void set_size(int n);
+	void print_assembly(ostream & file_buffer);
 };
 
 class Symbol_Table_Entry {
-
 	string variable_name; // name of symbol
 	Data_Type variable_data_type; // data type of symbol
 
+	Table_Scope scope;
+	int lineno;
+	int start_offset;
+	int end_offset;
+	Register_Descriptor * register_description;
+
 public:
-
 	Symbol_Table_Entry();
-
-	Symbol_Table_Entry(string & name, Data_Type new_data_type); // overloaded constructor to create symbol with name and type
-
+	Symbol_Table_Entry(string & name, Data_Type new_data_type, int line); // overloaded constructor to create symbol with name and type
 	~Symbol_Table_Entry();
-
 	Data_Type get_data_type(); // get symbol data type
-
 	string get_variable_name(); // get symbol name
+
+	int get_lineno();
+	bool operator==(Symbol_Table_Entry & entry);
+	void set_symbol_scope(Table_Scope sp);
+	Table_Scope get_symbol_scope();
+	void set_start_offset(int num);
+	int get_start_offset();
+	void set_end_offset(int num);
+	int get_end_offset();
+	Register_Descriptor * get_register();
+	void set_register(Register_Descriptor * reg);
+	void free_register(Register_Descriptor * destination_reg_descr);
+	void update_register(Register_Descriptor * result_reg_descr);
 };
 
 #endif

@@ -25,194 +25,171 @@
 #define AST_HH
 
 #include<string>
+#include<iostream>
+#include<iomanip>
+#include<typeinfo>
+#include<list>
+#include "common-classes.hh"
 
 #define AST_SPACE "         "
 #define AST_NODE_SPACE "            "
+#define AST_SUB_NODE_SPACE "               "
 
 using namespace std;
 
 class Ast;
 
 class Ast {
+	protected:
+		Data_Type node_data_type;
+		int bb_number;
 
-protected:
+		typedef enum {
+			zero_arity = 0,
+			unary_arity = 1,
+			binary_arity = 2,
+			tri_arity = 3
+		} Ast_Arity;
+		Ast_Arity ast_num_child;
+		int lineno;
+	public:
+		Ast();
+		~Ast();
+		virtual Data_Type get_data_type();
+		int get_bb_number();
+		virtual bool check_ast();
+		virtual void print_ast(ostream & file_buffer) = 0;
+		virtual void print_value(Local_Environment & eval_env, ostream & file_buffer);
+		virtual Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
+		virtual void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
+		virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
 
-	Data_Type node_data_type; 	// Data_Type is defined in symbol-table.hh but this file in not included here
-								// rather it is included in ast.cc where node_data_type is actually used
-								// here its just declared but never used
-	int bb_number;
-
-public:
-
-	Ast();
-	
-	~Ast();
-
-	// Following are pure virtual functions and hence should never be reached 
-
-	virtual Data_Type get_data_type();
-
-	int get_bb_number();
-	
-	virtual bool check_ast(int line);
-
-	virtual void print_ast(ostream & file_buffer) = 0;
-	
-	virtual void print_value(Local_Environment & eval_env, ostream & file_buffer);
-
-	virtual Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
-	
-	virtual void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
-	
-	virtual Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer) = 0;
+		virtual Symbol_Table_Entry & get_symbol_entry();
+		virtual Code_For_Ast & compile() = 0;
+		virtual Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra) = 0;
+		virtual Code_For_Ast & create_store_stmt(Register_Descriptor * store_register);
 };
 
 class Assignment_Ast:public Ast {
-	Ast * lhs;
-	Ast * rhs;
+	public:
+		Ast * lhs;
+		Ast * rhs;
+		Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs, int line);
+		~Assignment_Ast();
+		Data_Type get_data_type();
+		bool check_ast();
+		void print_ast(ostream & file_buffer);
+		Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
-public:
-
-	Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs);
-
-	~Assignment_Ast();
-
-	Data_Type get_data_type();
-	
-	bool check_ast(int line);
-
-	void print_ast(ostream & file_buffer);
-
-	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+		Code_For_Ast & compile();
+		Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 enum Comparator {LEOP, LTOP, GEOP, GTOP, EQOP, NEOP};
-
 class Relational_Expr_Ast:public Ast {
+	public:
+		Ast * lhs;
+		Ast * rhs;
+		Comparator C;
+		Relational_Expr_Ast(Ast* arg_lhs, Comparator c, Ast* arg_rhs, int line);
+		~Relational_Expr_Ast();
+		Data_Type get_data_type();
+		bool check_ast();
+		void print_ast(ostream & file_buffer);
+		Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
-public:
-
-	Ast * lhs;
-	Ast * rhs;
-	Comparator C;
-
-	Relational_Expr_Ast(Ast* arg_lhs, Comparator c, Ast* arg_rhs);
-
-	~Relational_Expr_Ast();
-
-	Data_Type get_data_type();
-	
-	bool check_ast(int line);
-
-	void print_ast(ostream & file_buffer);
-
-	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+		Code_For_Ast & compile();
+		Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 enum Operator {ADD, SUB, MUL, DIV};
-
 class Arithmetic_Expr_Ast:public Ast {
+	public:
+		Ast * lhs;
+		Ast * rhs;
+		Operator O;
 
-public:
+		Arithmetic_Expr_Ast(Ast* arg_lhs, Operator c, Ast* arg_rhs, int line);
+		~Arithmetic_Expr_Ast();
+		Data_Type get_data_type();
+		bool check_ast();
+		void print_ast(ostream & file_buffer);
+		Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
-	Ast * lhs;
-	Ast * rhs;
-	Operator O;
-
-	Arithmetic_Expr_Ast(Ast* arg_lhs, Operator c, Ast* arg_rhs);
-
-	~Arithmetic_Expr_Ast();
-
-	Data_Type get_data_type();
-	
-	bool check_ast(int line);
-
-	void print_ast(ostream & file_buffer);
-
-	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+		Code_For_Ast & compile();
+		Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 
-class Name_Ast:public Ast
-{
+class Name_Ast:public Ast {
 	string variable_name;
-	Symbol_Table_Entry variable_symbol_entry;
+	Symbol_Table_Entry * variable_symbol_entry;
+	public:
+		Name_Ast(string & name, Symbol_Table_Entry & var_entry, int line);
+		~Name_Ast();
+		Data_Type get_data_type();
+		Symbol_Table_Entry & get_symbol_entry();
+		void print_ast(ostream & file_buffer);
+		void print_value(Local_Environment & eval_env, ostream & file_buffer);
+		Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
+		void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
+		Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
-public:
-	Name_Ast(string & name, Symbol_Table_Entry & var_entry);
-	~Name_Ast();
-
-	Data_Type get_data_type();
-
-	void print_ast(ostream & file_buffer);
-
-	void print_value(Local_Environment & eval_env, ostream & file_buffer);
-	Eval_Result & get_value_of_evaluation(Local_Environment & eval_env);
-	void set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result);
-	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+		Code_For_Ast & compile();
+		Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+		Code_For_Ast & create_store_stmt(Register_Descriptor * store_register);
 };
 
 template <class T>
-class Number_Ast:public Ast
-{
+class Number_Ast:public Ast {
 	T constant;
+	public:
+		Number_Ast(T number, Data_Type constant_data_type, int line);
+		~Number_Ast();
+		Data_Type get_data_type();
+		void print_ast(ostream & file_buffer);
+		Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
-public:
-	Number_Ast(T number, Data_Type constant_data_type);
-	~Number_Ast();
-
-	Data_Type get_data_type();
-
-	void print_ast(ostream & file_buffer);
-
-	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+		Code_For_Ast & compile();
+		Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
-
 
 class Goto_Ast:public Ast {
+	public:
+		Goto_Ast(int bb_number, int line);
+		~Goto_Ast();
+		int get_bb_number();
+		Data_Type get_data_type();
+		void print_ast(ostream & file_buffer);
+		Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
-public:
-
-	Goto_Ast(int bb_number);
-
-	~Goto_Ast();
-
-	int get_bb_number();
-
-	Data_Type get_data_type();
-
-	void print_ast(ostream & file_buffer);
-
-	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
-	
+		Code_For_Ast & compile();
+		Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
-class If_Else_Ast:public Ast
-{
-
+class If_Else_Ast:public Ast {
 	Ast* cond;
 	Ast* true_successor;
 	Ast* false_successor;
+	public:
+		If_Else_Ast(Ast* cond, Ast* true_successor, Ast* false_successor, int line);
+		~If_Else_Ast();
+		void print_ast(ostream & file_buffer);
+		Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
 
-public:
-	If_Else_Ast(Ast* cond, Ast* true_successor, Ast* false_successor);
-	~If_Else_Ast();
-
-	void print_ast(ostream & file_buffer);
-
-	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+		Code_For_Ast & compile();
+		Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
-class Return_Ast:public Ast
-{
-
-public:
-	Return_Ast();
-	~Return_Ast();
-
-	void print_ast(ostream & file_buffer);
-
-	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+class Return_Ast:public Ast {
+	public:
+		Return_Ast(int line);
+		~Return_Ast();
+		void print_ast(ostream & file_buffer);
+		Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+		
+		Code_For_Ast & compile();
+		Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
 #endif

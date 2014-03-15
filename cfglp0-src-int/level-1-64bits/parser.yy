@@ -35,7 +35,7 @@
 	Symbol_Table_Entry * symbol_entry;
 	Basic_Block * basic_block;
 	list<Basic_Block *> * basic_block_list;
-	list<int> * goto_bb_num ; 
+	list<int> * goto_bb_num; 
 	Procedure * procedure;
 };
 
@@ -72,321 +72,283 @@
 program:
 	declaration_statement_list	procedure_name	
 		{
-			program_object.set_global_table(*$1);
-			return_statement_used_flag = false;	// No return statement in the current procedure till now
+			// if (NOT_ONLY_PARSE) {
+			// 	program_object.set_global_table(*$1);
+			// 	return_statement_used_flag = false;
+			// }
 		}
 		procedure_body
 		{
-			program_object.set_procedure_map(*current_procedure);
-			if ($1)
-				$1->global_list_in_proc_map_check(get_line_number());
-			delete $1;
+			// if (NOT_ONLY_PARSE) {
+			// 	program_object.set_procedure_map(current_procedure, get_line_number());
+			// 	if ($1)
+			// 		$1->global_list_in_proc_map_check();
+			// 	delete $1;
+			// }
 		}
 |
 	procedure_name	
 		{
-			return_statement_used_flag = false;	// No return statement in the current procedure till now
+			// if (NOT_ONLY_PARSE) {
+			// 	return_statement_used_flag = false;
+			// }
 		}
 	procedure_body
 		{
-			program_object.set_procedure_map(*current_procedure);
+			// if (NOT_ONLY_PARSE) {
+			// 	program_object.set_procedure_map(current_procedure, get_line_number());
+			// }
 		}
 ;
 
 procedure_name:
 	NAME '(' ')'
 		{
-			current_procedure = new Procedure(void_data_type, *$1);
+			// if (NOT_ONLY_PARSE) {
+			// 	current_procedure = new Procedure(void_data_type, *$1, get_line_number());
+			// }
 		}
 ;
 
 procedure_body:
 	'{' declaration_statement_list	
 		{
-			current_procedure->set_local_list(*$2);
-
-			delete $2;
+			// if (NOT_ONLY_PARSE) {
+			// 	current_procedure->set_local_list(*$2);
+			// 	delete $2;
+			// }
 		}
 	basic_block_list '}'
 		{
-			// if (return_statement_used_flag == false)
-			// {
-			// 	int line = get_line_number();
-			// 	report_error("Atleast 1 basic block should have a return statement", line);
+			// if (NOT_ONLY_PARSE) {
+			// 	current_procedure->set_basic_block_list(*$4);
+			// 	goto_bb_exist_check(*$4, goto_bb_num); // include check
+			// 	delete $4;
 			// }
-			current_procedure->set_basic_block_list(*$4);
-			goto_bb_exist_check(*$4, goto_bb_num);
-			delete $4;
 		}
 |
 	'{' basic_block_list '}'
 		{
-			// if (return_statement_used_flag == false)
-			// {
-			// 	int line = get_line_number();
-			// 	report_error("Atleast 1 basic block should have a return statement", line);
+			// if (NOT_ONLY_PARSE) {
+			// 	current_procedure->set_basic_block_list(*$2);
+			// 	goto_bb_exist_check(*$2, goto_bb_num);
+			// 	delete $2;
 			// }
-			current_procedure->set_basic_block_list(*$2);
-			goto_bb_exist_check(*$2, goto_bb_num);
-
-			delete $2;
 		}
 ;
 
 declaration_statement_list:
 	declaration_statement_list declaration_statement
 		{
-			// if declaration is local then no need to check in global list
-			// if declaration is global then this list is global list
-			int line = get_line_number();
-			program_object.variable_in_proc_map_check($2->get_variable_name(), line);
-
-			string var_name = $2->get_variable_name();
-			if (current_procedure && current_procedure->get_proc_name() == var_name)
-			{
-				int line = get_line_number();
-				report_error("Variable name cannot be same as procedure name", line);
-			}
-			if ($1 != NULL)
-			{
-				if($1->variable_in_symbol_list_check(var_name))
-				{
-					int line = get_line_number();
-					report_error("Variable is declared twice", line);
-				}
-				$$ = $1;
-			}
-			else
-				$$ = new Symbol_Table();
-			$$->push_symbol($2);
+			// if (NOT_ONLY_PARSE) {
+			// 	int line = get_line_number();
+			// 	program_object.variable_in_proc_map_check($2->get_variable_name());
+			// 	string var_name = $2->get_variable_name();
+			// 	if (current_procedure && current_procedure->get_proc_name() == var_name) {
+			// 		CHECK_INPUT(true, "Variable name cannot be same as procedure name", get_line_number());
+			// 	}
+			// 	if ($1 != NULL) {
+			// 		if($1->variable_in_symbol_list_check(var_name)) {
+			// 			// CHECK_INPUT(true, "Variable is declared twice", get_line_number());
+			// 		}
+			// 		$$ = $1;
+			// 	}
+			// 	else
+			// 		$$ = new Symbol_Table();
+			// 	$$->push_symbol($2);
+			// }
 		}
 |
 	declaration_statement
 		{
-			int line = get_line_number();
-			program_object.variable_in_proc_map_check($1->get_variable_name(), line);
-
-			string var_name = $1->get_variable_name();
-			if (current_procedure && current_procedure->get_proc_name() == var_name)
-			{
-				int line = get_line_number();
-				report_error("Variable name cannot be same as procedure name", line);
-			}
-
-			$$ = new Symbol_Table();
-			$$->push_symbol($1);
+			// if (NOT_ONLY_PARSE) {
+			// 	int line = get_line_number();
+			// 	program_object.variable_in_proc_map_check($1->get_variable_name());
+			// 	string var_name = $1->get_variable_name();
+			// 	if (current_procedure && current_procedure->get_proc_name() == var_name) {
+			// 		CHECK_INPUT(true, "Variable name cannot be same as procedure name", get_line_number());
+			// 	}
+			// 	$$ = new Symbol_Table();
+			// 	$$->push_symbol($1);
+			// }
 		}
 ;
 
 declaration_statement:
 	INTEGER NAME ';'
 		{
-			$$ = new Symbol_Table_Entry(*$2, int_data_type);
-			delete $2;
+			// if (NOT_ONLY_PARSE) {
+			// 	$$ = new Symbol_Table_Entry(*$2, int_data_type, get_line_number());
+			// 	delete $2;
+			// }
 		}
 ;
 
 basic_block_list:
 	basic_block_list basic_block
 		{
-			if (!$2)
-			{
-				int line = get_line_number();
-				report_error("Basic block doesn't exist", line);
-			}
-			bb_strictly_increasing_order_check($$, $2->get_bb_number());
-			$$ = $1;
-			$$->back()->set_has_successor(true);
-			$$->push_back($2);
+			// if (NOT_ONLY_PARSE) {
+			// 	if (!$2) {
+			// 		CHECK_INPUT(true, "Basic block doesn't exist", get_line_number());
+			// 	}
+			// 	bb_strictly_increasing_order_check($$, $2->get_bb_number());
+			// 	$$ = $1;
+			// 	$$->back()->set_has_successor(true);
+			// 	$$->push_back($2);
+			// }
 		}
 |
 	basic_block
 		{
-			if (!$1)
-			{
-				int line = get_line_number();
-				report_error("Basic block doesn't exist", line);
-			}
-			$$ = new list<Basic_Block *>;
-			$$->push_back($1);
+			// if (NOT_ONLY_PARSE) {
+			// 	if (!$1) {
+			// 		CHECK_INPUT(true, "Basic block doesn't exist", get_line_number());
+			// 	}
+			// 	$$ = new list<Basic_Block *>;
+			// 	$$->push_back($1);
+			// }
 		}
 ;
 
 basic_block:
 	BASIC_BLOCK ':'
 		{
-
-			if ($1 < 2) {
-				int line = get_line_number();
-				report_error("Illegal basic block lable", line);
-			}
-			list<Ast *> * ast_list = new list<Ast *>;
-			$$ = new Basic_Block($1, *ast_list);
+			// if (NOT_ONLY_PARSE) {
+			// 	if ($1 < 2) {
+			// 		CHECK_INPUT(true, "Illegal basic block lable", get_line_number());
+			// 	}
+			// 	list<Ast *> * ast_list = new list<Ast *>;
+			// 	$$ = new Basic_Block($1, get_line_number());
+			// 	$$->set_ast_list(*ast_list);
+			// }
 		}
 |
 	BASIC_BLOCK ':' statement_list
 		{
-			// if (*$2 != "bb") {
-			// 	int line = get_line_number();
-			// 	report_error("Not basic block lable", line);
+			// if (NOT_ONLY_PARSE) {
+			// 	if ($1 < 2) {
+			// 		CHECK_INPUT(true, "Illegal basic block lable", get_line_number());
+			// 	}
+			// 	$$ = new Basic_Block($1, get_line_number());
+			// 	$$->set_ast_list(*$3);
+			// 	$$->set_has_successor(false);
+			// 	delete $3;
 			// }
-
-			if ($1 < 2) {
-				int line = get_line_number();
-				report_error("Illegal basic block lable", line);
-			}
-
-			$$ = new Basic_Block($1, *$3);
-			$$->set_has_successor(false);
-
-			delete $3;
 		}
 |
 	BASIC_BLOCK ':' statement_list ifelse_statement
 		{
-			// if (*$2 != "bb") {
-			// 	int line = get_line_number();
-			// 	report_error("Not basic block lable", line);
+			// if (NOT_ONLY_PARSE) {
+			// 	if ($1 < 2) {
+			// 		CHECK_INPUT(true, "Illegal basic block lable", get_line_number());
+			// 	}
+			// 	$3->push_back($4);
+			// 	$$ = new Basic_Block($1, get_line_number());
+			// 	$$->set_ast_list(*$3);
+			// 	$$->set_has_successor(true);
+			// 	delete $3;
 			// }
-
-			if ($1 < 2) {
-				int line = get_line_number();
-				report_error("Illegal basic block lable", line);
-			}
-
-			$3->push_back($4);
-			$$ = new Basic_Block($1, *$3);
-			$$->set_has_successor(true);
-
-
-			delete $3;
 		}
 |
 	BASIC_BLOCK ':' statement_list return_statement
 		{
-			// if (*$2 != "bb") {
-			// 	int line = get_line_number();
-			// 	report_error("Not basic block lable", line);
+			// if (NOT_ONLY_PARSE) {
+			// 	if ($1 < 2) {
+			// 		CHECK_INPUT(true, "Illegal basic block lable", get_line_number());
+			// 	}
+			// 	$3->push_back($4);
+			// 	$$ = new Basic_Block($1, get_line_number());
+			// 	$$->set_ast_list(*$3);
+			// 	$$->set_has_successor(true);
+			// 	delete $3;
 			// }
-
-			if ($1 < 2) {
-				int line = get_line_number();
-				report_error("Illegal basic block lable", line);
-			}
-
-			$3->push_back($4);
-			$$ = new Basic_Block($1, *$3);
-			$$->set_has_successor(true);
-
-			delete $3;
 		}
 |
 	BASIC_BLOCK ':' statement_list goto_statement
 		{
-			// if (*$2 != "bb") {
-			// 	int line = get_line_number();
-			// 	report_error("Not basic block lable", line);
+			// if (NOT_ONLY_PARSE) {
+			// 	if ($1 < 2) {
+			// 		CHECK_INPUT(true, "Illegal basic block lable", get_line_number());
+			// 	}
+			// 	$3->push_back($4);
+			// 	$$ = new Basic_Block($1, get_line_number());
+			// 	$$->set_ast_list(*$3);
+			// 	$$->set_has_successor(true);
+			// 	delete $3;
 			// }
-			
-			if ($1 < 2) {
-				int line = get_line_number();
-				report_error("Illegal basic block lable", line);
-			}
-
-			$3->push_back($4);
-			$$ = new Basic_Block($1, *$3);
-			$$->set_has_successor(true);
-
-			delete $3;
 		}
 |
 	BASIC_BLOCK ':' ifelse_statement
 		{
-			// if (*$2 != "bb") {
-			// 	int line = get_line_number();
-			// 	report_error("Not basic block lable", line);
+			// if (NOT_ONLY_PARSE) {
+			// 	if ($1 < 2) {
+			// 		CHECK_INPUT(true, "Illegal basic block lable", get_line_number());
+			// 	}
+			// 	list<Ast *> * ast_list = new list<Ast *>;
+			// 	ast_list->push_back($3);
+			// 	$$ = new Basic_Block($1, get_line_number());
+			// 	$$->set_ast_list(*ast_list);
+			// 	$$->set_has_successor(true);
 			// }
-
-			if ($1 < 2) {
-				int line = get_line_number();
-				report_error("Illegal basic block lable", line);
-			}
-
-			list<Ast *> * ast_list = new list<Ast *>;
-			ast_list->push_back($3);
-			$$ = new Basic_Block($1, *ast_list);
-			$$->set_has_successor(true);
-
-
 		}
 |
 	BASIC_BLOCK ':' return_statement
 		{
-			// if (*$2 != "bb") {
-			// 	int line = get_line_number();
-			// 	report_error("Not basic block lable", line);
+			// if (NOT_ONLY_PARSE) {
+			// 	if ($1 < 2) {
+			// 		CHECK_INPUT(true, "Illegal basic block lable", get_line_number());
+			// 	}
+			// 	list<Ast *> * ast_list = new list<Ast *>;
+			// 	ast_list->push_back($3);
+			// 	$$ = new Basic_Block($1, get_line_number());
+			// 	$$->set_ast_list(*ast_list);
+			// 	$$->set_has_successor(true);
 			// }
-
-			if ($1 < 2) {
-				int line = get_line_number();
-				report_error("Illegal basic block lable", line);
-			}
-
-			list<Ast *> * ast_list = new list<Ast *>;
-			ast_list->push_back($3);
-			$$ = new Basic_Block($1, *ast_list);
-			$$->set_has_successor(true);
-
 		}
 |
 	BASIC_BLOCK ':' goto_statement
 		{
-			// if (*$2 != "bb") {
-			// 	int line = get_line_number();
-			// 	report_error("Not basic block lable", line);
+			// if (NOT_ONLY_PARSE) {
+			// 	if ($1 < 2) {
+			// 		CHECK_INPUT(true, "Illegal basic block lable", get_line_number());
+			// 	}
+			// 	list<Ast *> * ast_list = new list<Ast *>;
+			// 	ast_list->push_back($3);
+			// 	$$ = new Basic_Block($1, get_line_number());
+			// 	$$->set_ast_list(*ast_list);
+			// 	$$->set_has_successor(true);
 			// }
-
-			if ($1 < 2) {
-				int line = get_line_number();
-				report_error("Illegal basic block lable", line);
-			}
-
-			list<Ast *> * ast_list = new list<Ast *>;
-			ast_list->push_back($3);
-			$$ = new Basic_Block($1, *ast_list);
-			$$->set_has_successor(true);
-
 		}
 ;
 
 statement_list:
 	statement_list statement
 		{
-			if ($1 != NULL)
-				$$ = $1;
-			else
-				$$ = new list<Ast *>;
-			$$->push_back($2);
+			// if ($1 != NULL)
+			// 	$$ = $1;
+			// else
+			// 	$$ = new list<Ast *>;
+			// $$->push_back($2);
 		}
 |
 	statement
 		{
-			$$ = new list<Ast *>;
-			$$->push_back($1);
+			// $$ = new list<Ast *>;
+			// $$->push_back($1);
 		}
 ;
 
 statement:
 	assignment_statement
 		{
-			$$ = $1;
+			// $$ = $1;
 		}
 ;
 
 ifelse_statement:
 	IF '(' expression ')' goto_statement ELSE goto_statement
 		{
-			$$ = new If_Else_Ast($3,$5,$7);
+			// $$ = new If_Else_Ast($3,$5,$7, get_line_number());
 		}
 ;
 
@@ -394,17 +356,17 @@ ifelse_statement:
 goto_statement:
 	GOTO BASIC_BLOCK ';'
 		{
-			$$ = new Goto_Ast($2);
-			list<Basic_Block *>::iterator i;
-			goto_bb_num->push_back($2);
-			
+			// $$ = new Goto_Ast($2, get_line_number());
+			// list<Basic_Block *>::iterator i;
+			// goto_bb_num->push_back($2);
+			// 
 		}
 ;
 
 expression:
 	comparison_expression
 		{
-			$$ = $1;
+			// $$ = $1;
 		}
 ;
 
@@ -412,75 +374,74 @@ expression:
 greater_than_expression:
 	greater_than_expression GT arithmetic_expression
 		{
-			$$ = new Relational_Expr_Ast($1,GTOP,$3);
-			int line = get_line_number();
-			$$->check_ast(line);
+			// $$ = new Relational_Expr_Ast($1,GTOP,$3,get_line_number());
+			// $$->check_ast();
 		}
 |
 	greater_than_expression GE arithmetic_expression
 		{
-			$$ = new Relational_Expr_Ast($1,GEOP,$3);
-			int line = get_line_number();
-			$$->check_ast(line);
+			// $$ = new Relational_Expr_Ast($1,GEOP,$3,get_line_number());
+			// $$->check_ast();
 		}
 |
 	greater_than_expression LT arithmetic_expression
 		{
-			$$ = new Relational_Expr_Ast($1,LTOP,$3);
-			int line = get_line_number();
-			$$->check_ast(line);
+			// $$ = new Relational_Expr_Ast($1,LTOP,$3,get_line_number());
+			// $$->check_ast();
 		}
 |
 	greater_than_expression LE arithmetic_expression
 		{
-			$$ = new Relational_Expr_Ast($1,LEOP,$3);
-			int line = get_line_number();
-			$$->check_ast(line);
+			// $$ = new Relational_Expr_Ast($1,LEOP,$3,get_line_number());
+			// $$->check_ast();
 		}
 |
 	arithmetic_expression
 		{
-			$$ = $1;
+			// $$ = $1;
 		}	
 ;
 
 equality_expression:
 	equality_expression EQ greater_than_expression
 		{
-			$$ = new Relational_Expr_Ast($1,EQOP,$3);
-			int line = get_line_number();
-			$$->check_ast(line);
+			// $$ = new Relational_Expr_Ast($1,EQOP,$3,get_line_number());
+			// $$->check_ast();
 		}
 |
 	equality_expression NE greater_than_expression
 		{
-			$$ = new Relational_Expr_Ast($1,NEOP,$3);
-			int line = get_line_number();
-			$$->check_ast(line);
+			// $$ = new Relational_Expr_Ast($1,NEOP,$3,get_line_number());
+			// $$->check_ast();
 		}
 |
 	greater_than_expression
 		{
-			$$ = $1;
+			// $$ = $1;
 		}
 ;
 
 comparison_expression:
 	equality_expression
 		{
-			$$ = $1;
+			// $$ = $1;
 		}
 ;
 
 basic_expression:
 	identifier
 		{
-			$$ = $1;
+			// $$ = $1;
 		}
 |
 	constant
 		{
-			$$ = $1;
+			// $$ = $1;
+		}
+|
+	'(' expression ')'
+		{
+			// $$ = $1;
 		}
 ;
 
@@ -488,16 +449,14 @@ basic_expression:
 mult_expression:
 	mult_expression MULTOP basic_expression
 		{
-			$$ = new Arithmetic_Expr_Ast($1,MUL,$3);
-			int line = get_line_number();
-			$$->check_ast(line);
+			// $$ = new Arithmetic_Expr_Ast($1,MUL,$3, get_line_number());
+			// $$->check_ast();
 		}
 |
 	mult_expression DIVOP basic_expression
 		{
-			$$ = new Arithmetic_Expr_Ast($1,DIV,$3);
-			int line = get_line_number();
-			$$->check_ast(line);
+			// $$ = new Arithmetic_Expr_Ast($1,DIV,$3, get_line_number());
+			// $$->check_ast();
 		}
 |
 	basic_expression
@@ -506,73 +465,70 @@ mult_expression:
 add_expression:
 	add_expression ADDOP mult_expression
 		{
-			$$ = new Arithmetic_Expr_Ast($1,ADD,$3);
-			int line = get_line_number();
-			$$->check_ast(line);
+			// $$ = new Arithmetic_Expr_Ast($1,ADD,$3, get_line_number());
+			// $$->check_ast();
 		}
 |
 	add_expression MINUSOP mult_expression
 		{
-			$$ = new Arithmetic_Expr_Ast($1,SUB,$3);
-			int line = get_line_number();
-			$$->check_ast(line);
+			// $$ = new Arithmetic_Expr_Ast($1,SUB,$3, get_line_number());
+			// $$->check_ast();
 		}
 |
 	mult_expression
 		{
-			$$ = $1;
+			// $$ = $1;
 		}
 ;
 
 arithmetic_expression:
 	add_expression
 		{
-			$$ = $1;
+			// $$ = $1;
 		}
 ;
 
 assignment_statement:
 	identifier ASSIGN_OP expression ';'
 		{
-			$$ = new Assignment_Ast($1, $3);
-			int line = get_line_number();
-			$$->check_ast(line);
+			// CHECK_INVARIANT((($1 != NULL) && ($3 != NULL)), "lhs/rhs cannot be null");
+			// Ast * lhs = $1;
+			// Ast * rhs = $3;
+			// Ast * assign = new Assignment_Ast(lhs, rhs, get_line_number());
+			// assign->check_ast();
+			// $$ = assign;
 		}
 ;
 
 return_statement:
 	RETURN ';'
 		{
-			$$ = new Return_Ast();
-			return_statement_used_flag = true; // Current procedure has an occurrence of return statement
+			// $$ = new Return_Ast(get_line_number());
+			// return_statement_used_flag = true;
 		}
 ;
 
 identifier:
 	NAME
 		{
-			Symbol_Table_Entry var_table_entry;
-
-			if (current_procedure->variable_in_symbol_list_check(*$1))
-				 var_table_entry = current_procedure->get_symbol_table_entry(*$1);
-
-			else if (program_object.variable_in_symbol_list_check(*$1))
-				var_table_entry = program_object.get_symbol_table_entry(*$1);
-
-			else
-			{
-				int line = get_line_number();
-				report_error("Variable has not been declared", line);
-			}
-
-			$$ = new Name_Ast(*$1, var_table_entry);
-			delete $1;
+			// Symbol_Table_Entry * var_table_entry;
+			// CHECK_INVARIANT(($1 != NULL), "Variable name cannot be null");
+			// string var_name = *$1;
+			// if (current_procedure->variable_in_symbol_list_check(var_name) == true)
+			// 	 var_table_entry = &(current_procedure->get_symbol_table_entry(var_name));
+			// else if (program_object.variable_in_symbol_list_check(var_name) == true)
+			// 	var_table_entry = &(program_object.get_symbol_table_entry(var_name));
+			// else
+			// 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Variable has not been declared");
+			// Ast * name_ast = new Name_Ast(var_name, *var_table_entry, get_line_number());
+			// $$ = name_ast;
 		}
 ;
 
 constant:
 	INTEGER_NUMBER
 		{
-			$$ = new Number_Ast<int>($1, int_data_type);
+			// Ast * num_ast = new Number_Ast<int>($1, int_data_type, get_line_number());
+			// $$ = num_ast;
 		}
 ;
