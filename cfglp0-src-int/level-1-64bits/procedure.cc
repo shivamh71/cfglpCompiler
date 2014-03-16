@@ -43,6 +43,7 @@ Procedure::Procedure(Data_Type proc_return_type, string proc_name, int line)
 {
 	return_type = proc_return_type;
 	name = proc_name;
+
 	lineno = line;
 }
 
@@ -87,12 +88,15 @@ Symbol_Table_Entry & Procedure::get_symbol_table_entry(string variable_name)
 void Procedure::print(ostream & file_buffer)
 {
 	CHECK_INVARIANT((return_type == void_data_type), "Only void return type of funtion is allowed");
+
 	file_buffer << PROC_SPACE << "Procedure: main, Return Type: void\n";
+
 	if ((command_options.is_show_symtab_selected()) || (command_options.is_show_program_selected()))
 	{
 		file_buffer << "   Local Declarartions\n";
 		local_symbol_table.print(file_buffer);
 	}
+
 	if ((command_options.is_show_program_selected()) || (command_options.is_show_ast_selected()))
 	{
 		list<Basic_Block *>::iterator i;
@@ -100,7 +104,7 @@ void Procedure::print(ostream & file_buffer)
 			(*i)->print_bb(file_buffer);
 	}
 }
-	
+
 Basic_Block & Procedure::get_start_basic_block()
 {
 	list<Basic_Block *>::iterator i;
@@ -197,10 +201,10 @@ void Procedure::print_assembly(ostream & file_buffer)
 {
 	print_prologue(file_buffer);
 
-	file_buffer << "label2:" << endl;
 	list<Basic_Block *>::iterator i;
 	for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
 		(*i)->print_assembly(file_buffer);
+
 	print_epilogue(file_buffer);
 }
 

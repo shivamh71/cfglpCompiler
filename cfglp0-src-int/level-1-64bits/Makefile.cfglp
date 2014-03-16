@@ -56,8 +56,8 @@ parser.cc parserbase.h: parser.yy parser.ih parser.h
 	$(BISONCPP) --verbose parser.yy
 
 clean :
-	rm -f *.o cfglp64 cfgpp64 scannerbase.h parserbase.h scanner.cc parser.cc parser.yy.output
-	rm -f cscope.out tags a.out
+	rm -rf *.o cfglp64 scannerbase.h parserbase.h scanner.cc parser.cc parser.yy.output test_files/*.cfg tmpUs tmpSir
+	rm -rf cscope.out tags a.out
 
 ###########################################################################
 

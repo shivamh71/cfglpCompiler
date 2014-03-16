@@ -51,6 +51,7 @@ Symbol_Table::~Symbol_Table()
 void Symbol_Table::set_table_scope(Table_Scope list_scope)
 {
 	scope = list_scope;
+
 	list<Symbol_Table_Entry *>::iterator i;
 	for(i = variable_table.begin(); i != variable_table.end(); i++)
 		(*i)->set_symbol_scope(list_scope);
@@ -77,8 +78,7 @@ void Symbol_Table::global_list_in_proc_map_check()
 	for (i = variable_table.begin(); i != variable_table.end(); i++)
 	{
 		string name = (*i)->get_variable_name();
-		CHECK_INPUT((program_object.variable_in_proc_map_check(name) == false),
-			"Global variable should not match procedure name", NO_FILE_LINE);
+		CHECK_INPUT((program_object.variable_in_proc_map_check(name) == false),"Global variable should not match procedure name", NO_FILE_LINE);
 	}
 }
 
@@ -99,14 +99,16 @@ Symbol_Table_Entry & Symbol_Table::get_symbol_table_entry(string variable_name)
 	for (i = variable_table.begin(); i != variable_table.end(); i++)
 	{
 		if ((*i)->get_variable_name() == variable_name)
-			return *(*i);
+			return **i;
 	}
+
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "The variable symbol entry doesn't exist");
 }
 
 void Symbol_Table::create(Local_Environment & local_global_variables_table)
 {
 	list<Symbol_Table_Entry *>::iterator i;
+
 	for (i = variable_table.begin(); i != variable_table.end(); i++)
 	{
 		string name = (*i)->get_variable_name();
@@ -151,6 +153,8 @@ void Symbol_Table::print(ostream & file_buffer)
 			file_buffer << " Start Offset: " << start_off << " End Offset: " << end_off << "\n";
 	}
 }
+
+// Compile
 
 void Symbol_Table::set_start_offset_of_first_symbol(int n)
 {
@@ -204,7 +208,7 @@ void Symbol_Table::print_assembly(ostream & file_buffer)
 	}
 }
 
-/****************************************************************************************************************************************/
+/////////////////////////////////////////////////////////////
 
 Symbol_Table_Entry::Symbol_Table_Entry()
 {
@@ -212,9 +216,6 @@ Symbol_Table_Entry::Symbol_Table_Entry()
 	start_offset = end_offset = 0;
 	register_description = NULL;
 }
-
-Symbol_Table_Entry::~Symbol_Table_Entry()
-{}
 
 Symbol_Table_Entry::Symbol_Table_Entry(string & name, Data_Type new_data_type, int line)
 {
@@ -225,6 +226,9 @@ Symbol_Table_Entry::Symbol_Table_Entry(string & name, Data_Type new_data_type, i
 	lineno = line;
 }
 
+Symbol_Table_Entry::~Symbol_Table_Entry()
+{}
+
 bool Symbol_Table_Entry::operator==(Symbol_Table_Entry & entry)
 {
 	if (variable_name != entry.get_variable_name())
@@ -233,6 +237,7 @@ bool Symbol_Table_Entry::operator==(Symbol_Table_Entry & entry)
 		return false;
 	else if (scope != entry.get_symbol_scope())
 		return false;
+
 	return true;
 }
 
@@ -261,25 +266,12 @@ string Symbol_Table_Entry::get_variable_name()
 	return variable_name;
 }
 
-int Symbol_Table_Entry::get_start_offset()
-{ 
-	return start_offset; 
-}
+// Compile
 
-int Symbol_Table_Entry::get_end_offset()
-{
-	return end_offset;
-}
-
-void Symbol_Table_Entry::set_start_offset(int n)
-{
-	start_offset = n;
-}
-
-void Symbol_Table_Entry::set_end_offset(int n)
-{
-	end_offset = n;
-}
+int Symbol_Table_Entry::get_start_offset()	{ return start_offset; }
+int Symbol_Table_Entry::get_end_offset()	{ return end_offset; }
+void Symbol_Table_Entry::set_start_offset(int n) { start_offset = n; }
+void Symbol_Table_Entry::set_end_offset(int n)	{ end_offset = n; }
 
 void Symbol_Table_Entry::set_register(Register_Descriptor * reg)
 {
@@ -293,8 +285,7 @@ Register_Descriptor * Symbol_Table_Entry::get_register()
 
 void Symbol_Table_Entry::free_register(Register_Descriptor * destination_reg_descr)
 {
-	CHECK_INVARIANT((destination_reg_descr != NULL), 
-			"The register descriptor of the destination should not be NULL while freeing a register");
+	CHECK_INVARIANT((destination_reg_descr != NULL), "The register descriptor of the destination should not be NULL while freeing a register");
 
 	/* Remove the destination from its register descriptor */
 	destination_reg_descr->remove_symbol_entry_from_list(*this);
@@ -305,8 +296,7 @@ void Symbol_Table_Entry::free_register(Register_Descriptor * destination_reg_des
 
 void Symbol_Table_Entry::update_register(Register_Descriptor * result_reg_descr)
 {
-	CHECK_INVARIANT((result_reg_descr != NULL), 
-			"The register descriptor of the result should not be NULL while updating register information");
+	CHECK_INVARIANT((result_reg_descr != NULL), "The register descriptor of the result should not be NULL while updating register information");
 
 	Register_Descriptor * destination_reg_descr = get_register();
 

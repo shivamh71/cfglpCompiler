@@ -39,8 +39,6 @@ using namespace std;
 #include"procedure.hh"
 #include"program.hh"
 
-/****************************************************************************************************************************************/
-
 Ast::Ast()
 {}
 
@@ -54,16 +52,16 @@ bool Ast::check_ast()
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
 }
 
+int Ast::get_bb_number()
+{
+	return bb_number;
+}
+
 Data_Type Ast::get_data_type()
 {
 	stringstream msg;
 	msg << "No get_data_type() function for " << typeid(*this).name();
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
-}
-
-int Ast::get_bb_number()
-{
-	return bb_number;
 }
 
 Symbol_Table_Entry & Ast::get_symbol_entry()
@@ -120,29 +118,30 @@ Assignment_Ast::~Assignment_Ast()
 
 Data_Type Assignment_Ast::get_data_type()
 {
-	return node_data_type;
+	return node_data_type; // whats this node data type ?
 }
 
 bool Assignment_Ast::check_ast() // ??
 {
 	CHECK_INVARIANT((rhs != NULL), "Rhs of Assignment_Ast cannot be null");
 	CHECK_INVARIANT((lhs != NULL), "Lhs of Assignment_Ast cannot be null");
-	if (lhs->get_data_type() == rhs->get_data_type())
-	{
+	if (lhs->get_data_type() == rhs->get_data_type()) {
 		node_data_type = lhs->get_data_type();
 		return true;
 	}
-	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Assignment statement data type not compatible");
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,"Assignment statement data type not compatible");
 }
 
-void Assignment_Ast::print_ast(ostream & file_buffer)
+void Assignment_Ast::print(ostream & file_buffer)
 {
 	file_buffer << AST_SPACE << "Asgn:\n";
+
 	file_buffer << AST_NODE_SPACE"LHS (";
-	lhs->print_ast(file_buffer);
+	lhs->print(file_buffer);
 	file_buffer << ")\n";
+
 	file_buffer << AST_NODE_SPACE << "RHS (";
-	rhs->print_ast(file_buffer);
+	rhs->print(file_buffer);
 	file_buffer << ")\n";
 }
 
@@ -153,8 +152,10 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 	CHECK_INPUT_AND_ABORT(result.is_variable_defined(), "Variable should be defined to be on rhs of Assignment_Ast", lineno);
 	CHECK_INVARIANT((lhs != NULL), "Lhs of Assignment_Ast cannot be null");
 	lhs->set_value_of_evaluation(eval_env, result);
+
+	// Print the result
 	file_buffer << "\n";
-	print_ast(file_buffer);
+	print(file_buffer);
 	lhs->print_value(eval_env, file_buffer);
 	Eval_Result * to_return = new Eval_Result_Value_Int();
 	to_return->set_value(0);
@@ -176,19 +177,27 @@ Code_For_Ast & Assignment_Ast::compile()
 
 	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
 	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
+
 	Code_For_Ast & load_stmt = rhs->compile();
+
 	Register_Descriptor * load_register = load_stmt.get_reg();
+
 	Code_For_Ast store_stmt = lhs->create_store_stmt(load_register);
 
 	// Store the statement in ic_list
+
 	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+
 	if (load_stmt.get_icode_list().empty() == false)
 		ic_list = load_stmt.get_icode_list();
+
 	if (store_stmt.get_icode_list().empty() == false)
 		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
+
 	Code_For_Ast * assign_stmt;
 	if (ic_list.empty() == false)
 		assign_stmt = new Code_For_Ast(ic_list, load_register);
+
 	return *assign_stmt;
 }
 
@@ -196,18 +205,26 @@ Code_For_Ast & Assignment_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 {
 	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
 	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
+
 	lra.optimize_lra(mc_2m, lhs, rhs);
 	Code_For_Ast load_stmt = rhs->compile_and_optimize_ast(lra);
+
 	Register_Descriptor * result_register = load_stmt.get_reg();
+
 	Code_For_Ast store_stmt = lhs->create_store_stmt(result_register);
+
 	list<Icode_Stmt *> ic_list;
+
 	if (load_stmt.get_icode_list().empty() == false)
 		ic_list = load_stmt.get_icode_list();
+
 	if (store_stmt.get_icode_list().empty() == false)
 		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
+
 	Code_For_Ast * assign_stmt;
 	if (ic_list.empty() == false)
 		assign_stmt = new Code_For_Ast(ic_list, result_register);
+
 	return *assign_stmt;
 }
 
@@ -216,13 +233,18 @@ Code_For_Ast & Assignment_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 Relational_Expr_Ast::Relational_Expr_Ast(Ast* arg_lhs, Comparator c, Ast* arg_rhs, int line) {
 	lhs = arg_lhs;
 	rhs = arg_rhs;
-	C = c;
 	ast_num_child = binary_arity;
-	node_data_type = void_data_type;
+	node_data_type = int_data_type;
 	lineno = line;
+	C = c;
 }
 
-void Relational_Expr_Ast::print_ast(ostream & file_buffer) {
+Relational_Expr_Ast::~Relational_Expr_Ast() {
+	delete lhs;
+	delete rhs;
+}
+
+void Relational_Expr_Ast::print(ostream & file_buffer) {
 	file_buffer << "\n";
 	if (C==LTOP) file_buffer << AST_NODE_SPACE << "Condition: "<<"LT"<<"\n";
 	if (C==LEOP) file_buffer << AST_NODE_SPACE << "Condition: "<<"LE"<<"\n";
@@ -231,42 +253,45 @@ void Relational_Expr_Ast::print_ast(ostream & file_buffer) {
 	if (C==NEOP) file_buffer << AST_NODE_SPACE << "Condition: "<<"NE"<<"\n";
 	if (C==EQOP) file_buffer << AST_NODE_SPACE << "Condition: "<<"EQ"<<"\n";
 	file_buffer << AST_NODE_SPACE << "   LHS (";
-	lhs->print_ast(file_buffer);
+	lhs->print(file_buffer);
 	file_buffer << ")\n";
 	file_buffer << AST_NODE_SPACE "   RHS (";
-	rhs->print_ast(file_buffer);
+	rhs->print(file_buffer);
 	file_buffer << ")";
 }
 
-Data_Type Relational_Expr_Ast::get_data_type() {
+Data_Type Relational_Expr_Ast::get_data_type()
+{
 	return node_data_type;
 }
 	
 bool Relational_Expr_Ast::check_ast() {
-	CHECK_INVARIANT((rhs != NULL), "First argument of Relational Expression cannot be null");
-	CHECK_INVARIANT((lhs != NULL), "Second argument of Relational Expression cannot be null");
-	if (lhs->get_data_type() == rhs->get_data_type())
-	{
-		node_data_type = lhs->get_data_type();
+	CHECK_INVARIANT((rhs != NULL), "Rhs of Relational_Ast cannot be null");
+	CHECK_INVARIANT((lhs != NULL), "Lhs of Relational_Ast cannot be null");
+	if (lhs->get_data_type() == rhs->get_data_type()) {
+		node_data_type = int_data_type;
 		return true;
 	}
-	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Relational statement data type not compatible");
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,"Relational statement data type not compatible");
 }
 
 Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
-	CHECK_INVARIANT((lhs != NULL), "Lhs of Relational Expression cannot be null");
-	CHECK_INVARIANT((rhs != NULL), "Rhs of Relational Expression cannot be null");
+	CHECK_INVARIANT((lhs!=NULL), "Lhs of Relational_Ast cannot be null")
 	Eval_Result & result1 = lhs->evaluate(eval_env, file_buffer);
 	Eval_Result* result_lhs = new Eval_Result_Value_Int();
-	CHECK_INPUT_AND_ABORT(result1.is_variable_defined(), "Variable should be defined to be on lhs of condition", lineno);
+	CHECK_INPUT_AND_ABORT(result1.is_variable_defined(),"Variable should be defined to be on lhs of condition", lineno);
+
+	CHECK_INVARIANT((lhs!=NULL), "Rhs of Relational_Ast cannot be null")
 	Eval_Result & result2 = rhs->evaluate(eval_env, file_buffer);
 	Eval_Result* result_rhs = new Eval_Result_Value_Int();
-	CHECK_INPUT_AND_ABORT(result2.is_variable_defined(), "Variable should be defined to be on rhs of condition", lineno);
+	CHECK_INPUT_AND_ABORT(result1.is_variable_defined(),"Variable should be defined to be on rhs of condition", lineno);	
+
 	result_lhs = &(result1);
 	result_rhs = &(result2);
 	double l = result_lhs->get_value();
 	double r = result_rhs->get_value();
 	int ans;
+
 	if (C==LEOP) {
 		ans = (l <= r);
 	}
@@ -285,28 +310,76 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	else {
 		ans = (l!=r);
 	}
+
 	Eval_Result * result = new Eval_Result_Value_Int();
 	result->set_value(ans);
 	return *result;
 }
 
-Relational_Expr_Ast::~Relational_Expr_Ast() {
-	delete lhs;
-	delete rhs;
-}
-
 Code_For_Ast & Relational_Expr_Ast::compile()
 {
-	// to be defined
-	Code_For_Ast & ret_code = *new Code_For_Ast();
-	return ret_code;
+	/* 
+		An assignment x = y where y is a variable is 
+		compiled as a combination of load and store statements:
+		(load) R <- y 
+		(store) x <- R
+		If y is a constant, the statement is compiled as:
+		(imm_Load) R <- y 
+		(store) x <- R
+		where imm_Load denotes the load immediate operation.
+	*/
+
+	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
+	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
+
+	Code_For_Ast & load_stmt = rhs->compile();
+
+	Register_Descriptor * load_register = load_stmt.get_reg();
+
+	Code_For_Ast store_stmt = lhs->create_store_stmt(load_register);
+
+	// Store the statement in ic_list
+
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+
+	if (load_stmt.get_icode_list().empty() == false)
+		ic_list = load_stmt.get_icode_list();
+
+	if (store_stmt.get_icode_list().empty() == false)
+		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
+
+	Code_For_Ast * assign_stmt;
+	if (ic_list.empty() == false)
+		assign_stmt = new Code_For_Ast(ic_list, load_register);
+
+	return *assign_stmt;
 }
 
 Code_For_Ast & Relational_Expr_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 {
-	// to be defined
-	Code_For_Ast & ret_code = *new Code_For_Ast();
-	return ret_code;
+	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
+	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
+
+	lra.optimize_lra(mc_2m, lhs, rhs);
+	Code_For_Ast load_stmt = rhs->compile_and_optimize_ast(lra);
+
+	Register_Descriptor * result_register = load_stmt.get_reg();
+
+	Code_For_Ast store_stmt = lhs->create_store_stmt(result_register);
+
+	list<Icode_Stmt *> ic_list;
+
+	if (load_stmt.get_icode_list().empty() == false)
+		ic_list = load_stmt.get_icode_list();
+
+	if (store_stmt.get_icode_list().empty() == false)
+		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
+
+	Code_For_Ast * assign_stmt;
+	if (ic_list.empty() == false)
+		assign_stmt = new Code_For_Ast(ic_list, result_register);
+
+	return *assign_stmt;
 }
 
 /****************************************************************************************************************************************/
@@ -314,19 +387,24 @@ Code_For_Ast & Relational_Expr_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 Arithmetic_Expr_Ast::Arithmetic_Expr_Ast(Ast* arg_lhs, Operator o, Ast* arg_rhs, int line) {
 	lhs = arg_lhs;
 	rhs = arg_rhs;
-	O = o;
 	ast_num_child = binary_arity;
-	node_data_type = void_data_type;
+	node_data_type = int_data_type;
 	lineno = line;
+	O = o;
 }
 
-void Arithmetic_Expr_Ast::print_ast(ostream & file_buffer) {
+Arithmetic_Expr_Ast::~Arithmetic_Expr_Ast() {
+	delete lhs;
+	delete rhs;
+}
+
+void Arithmetic_Expr_Ast::print(ostream & file_buffer) {
 	file_buffer << AST_SPACE << "Operator: "<<O<<"\n";
 	file_buffer << AST_NODE_SPACE << "LHS (";
-	lhs->print_ast(file_buffer);
+	lhs->print(file_buffer);
 	file_buffer << ")\n";
 	file_buffer << AST_NODE_SPACE << "RHS (";
-	rhs->print_ast(file_buffer);
+	rhs->print(file_buffer);
 	file_buffer << ")\n";
 }
 
@@ -335,59 +413,137 @@ Data_Type Arithmetic_Expr_Ast::get_data_type() {
 }
 	
 bool Arithmetic_Expr_Ast::check_ast() {
-	CHECK_INVARIANT((rhs != NULL), "First argument of Arithmetic Expression cannot be null");
-	CHECK_INVARIANT((lhs != NULL), "Second argument of Arithmetic Expression cannot be null");
-	if (lhs->get_data_type() == rhs->get_data_type())
-	{
+	CHECK_INVARIANT((rhs != NULL), "Rhs of Arithmetic_Expr_Ast cannot be null");
+	CHECK_INVARIANT((lhs != NULL), "Lhs of Arithmetic_Expr_Ast cannot be null");
+	if (lhs->get_data_type() == rhs->get_data_type()) {
 		node_data_type = lhs->get_data_type();
 		return true;
 	}
-	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Arithmetic statement data type not compatible");
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,"Arithmetic statement data type not compatible");
 }
 
 Eval_Result & Arithmetic_Expr_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
-	Eval_Result *result_lhs = new Eval_Result_Value_Int(); 
-	*result_lhs = lhs->evaluate(eval_env, file_buffer);
-	Eval_Result *result_rhs = new Eval_Result_Value_Int(); 
-	*result_rhs = rhs->evaluate(eval_env, file_buffer);
-	int l = result_lhs->get_value();
-	int r = result_rhs->get_value();
-	int ans;
-	if (O==ADD) {
-		ans = (l + r);
-	}
-	else if (O==SUB) {
-		ans = (l - r);
-	}
-	else if (O==MUL) {
-		ans = (l * r);
+	
+	CHECK_INVARIANT((lhs!=NULL), "Lhs of Arithmetic_Ast cannot be null")
+	Eval_Result & result1 = lhs->evaluate(eval_env, file_buffer);
+	Eval_Result* result_lhs = new Eval_Result_Value_Int();
+	CHECK_INPUT_AND_ABORT(result1.is_variable_defined(),"Variable should be defined to be on lhs of Arithmetic Expression", lineno);
+
+	CHECK_INVARIANT((lhs!=NULL), "Rhs of Arithmetic_Ast cannot be null")
+	Eval_Result & result2 = rhs->evaluate(eval_env, file_buffer);
+	Eval_Result* result_rhs = new Eval_Result_Value_Int();
+	CHECK_INPUT_AND_ABORT(result1.is_variable_defined(),"Variable should be defined to be on rhs of Arithmetic Expression", lineno);
+
+	double ans;
+
+	if (lhs->get_data_type() == int_data_type) {
+		int temp1 = result1.get_value();
+		int temp2 = result2.get_value();
+		int temp;
+		if (O==ADD) {
+			temp = (temp1 + temp2);
+		}
+		else if (O==SUB) {
+			temp = (temp1 - temp2);
+		}
+		else if (O==MUL) {
+			temp = (temp1 * temp2);
+		}
+		else if (O==DIV) {
+			CHECK_INPUT_AND_ABORT(temp2!=0,"Divide by 0",lineno);
+			temp = (temp1 / temp2);
+		}
+		ans = temp;
 	}
 	else {
-		ans = (l/r);
+		double temp1 = result1.get_value();
+		double temp2 = result2.get_value();
+		double temp;
+		if (O==ADD) {
+			temp = (temp1 + temp2);
+		}
+		else if (O==SUB) {
+			temp = (temp1 - temp2);
+		}
+		else if (O==MUL) {
+			temp = (temp1 * temp2);
+		}
+		else if (O==DIV) {
+			CHECK_INPUT_AND_ABORT(temp2!=0,"Divide by 0",lineno);
+			temp = (temp1 / temp2);
+		}
+		ans = temp;
 	}
+
 	Eval_Result * result = new Eval_Result_Value_Int();
 	result->set_value(ans);
-	print_ast(file_buffer);
 	return *result;
-}
-
-Arithmetic_Expr_Ast::~Arithmetic_Expr_Ast() {
-	delete lhs;
-	delete rhs;
 }
 
 Code_For_Ast & Arithmetic_Expr_Ast::compile()
 {
-	// to be defined
-	Code_For_Ast & ret_code = *new Code_For_Ast();
-	return ret_code;
+	/* 
+		An assignment x = y where y is a variable is 
+		compiled as a combination of load and store statements:
+		(load) R <- y 
+		(store) x <- R
+		If y is a constant, the statement is compiled as:
+		(imm_Load) R <- y 
+		(store) x <- R
+		where imm_Load denotes the load immediate operation.
+	*/
+
+	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
+	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
+
+	Code_For_Ast & load_stmt = rhs->compile();
+
+	Register_Descriptor * load_register = load_stmt.get_reg();
+
+	Code_For_Ast store_stmt = lhs->create_store_stmt(load_register);
+
+	// Store the statement in ic_list
+
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+
+	if (load_stmt.get_icode_list().empty() == false)
+		ic_list = load_stmt.get_icode_list();
+
+	if (store_stmt.get_icode_list().empty() == false)
+		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
+
+	Code_For_Ast * assign_stmt;
+	if (ic_list.empty() == false)
+		assign_stmt = new Code_For_Ast(ic_list, load_register);
+
+	return *assign_stmt;
 }
 
 Code_For_Ast & Arithmetic_Expr_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 {
-	// to be defined
-	Code_For_Ast & ret_code = *new Code_For_Ast();
-	return ret_code;
+	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
+	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
+
+	lra.optimize_lra(mc_2m, lhs, rhs);
+	Code_For_Ast load_stmt = rhs->compile_and_optimize_ast(lra);
+
+	Register_Descriptor * result_register = load_stmt.get_reg();
+
+	Code_For_Ast store_stmt = lhs->create_store_stmt(result_register);
+
+	list<Icode_Stmt *> ic_list;
+
+	if (load_stmt.get_icode_list().empty() == false)
+		ic_list = load_stmt.get_icode_list();
+
+	if (store_stmt.get_icode_list().empty() == false)
+		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
+
+	Code_For_Ast * assign_stmt;
+	if (ic_list.empty() == false)
+		assign_stmt = new Code_For_Ast(ic_list, result_register);
+
+	return *assign_stmt;
 }
 
 /****************************************************************************************************************************************/
@@ -395,6 +551,7 @@ Code_For_Ast & Arithmetic_Expr_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 Goto_Ast::Goto_Ast(int bb_number, int line) {
 	this->bb_number = bb_number;
 	lineno = line;
+	node_data_type = void_data_type;
 	ast_num_child = zero_arity;
 }
 
@@ -409,7 +566,7 @@ int Goto_Ast::get_bb_number() {
 	return bb_number;
 }
 
-void Goto_Ast::print_ast(ostream & file_buffer) {
+void Goto_Ast::print(ostream & file_buffer) {
 	file_buffer << AST_SPACE << "Goto statement:\n";
 	file_buffer << AST_NODE_SPACE << "Successor: " << get_bb_number() << "\n";
 }
@@ -418,8 +575,8 @@ Eval_Result & Goto_Ast::evaluate(Local_Environment & eval_env, ostream & file_bu
 	Eval_Result * result = new Eval_Result_Value_Int();
 	result->set_value(bb_number);
 	file_buffer << "\n";
-	print_ast(file_buffer);
-	file_buffer << AST_SPACE << "GOTO (BB " << bb_number << ")"; 
+	print(file_buffer);
+	file_buffer << AST_SPACE << "GOTO (BB "<<bb_number<<")"; 
 	file_buffer << "\n";
 	return *result;
 }
@@ -442,8 +599,9 @@ If_Else_Ast::If_Else_Ast(Ast* cond, Ast* true_successor, Ast* false_successor, i
 	this->cond = cond;
 	this->true_successor = true_successor;
 	this->false_successor = false_successor;
-	lineno = line;
+	node_data_type = void_data_type;
 	ast_num_child = tri_arity;
+	lineno = line;
 }
 
 If_Else_Ast::~If_Else_Ast() {
@@ -452,9 +610,9 @@ If_Else_Ast::~If_Else_Ast() {
 	delete false_successor;
 }
 
-void If_Else_Ast::print_ast(ostream & file_buffer) {
+void If_Else_Ast::print(ostream & file_buffer) {
 	file_buffer << AST_SPACE << "If_Else statement:";
-	cond->print_ast(file_buffer);
+	cond->print(file_buffer);
 	file_buffer << "\n";
 	file_buffer << AST_NODE_SPACE << "True Successor: " << true_successor->get_bb_number();
 	file_buffer << "\n";
@@ -465,16 +623,23 @@ void If_Else_Ast::print_ast(ostream & file_buffer) {
 Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
 	file_buffer << "\n";
 	file_buffer << AST_SPACE << "If_Else statement:";
-	cond->print_ast(file_buffer);
-	
+	cond->print(file_buffer);
+
+	CHECK_INVARIANT((cond!=NULL), "Condition of If_Else_Ast cannot be null")
 	Eval_Result & result1 = cond->evaluate(eval_env, file_buffer);
+	CHECK_INPUT_AND_ABORT(result1.is_variable_defined(),"Variable should be defined to be on lhs of Arithmetic Expression", lineno);
+
 	Eval_Result* result = new Eval_Result_Value_Int();
 	file_buffer << "\n";
 	file_buffer << AST_NODE_SPACE << "True Successor: " << true_successor->get_bb_number();
 	file_buffer << "\n";
 	file_buffer << AST_NODE_SPACE << "False Successor: " << false_successor->get_bb_number();
 	file_buffer << "\n";
+
+	// print(file_buffer);
+
 	result = &(result1);
+	
 	int flag = result->get_value();
 	if (flag) {
 		file_buffer << AST_SPACE << "Condition True : Goto (BB " << true_successor->get_bb_number() <<")";
@@ -502,17 +667,16 @@ Code_For_Ast & If_Else_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 
 /****************************************************************************************************************************************/
 
-Return_Ast::Return_Ast(int line)
-{
-	lineno = line;
-	node_data_type = void_data_type;
+Return_Ast::Return_Ast(int line) {
 	ast_num_child = zero_arity;
+	node_data_type  =void_data_type;
+	lineno = line;
 }
 
 Return_Ast::~Return_Ast()
 {}
 
-void Return_Ast::print_ast(ostream & file_buffer)
+void Return_Ast::print(ostream & file_buffer)
 {
 	file_buffer << AST_SPACE << "Return <NOTHING>\n";
 }
@@ -521,9 +685,11 @@ Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 {
 	Eval_Result & result = *new Eval_Result_Value_Int();
 	file_buffer << "\n";
-	print_ast(file_buffer);
+	print(file_buffer);
+
 	Eval_Result * to_return = new Eval_Result_Value_Int();
 	to_return->set_value(-1);
+
 	return *to_return;
 }
 
@@ -548,6 +714,8 @@ Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry, int line)
 	ast_num_child = zero_arity;
 	node_data_type = variable_symbol_entry->get_data_type();
 	lineno = line;
+	variable_name = variable_symbol_entry->get_variable_name();
+	variable_symbol_entry->variable_data_type = node_data_type;
 }
 
 Name_Ast::~Name_Ast()
@@ -555,7 +723,7 @@ Name_Ast::~Name_Ast()
 
 Data_Type Name_Ast::get_data_type()
 {
-	return variable_symbol_entry->get_data_type();
+	return node_data_type;
 }
 
 Symbol_Table_Entry & Name_Ast::get_symbol_entry()
@@ -563,17 +731,16 @@ Symbol_Table_Entry & Name_Ast::get_symbol_entry()
 	return *variable_symbol_entry;
 }
 
-void Name_Ast::print_ast(ostream & file_buffer)
+void Name_Ast::print(ostream & file_buffer)
 {
-	file_buffer << "Name : " << variable_symbol_entry->get_variable_name();
+	file_buffer << "Name : " << variable_name;
 }
 
 void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 {
-	string variable_name = variable_symbol_entry->get_variable_name();
 	Eval_Result * loc_var_val = eval_env.get_variable_value(variable_name);
 	Eval_Result * glob_var_val = interpreter_global_table.get_variable_value(variable_name);
-	file_buffer << "\n" << AST_SPACE << variable_name << " : ";
+	file_buffer << "" << AST_SPACE << variable_name << " : ";
 	if (!eval_env.is_variable_defined(variable_name) && !interpreter_global_table.is_variable_defined(variable_name))
 		file_buffer << "undefined";
 	else if (eval_env.is_variable_defined(variable_name) && loc_var_val != NULL)
@@ -583,7 +750,9 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 	}
 	else
 	{
-		CHECK_INVARIANT(glob_var_val->get_result_enum() == int_result, "Result type can only be int and float");
+		CHECK_INVARIANT(glob_var_val->get_result_enum() == int_result, 
+			"Result type can only be int and float");
+
 		if (glob_var_val == NULL)
 			file_buffer << "0\n";
 		else
@@ -594,15 +763,16 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 
 Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env)
 {
-	string variable_name = variable_symbol_entry->get_variable_name();
 	if (eval_env.does_variable_exist(variable_name))
 	{
 		CHECK_INPUT_AND_ABORT((eval_env.is_variable_defined(variable_name) == true), 
 					"Variable should be defined before its use", lineno);
+
 		Eval_Result * result = eval_env.get_variable_value(variable_name);
 		return *result;
 	}
 	CHECK_INPUT_AND_ABORT((interpreter_global_table.is_variable_defined(variable_name) == true), "Variable should be defined before its use", lineno);
+
 	Eval_Result * result = interpreter_global_table.get_variable_value(variable_name);
 	return *result;
 }
@@ -610,15 +780,16 @@ Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env)
 void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result)
 {
 	Eval_Result * i;
-	string variable_name = variable_symbol_entry->get_variable_name();
-	if (variable_symbol_entry->get_data_type() == int_data_type)
+	if (node_data_type == int_data_type)
 		i = new Eval_Result_Value_Int();
 	else
 		CHECK_INPUT_AND_ABORT(CONTROL_SHOULD_NOT_REACH, "Type of a name can be int/float only", lineno);
+
 	if (result.get_result_enum() == int_result)
 	 	i->set_value(result.get_value());
 	else
 		CHECK_INPUT_AND_ABORT(CONTROL_SHOULD_NOT_REACH, "Type of a name can be int/float only", lineno);
+
 	if (eval_env.does_variable_exist(variable_name))
 		eval_env.put_variable_value(*i, variable_name);
 	else
@@ -713,7 +884,7 @@ Data_Type Number_Ast<DATA_TYPE>::get_data_type()
 }
 
 template <class DATA_TYPE>
-void Number_Ast<DATA_TYPE>::print_ast(ostream & file_buffer)
+void Number_Ast<DATA_TYPE>::print(ostream & file_buffer)
 {
 	file_buffer << std::fixed;
 	file_buffer << std::setprecision(2);

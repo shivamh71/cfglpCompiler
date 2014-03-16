@@ -50,6 +50,7 @@ int main(int argc, char * argv[])
 	Parser cfglp_parser(input_file_name);
 
 	CHECK_INPUT((!cfglp_parser.parse()), "Cannot parse the input program", NO_FILE_LINE);
+
 	if (command_options.not_only_parse)
 	{
 		if ((error_status() == false) && (command_options.is_show_ast_selected()))
@@ -66,13 +67,13 @@ int main(int argc, char * argv[])
 
 		if ((error_status() == false) && (command_options.is_do_eval_selected() == false))
 		{
-			program_object.compile();
+			// program_object.compile();
 
-			if (command_options.is_show_program_selected())
-				program_object.print();
+			// if (command_options.is_show_program_selected())
+			// 	program_object.print();
 
-			if (command_options.is_show_symtab_selected())
-				program_object.print();
+			// if (command_options.is_show_symtab_selected())
+			// 	program_object.print();
 		}
 
 		program_object.delete_all();

@@ -63,6 +63,7 @@ void Program::set_global_table(Symbol_Table & new_global_table)
 void Program::set_procedure_map(Procedure * proc, int line)
 {
 	CHECK_INVARIANT((proc != NULL), "Procedure cannot be null");
+
 	procedure_map[proc->get_proc_name()] = proc;
 }
 
@@ -80,6 +81,7 @@ bool Program::variable_in_proc_map_check(string symbol)
 {
 	if (procedure_map.find(symbol) == procedure_map.end())
 		return false;
+
 	return true;
 }
 
@@ -87,7 +89,6 @@ void Program::global_list_in_proc_map_check()
 {
 	global_symbol_table.global_list_in_proc_map_check();
 }
-
 
 Procedure * Program::get_main_procedure(ostream & file_buffer)
 {
@@ -97,33 +98,40 @@ Procedure * Program::get_main_procedure(ostream & file_buffer)
 		if (i->second != NULL && i->second->get_proc_name() == "main")
 				return i->second;
 	}
+	
 	return NULL;
 }
 
 void Program::print()
 {
 	ostream * file_buffer;
+
 	if(command_options.is_show_ast_selected())
 	{
 		command_options.create_ast_buffer();
 		file_buffer = &(command_options.get_ast_buffer());
 	}
+
 	else if (command_options.is_show_program_selected())
 	{
 		command_options.create_program_buffer();
 		file_buffer = &(command_options.get_program_buffer());
 	}
+
 	else if (command_options.is_show_symtab_selected())
 	{
 		command_options.create_symtab_buffer();
 		file_buffer = &(command_options.get_symtab_buffer());
 	}
+
 	*file_buffer << "Program:\n";
+
 	if (command_options.is_show_program_selected() || command_options.is_show_symtab_selected())
 	{
 		*file_buffer << "\nGlobal Declarations:\n";
 		global_symbol_table.print(*file_buffer);
 	}
+
 	map<string, Procedure *>::iterator i;
 	for(i = procedure_map.begin(); i != procedure_map.end(); i++)
 		i->second->print(*file_buffer);
@@ -132,16 +140,22 @@ void Program::print()
 Eval_Result & Program::evaluate()
 {
 	Procedure * main = get_main_procedure(command_options.get_output_buffer());
-	CHECK_INPUT_AND_ABORT((main != NULL), "No main function found in the program", NO_FILE_LINE);
+	CHECK_INPUT_AND_ABORT((main != NULL), 
+		"No main function found in the program", NO_FILE_LINE);
+
 	global_symbol_table.create(interpreter_global_table);
+
 	command_options.create_output_buffer();
 	ostream & file_buffer = command_options.get_output_buffer();
 	file_buffer << "Evaluating Program\n";
 	file_buffer << GLOB_SPACE << "Global Variables (before evaluating):\n";
 	interpreter_global_table.print(file_buffer);
+
 	Eval_Result & result = main->evaluate(file_buffer);
+
 	file_buffer << GLOB_SPACE << "Global Variables (after evaluating):\n";
 	interpreter_global_table.print(file_buffer);
+
 	return result;
 }
 

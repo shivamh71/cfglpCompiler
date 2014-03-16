@@ -87,7 +87,8 @@ void Register_Descriptor::clear_lra_symbol_list()
 	{
 		Symbol_Table_Entry & sym_entry = **i;
 		sym_entry.set_register(NULL);
-	} 
+	}
+
 	lra_symbol_list.clear();
 }
 

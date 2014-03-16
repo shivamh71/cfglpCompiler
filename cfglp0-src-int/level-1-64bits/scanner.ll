@@ -156,7 +156,5 @@ goto 	{
 			string error_message;
 			error_message =  "Illegal character `" + matched();
 			error_message += "' on line " + lineNr();
-			
-			int line_number = lineNr();
-			CHECK_INPUT(false, error_message, line_number);
+			CHECK_INVARIANT(false,error_message);
 		}

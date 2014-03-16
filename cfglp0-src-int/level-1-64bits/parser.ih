@@ -21,7 +21,6 @@
 
 ***********************************************************************************************/
 
-
 #ifndef PARSER_IH
 #define PARSER_IH
 
@@ -81,21 +80,19 @@ int Parser::get_line_number()
 
 inline void Parser::bb_strictly_increasing_order_check(list<Basic_Block *> * bb_list, int bb_number)
 {
-	list<Basic_Block *>::iterator i;
-	for(i = bb_list->begin(); i != bb_list->end(); i++)
-		CHECK_INPUT(((*i)->get_bb_number() < bb_number), "Basic blocks should be in strictly increasing order", get_line_number());
+  list<Basic_Block *>::iterator i;
+  for(i = bb_list->begin(); i != bb_list->end(); i++)
+    CHECK_INPUT(((*i)->get_bb_number() < bb_number), "Basic blocks should be in strictly increasing order", get_line_number());
 }
 
 ///////////////////////////////////////////////////////////////////
 
 ////////////////// Parser goto_bb_check function ////////////////////////
-inline void Parser::goto_bb_exist_check(list<Basic_Block *>bb_list,list<int>* goto_bb_num)
-{
-  // int basic_block_range = bb_list.size()+1;
+inline void Parser::goto_bb_exist_check(list<Basic_Block *>bb_list,list<int>* goto_bb_num) {
     list<int >::iterator i;
     for(i = goto_bb_num->begin(); i != goto_bb_num->end(); i++) {
         if((*i)<2) {
-            CHECK_INPUT(false, "Illegal basic block lable", -1);
+            CHECK_INVARIANT(false,"Illegal basic block lable");
         }
         int bb_num = *i;
         list<Basic_Block*>::iterator sit;
@@ -107,8 +104,9 @@ inline void Parser::goto_bb_exist_check(list<Basic_Block *>bb_list,list<int>* go
         if(flag == 0) {
             char* error_string;
             sprintf(error_string,"bb %d doesn't exist",bb_num);
-            CHECK_INPUT(false, error_string, -1);
+            CHECK_INVARIANT(false,error_string);
         }
     }
 }
+
 #endif

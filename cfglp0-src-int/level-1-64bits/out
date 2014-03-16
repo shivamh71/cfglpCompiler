@@ -1,0 +1,1176 @@
+
+Processing correct files
+-------------------------
+
+test_files/ContDoWhile.cs306.cfg
+35a43,92
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 8		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 0
+> 	sw, $v0, 4($fp)
+> 
+> label3: 
+> 	lw, $v0, 4($fp)
+> 	li, $t0, 5
+> 	seq $t1, $v0, $t0
+> 	bne $t1, $zero, label4 
+> 	j label5
+> 
+> label4: 
+> 	li, $v0, 10
+> 	sw, $v0, 4($fp)
+> 	j label6
+> 
+> label5: 
+> 	lw, $v0, 4($fp)
+> 	sw, $v0, 0($fp)
+> 	li, $v0, 5
+> 	sw, $v0, 4($fp)
+> 
+> label6: 
+> 	lw, $v0, 4($fp)
+> 	li, $t0, 9
+> 	sgt $t1, $v0, $t0
+> 	bne $t1, $zero, label3 
+> 	j label7
+> 
+> label7: 
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 8
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/Decl1BB.cs306.cfg
+4a7,27
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/DeclDef1BB.cs306.cfg
+10a13,37
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 8		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 3
+> 	sw, $v0, 4($fp)
+> 	lw, $v0, 4($fp)
+> 	sw, $v0, 0($fp)
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 8
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/EmptyBB.cs306.cfg
+4a7,27
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		#Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 
+> #Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/Glob.cs306.cfg
+16a19,50
+> 
+> 	.data
+> a:	.word 0
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 4
+> 	sw, $v0, 0($fp)
+> 	li, $v0, 3
+> 	sw, $v0, a
+> 	lw, $v0, a
+> 	lw, $t0, 0($fp)
+> 	sgt $t1, $v0, $t0
+> 	sw, $t1, a
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/GlobDeclDef.cs306.cfg
+10a13,40
+> 
+> 	.data
+> a:	.word 0
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	lw, $v0, a
+> 	sw, $v0, 0($fp)
+> 	li, $v0, 3
+> 	sw, $v0, a
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/GlobLocSameVar.cs306.cfg
+7a10,35
+> 
+> 	.data
+> a:	.word 0
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 3
+> 	sw, $v0, 0($fp)
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/GlobNoDeclNoDef1BB.cs306.cfg
+4a7,30
+> 
+> 	.data
+> a:	.word 0
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		#Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 
+> #Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/InfiniteLoop.cs306.cfg
+5a8,28
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		#Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	j label2
+> 
+> #Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/MultGlob.cs306.cfg
+4a7,31
+> 
+> 	.data
+> c:	.word 0
+> a:	.word 0
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		#Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 
+> #Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/MultGlobAssign.cs306.cfg
+10a13,41
+> 
+> 	.data
+> b:	.word 0
+> a:	.word 0
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		#Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	lw, $v0, b
+> 	sw, $v0, a
+> 	li, $v0, 3
+> 	sw, $v0, b
+> 
+> #Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/MultGlobLoc.cs306.cfg
+46a49,102
+> 
+> 	.data
+> c:	.word 0
+> b:	.word 0
+> a:	.word 0
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 24		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 3
+> 	sw, $v0, 20($fp)
+> 	li, $v0, 2
+> 	sw, $v0, c
+> 	lw, $v0, 0($fp)
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 4
+> 	sw, $v0, 16($fp)
+> 	lw, $v0, 20($fp)
+> 	sw, $v0, 16($fp)
+> 	lw, $v0, 16($fp)
+> 	sw, $v0, 20($fp)
+> 	lw, $v0, 0($fp)
+> 	sw, $v0, 20($fp)
+> 	lw, $v0, 16($fp)
+> 	sw, $v0, 4($fp)
+> 	lw, $v0, 20($fp)
+> 	sw, $v0, 12($fp)
+> 	li, $v0, 4
+> 	sw, $v0, 12($fp)
+> 	li, $v0, 4
+> 	sw, $v0, 12($fp)
+> 	lw, $v0, 12($fp)
+> 	sw, $v0, 16($fp)
+> 	lw, $v0, 20($fp)
+> 	sw, $v0, 16($fp)
+> 	lw, $v0, 20($fp)
+> 	sw, $v0, 12($fp)
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 24
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/MultIftmp.cs306.cfg
+65a74,144
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 20		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 2
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 10
+> 	sw, $v0, 4($fp)
+> 	li, $v0, 11
+> 	sw, $v0, 0($fp)
+> 	lw, $v0, 8($fp)
+> 	li, $t0, 0
+> 	sne $t1, $v0, $t0
+> 	bne $t1, $zero, label3 
+> 	j label4
+> 
+> label3: 
+> 	lw, $v0, 4($fp)
+> 	li, $t0, 3
+> 	sgt $t1, $v0, $t0
+> 	sw, $t1, 16($fp)
+> 	j label5
+> 
+> label4: 
+> 	lw, $v0, 0($fp)
+> 	lw, $t0, 8($fp)
+> 	slt $t1, $v0, $t0
+> 	sw, $t1, 16($fp)
+> 
+> label5: 
+> 	lw, $v0, 16($fp)
+> 	sw, $v0, 8($fp)
+> 	lw, $v0, 4($fp)
+> 	li, $t0, 0
+> 	sne $t1, $v0, $t0
+> 	bne $t1, $zero, label6 
+> 	j label7
+> 
+> label6: 
+> 	lw, $v0, 8($fp)
+> 	lw, $t0, 4($fp)
+> 	sgt $t1, $v0, $t0
+> 	sw, $t1, 12($fp)
+> 	j label8
+> 
+> label7: 
+> 	lw, $v0, 0($fp)
+> 	lw, $t0, 4($fp)
+> 	seq $t1, $v0, $t0
+> 	sw, $t1, 12($fp)
+> 
+> label8: 
+> 	lw, $v0, 12($fp)
+> 	sw, $v0, 0($fp)
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 20
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/MultRel.cs306.cfg
+37a40,82
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 24		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 3
+> 	sw, $v0, 20($fp)
+> 	li, $v0, 4
+> 	sw, $v0, 16($fp)
+> 	li, $v0, 5
+> 	sw, $v0, 12($fp)
+> 	li, $v0, 6
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 7
+> 	sw, $v0, 4($fp)
+> 	li, $v0, 8
+> 	sw, $v0, 0($fp)
+> 	lw, $v0, 12($fp)
+> 	li, $t0, 7
+> 	sle $t1, $v0, $t0
+> 	lw, $v0, 4($fp)
+> 	sle $t0, $t1, $v0
+> 	lw, $v0, 8($fp)
+> 	seq $t1, $t0, $v0
+> 	lw, $v0, 0($fp)
+> 	sne $t0, $t1, $v0
+> 	sw, $t0, 20($fp)
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 24
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/MultRelInTernary.cs306.cfg
+51a57,113
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 32		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 3
+> 	sw, $v0, 24($fp)
+> 	li, $v0, 10
+> 	sw, $v0, 20($fp)
+> 	li, $v0, 2
+> 	sw, $v0, 16($fp)
+> 	li, $v0, 1
+> 	sw, $v0, 12($fp)
+> 	li, $v0, 4
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 8
+> 	sw, $v0, 4($fp)
+> 	li, $v0, 11
+> 	sw, $v0, 0($fp)
+> 	lw, $v0, 20($fp)
+> 	lw, $t0, 16($fp)
+> 	sgt $t1, $v0, $t0
+> 	bne $t1, $zero, label3 
+> 	j label4
+> 
+> label3: 
+> 	lw, $v0, 12($fp)
+> 	lw, $t0, 8($fp)
+> 	sgt $t1, $v0, $t0
+> 	sw, $t1, 28($fp)
+> 	j label5
+> 
+> label4: 
+> 	lw, $v0, 4($fp)
+> 	lw, $t0, 0($fp)
+> 	sge $t1, $v0, $t0
+> 	sw, $t1, 28($fp)
+> 
+> label5: 
+> 	lw, $v0, 28($fp)
+> 	sw, $v0, 24($fp)
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 32
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/NestedIf.cs306.cfg
+77a90,177
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 16		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 3
+> 	sw, $v0, 12($fp)
+> 	li, $v0, 5
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 7
+> 	sw, $v0, 4($fp)
+> 	lw, $v0, 12($fp)
+> 	li, $t0, 0
+> 	sne $t1, $v0, $t0
+> 	bne $t1, $zero, label3 
+> 	j label12
+> 
+> label3: 
+> 	lw, $v0, 8($fp)
+> 	li, $t0, 0
+> 	sne $t1, $v0, $t0
+> 	bne $t1, $zero, label4 
+> 	j label12
+> 
+> label4: 
+> 	lw, $v0, 4($fp)
+> 	li, $t0, 0
+> 	sne $t1, $v0, $t0
+> 	bne $t1, $zero, label5 
+> 	j label12
+> 
+> label5: 
+> 	lw, $v0, 12($fp)
+> 	lw, $t0, 8($fp)
+> 	sge $t1, $v0, $t0
+> 	bne $t1, $zero, label6 
+> 	j label9
+> 
+> label6: 
+> 	lw, $v0, 12($fp)
+> 	lw, $t0, 4($fp)
+> 	sge $t1, $v0, $t0
+> 	bne $t1, $zero, label7 
+> 	j label8
+> 
+> label7: 
+> 	lw, $v0, 12($fp)
+> 	sw, $v0, 0($fp)
+> 	j label12
+> 
+> label8: 
+> 	lw, $v0, 4($fp)
+> 	sw, $v0, 0($fp)
+> 	j label12
+> 
+> label9: 
+> 	lw, $v0, 8($fp)
+> 	lw, $t0, 4($fp)
+> 	sge $t1, $v0, $t0
+> 	bne $t1, $zero, label10 
+> 	j label11
+> 
+> label10: 
+> 	lw, $v0, 8($fp)
+> 	sw, $v0, 0($fp)
+> 	j label12
+> 
+> label11: 
+> 	lw, $v0, 4($fp)
+> 	sw, $v0, 0($fp)
+> 
+> label12: 
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 16
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/NestedLoop.cs306.cfg
+41a50,104
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 8		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 3
+> 	sw, $v0, 4($fp)
+> 	li, $v0, 4
+> 	sw, $v0, 0($fp)
+> 	j label7
+> 
+> label3: 
+> 	j label5
+> 
+> label4: 
+> 	li, $v0, 4
+> 	sw, $v0, 0($fp)
+> 
+> label5: 
+> 	lw, $v0, 0($fp)
+> 	li, $t0, 8
+> 	sne $t1, $v0, $t0
+> 	bne $t1, $zero, label4 
+> 	j label6
+> 
+> label6: 
+> 	li, $v0, 4
+> 	sw, $v0, 0($fp)
+> 	li, $v0, 4
+> 	sw, $v0, 4($fp)
+> 
+> label7: 
+> 	lw, $v0, 4($fp)
+> 	li, $t0, 9
+> 	sle $t1, $v0, $t0
+> 	bne $t1, $zero, label3 
+> 	j label8
+> 
+> label8: 
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 8
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/NoDeclNoDef1BB.cs306.cfg
+4a7,27
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		#Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 
+> #Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/NotEqInIf.cs306.cfg
+45a51,103
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 12		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 4
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 3
+> 	sw, $v0, 4($fp)
+> 	li, $v0, 10
+> 	sw, $v0, 0($fp)
+> 	lw, $v0, 4($fp)
+> 	li, $t0, 0
+> 	seq $t1, $v0, $t0
+> 	lw, $v0, 8($fp)
+> 	sne $t0, $t1, $v0
+> 	bne $t0, $zero, label3 
+> 	j label4
+> 
+> label3: 
+> 	lw, $v0, 8($fp)
+> 	lw, $t0, 4($fp)
+> 	slt $t1, $v0, $t0
+> 	lw, $v0, 0($fp)
+> 	sge $t0, $t1, $v0
+> 	sw, $t0, 8($fp)
+> 	j label5
+> 
+> label4: 
+> 	lw, $v0, 8($fp)
+> 	lw, $t0, 4($fp)
+> 	slt $t1, $v0, $t0
+> 	lw, $v0, 0($fp)
+> 	sge $t0, $t1, $v0
+> 	sw, $t0, 4($fp)
+> 
+> label5: 
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 12
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/Precedence.cs306.cfg
+39a45,93
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 16		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 2
+> 	sw, $v0, 12($fp)
+> 	li, $v0, 4
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 3
+> 	sw, $v0, 4($fp)
+> 	li, $v0, 5
+> 	sw, $v0, 0($fp)
+> 	lw, $v0, 8($fp)
+> 	lw, $t0, 4($fp)
+> 	seq $t1, $v0, $t0
+> 	lw, $v0, 12($fp)
+> 	slt $t0, $t1, $v0
+> 	lw, $v0, 0($fp)
+> 	slt $t1, $t0, $v0
+> 	bne $t1, $zero, label3 
+> 	j label4
+> 
+> label3: 
+> 	li, $v0, 10
+> 	sw, $v0, 12($fp)
+> 	j label5
+> 
+> label4: 
+> 	li, $v0, 11
+> 	sw, $v0, 12($fp)
+> 
+> label5: 
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 16
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/RelInCond.cs306.cfg
+36a42,88
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 16		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 3
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 2
+> 	sw, $v0, 4($fp)
+> 	lw, $v0, 8($fp)
+> 	li, $t0, 0
+> 	sne $t1, $v0, $t0
+> 	bne $t1, $zero, label3 
+> 	j label4
+> 
+> label3: 
+> 	lw, $v0, 8($fp)
+> 	lw, $t0, 4($fp)
+> 	sgt $t1, $v0, $t0
+> 	sw, $t1, 12($fp)
+> 	j label5
+> 
+> label4: 
+> 	lw, $v0, 8($fp)
+> 	lw, $t0, 4($fp)
+> 	slt $t1, $v0, $t0
+> 	sw, $t1, 12($fp)
+> 
+> label5: 
+> 	lw, $v0, 12($fp)
+> 	sw, $v0, 0($fp)
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 16
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/RelInStmt.cs306.cfg
+30a36,78
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 3
+> 	sw, $v0, 0($fp)
+> 	lw, $v0, 0($fp)
+> 	li, $t0, 2
+> 	sgt $t1, $v0, $t0
+> 	sw, $t1, 0($fp)
+> 	lw, $v0, 0($fp)
+> 	li, $t0, 0
+> 	sne $t1, $v0, $t0
+> 	bne $t1, $zero, label3 
+> 	j label4
+> 
+> label3: 
+> 	li, $v0, 6
+> 	sw, $v0, 0($fp)
+> 	j label5
+> 
+> label4: 
+> 	li, $v0, 4
+> 	sw, $v0, 0($fp)
+> 
+> label5: 
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/TempInIfRel.cs306.cfg
+42a48,98
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 12		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 3
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 4
+> 	sw, $v0, 4($fp)
+> 	li, $v0, 2
+> 	sw, $v0, 0($fp)
+> 	lw, $v0, 8($fp)
+> 	li, $t0, 2
+> 	sgt $t1, $v0, $t0
+> 	bne $t1, $zero, label3 
+> 	j label4
+> 
+> label3: 
+> 	lw, $v0, 8($fp)
+> 	lw, $t0, 4($fp)
+> 	sgt $t1, $v0, $t0
+> 	lw, $v0, 0($fp)
+> 	sgt $t0, $t1, $v0
+> 	sw, $t0, 0($fp)
+> 	j label5
+> 
+> label4: 
+> 	lw, $v0, 8($fp)
+> 	lw, $t0, 4($fp)
+> 	sgt $t1, $v0, $t0
+> 	lw, $v0, 0($fp)
+> 	sgt $t0, $t1, $v0
+> 	sw, $t0, 0($fp)
+> 
+> label5: 
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 12
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/TwoRelInTernary.cs306.cfg
+39a45,93
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 20		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 4
+> 	sw, $v0, 12($fp)
+> 	li, $v0, 3
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 2
+> 	sw, $v0, 4($fp)
+> 	li, $v0, 10
+> 	sw, $v0, 0($fp)
+> 	lw, $v0, 8($fp)
+> 	lw, $t0, 4($fp)
+> 	sgt $t1, $v0, $t0
+> 	lw, $v0, 0($fp)
+> 	sgt $t0, $t1, $v0
+> 	bne $t0, $zero, label3 
+> 	j label4
+> 
+> label3: 
+> 	li, $v0, 10
+> 	sw, $v0, 16($fp)
+> 	j label5
+> 
+> label4: 
+> 	li, $v0, 11
+> 	sw, $v0, 16($fp)
+> 
+> label5: 
+> 	lw, $v0, 16($fp)
+> 	sw, $v0, 12($fp)
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 20
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/VarMain.cs306.cfg
+7a10,32
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 5
+> 	sw, $v0, 0($fp)
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/iftmp.cs306.cfg
+30a36,78
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 16		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 3
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 4
+> 	sw, $v0, 4($fp)
+> 	lw, $v0, 8($fp)
+> 	li, $t0, 2
+> 	sgt $t1, $v0, $t0
+> 	bne $t1, $zero, label3 
+> 	j label4
+> 
+> label3: 
+> 	lw, $v0, 8($fp)
+> 	sw, $v0, 12($fp)
+> 	j label5
+> 
+> label4: 
+> 	lw, $v0, 4($fp)
+> 	sw, $v0, 12($fp)
+> 
+> label5: 
+> 	lw, $v0, 12($fp)
+> 	sw, $v0, 0($fp)
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 16
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/myfile.cs306.cfg
+27a33,73
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 16		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	li, $v0, 2
+> 	sw, $v0, 8($fp)
+> 	li, $v0, 2
+> 	sw, $v0, 0($fp)
+> 	lw, $v0, 4($fp)
+> 	lw, $t0, 0($fp)
+> 	seq $t1, $v0, $t0
+> 	bne $t1, $zero, label3 
+> 	j label4
+> 
+> label3: 
+> 	lw, $v0, 0($fp)
+> 	sw, $v0, 0($fp)
+> 	j label5
+> 
+> label4: 
+> 	lw, $v0, 8($fp)
+> 	sw, $v0, 12($fp)
+> 
+> label5: 
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 16
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 
+test_files/test.cs306.cfg
+7a10,35
+> 
+> 	.data
+> a:	.word 0
+> 
+> 	.text 			# The .text assembler directive indicates
+> 	.globl main		# The following is the code (as oppose to data)
+> main:				# .globl makes main know to the 
+> 				# outside of the program.
+> # Prologue begins 
+> 	sw $fp, 0($sp)		# Save the frame pointer
+> 	sub $fp, $sp, 4		# Update the frame pointer
+> 
+> 	sub $sp, $sp, 4		# Make space for the locals
+> # Prologue ends
+> 
+> 
+> label2: 
+> 	lw, $v0, a
+> 	sw, $v0, 0($fp)
+> 
+> # Epilogue Begins
+> 	add $sp, $sp, 4
+> 	lw $fp, 0($sp)  
+> 	jr        $31		# Jump back to the operating system.
+> # Epilogue Ends
+> 

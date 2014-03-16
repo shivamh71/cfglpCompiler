@@ -8,15 +8,15 @@
 
            Implemented   by  Tanu  Kanvar (tanu@cse.iitb.ac.in) and Uday
            Khedker    (http://www.cse.iitb.ac.in/~uday)  for the courses
-           cs302+cs306: Language  Processors (theory and lab)  at IIT
+           cs302+cs306: Language  Processors  (theory and  lab)  at  IIT
            Bombay.
 
-           Release  date Jan  15, 2013.  Copyrights reserved  by Uday
-           Khedker. This implemenation has been made available purely
+           Release  date  Jan  15, 2013.  Copyrights  reserved  by  Uday
+           Khedker. This  implemenation  has been made  available purely
            for academic purposes without any warranty of any kind.
 
-           Documentation  (functionality,   manual, and  design)  and
-           related tools are at http://www.cse.iitb.ac.in/~uday/cfglp
+           Documentation (functionality, manual, and design) and related
+           tools are  available at http://www.cse.iitb.ac.in/~uday/cfglp
 
 
 ***********************************************************************************************/
@@ -60,7 +60,7 @@ void Eval_Result::set_variable_status(bool def)
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
 }
 
-/****************************************************************************************************************************************/
+///////////////////////////////////////////////////////////////////////////////
 
 void Eval_Result_Value::set_value(int value)
 {
@@ -76,7 +76,7 @@ int Eval_Result_Value::get_value()
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
 }
 
-/****************************************************************************************************************************************/
+//////////////////////////////////////////////////////////////////////////////
 
 Eval_Result_Value_Int::Eval_Result_Value_Int()
 {
@@ -135,10 +135,13 @@ void Local_Environment::print(ostream & file_buffer)
 		if (variable_table.find((*i).first) != variable_table.end())
 		{
 			Eval_Result * vi = variable_table[(*i).first];
+
 			if (vi == NULL)
 				continue;
+
 			if (vi->is_variable_defined() == false)
 				file_buffer << VAR_SPACE << (*i).first << " : undefined" << "\n";
+		
 			else
 			{
 				if (vi->get_result_enum() == int_result)
@@ -161,8 +164,13 @@ bool Local_Environment::is_variable_defined(string name)
 
 Eval_Result * Local_Environment::get_variable_value(string name)
 {
-	Eval_Result * i = variable_table[name];
-	return i;
+	if (variable_table.find(name) != variable_table.end())
+	{
+		Eval_Result * i = variable_table[name];
+		return i;
+	}
+
+	return NULL;
 }
 
 void Local_Environment::put_variable_value(Eval_Result & i, string name)
@@ -172,7 +180,7 @@ void Local_Environment::put_variable_value(Eval_Result & i, string name)
 
 bool Local_Environment::does_variable_exist(string name)
 {
-	if (variable_table[name] == NULL)
+	if (variable_table.find(name) == variable_table.end())
 		return false;
 	else
 		return true;
