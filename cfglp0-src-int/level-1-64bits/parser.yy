@@ -584,15 +584,17 @@ identifier:
 		{
 			if(NOT_ONLY_PARSE)
 			{
-				Symbol_Table_Entry var_table_entry;
-
+				Symbol_Table_Entry * var_table_entry;
+				CHECK_INVARIANT(($1 != NULL), "Variable name cannot be null");
+				string var_name = *$1;
 				if (current_procedure->variable_in_symbol_list_check(*$1))
-					 var_table_entry = current_procedure->get_symbol_table_entry(*$1);
+					 var_table_entry = &(current_procedure->get_symbol_table_entry(*$1));
 				else if (program_object.variable_in_symbol_list_check(*$1))
-					var_table_entry = program_object.get_symbol_table_entry(*$1);
+					var_table_entry = &(program_object.get_symbol_table_entry(*$1));
 				else
 					CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Variable has not been declared");
-				$$ = new Name_Ast(*$1, var_table_entry, get_line_number());
+				// cout<<var_table_entry->variable_name << " "<<var_table_entry->get_symbol_scope()<<endl;
+				$$ = new Name_Ast(var_name, *var_table_entry, get_line_number());
 				delete $1;
 			}
 		}

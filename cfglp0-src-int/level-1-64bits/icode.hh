@@ -50,6 +50,8 @@ typedef enum
 	a_op_r_r_o1,	/* r <- r op o1 */
 	a_op_r_o1_o2,	/* r <- o1 op o2 */ 
 	a_op_o1_o2_r,	/* r <- o1 op o2 */
+	a_j,
+	a_b,
 	a_nsy		/* not specified yet */
 } Assembly_Format;
 
@@ -62,7 +64,9 @@ typedef enum
 	i_op_r_o1,    
 	i_r_op_o1,	/* r <- o1 */
 	i_r_r_op_o1,	/* r <- r op o1 */
-	i_r_o1_op_o2,	/* r <- o1 op o2 */ 
+	i_r_o1_op_o2,	/* r <- o1 op o2 */
+	i_j,
+	i_b,
 	i_nsy		/* not specified yet */
 } Icode_Format;
 
@@ -78,7 +82,16 @@ typedef enum
 { 
 	load, 
 	imm_load, 
-	store, 
+	store,
+	sle,
+	slt,
+	sge,
+	sgt,
+	sne,
+	seq,
+	goto_label,
+	jump,
+	branch,
 	nop 
 } Tgt_Op;
 
@@ -182,55 +195,90 @@ public:
 
 ///////////////////////////////// Intermediate code statements //////////////////////////
 
-class Icode_Stmt
-{
-	/* 
-		Abstract base class for generated ic statements. From this 
-		class, we derive three classes: move, compute, control_Flow.
-		In this version, we need move sub class only
-	*/
+/****************************************************************************************************************************************/
 
-protected:
-	Instruction_Descriptor op_desc;
-
+class Icode_Stmt {
 public:
+	Instruction_Descriptor op_desc;
 	Icode_Stmt() {}
 	~Icode_Stmt() {}  
-
 	Instruction_Descriptor & get_op();
 	virtual Ics_Opd * get_opd1();
 	virtual Ics_Opd * get_opd2();
 	virtual Ics_Opd * get_result();
-
 	virtual void set_opd1(Ics_Opd * io);
 	virtual void set_opd2(Ics_Opd * io);
 	virtual void set_result(Ics_Opd * io);
-
 	virtual void print_icode(ostream & file_buffer) = 0;
 	virtual void print_assembly(ostream & file_buffer) = 0;
 };
 
-class Move_IC_Stmt: public Icode_Stmt
-{ 
+/****************************************************************************************************************************************/
+
+class Move_IC_Stmt: public Icode_Stmt { 
+public:
 	Ics_Opd * opd1;   
 	Ics_Opd * result; 
-
-public:
 	Move_IC_Stmt(Tgt_Op inst_op, Ics_Opd * opd1, Ics_Opd * result); 
 	~Move_IC_Stmt() {} 
 	Move_IC_Stmt & operator=(const Move_IC_Stmt & rhs);
-
 	Instruction_Descriptor & get_inst_op_of_ics();
-
 	Ics_Opd * get_opd1();
 	void set_opd1(Ics_Opd * io);
-
 	Ics_Opd * get_result();
 	void set_result(Ics_Opd * io);
-
 	void print_icode(ostream & file_buffer);
 	void print_assembly(ostream & file_buffer);
 };
+
+/****************************************************************************************************************************************/
+
+class Compute_IC_Stmt: public Icode_Stmt {
+public:
+	Ics_Opd * opd1;   
+	Ics_Opd * opd2;
+	Ics_Opd * result;
+	Compute_IC_Stmt(Tgt_Op op, Ics_Opd * o1, Ics_Opd * o2, Ics_Opd * res);
+	~Compute_IC_Stmt() {}
+	Compute_IC_Stmt & operator=(const Compute_IC_Stmt & rhs);
+	Instruction_Descriptor & get_inst_op_of_ics();
+	Ics_Opd * get_opd1();
+	void set_opd1(Ics_Opd * io);
+	Ics_Opd * get_opd2();
+	void set_opd2(Ics_Opd * io);
+	Ics_Opd * get_result();
+	void set_result(Ics_Opd * io);
+	void print_icode(ostream & file_buffer);
+	void print_assembly(ostream & file_buffer);
+};
+
+/****************************************************************************************************************************************/
+
+class Label_IC_Stmt: public Icode_Stmt {
+public:
+	int label;
+	Label_IC_Stmt(int label);
+	void print_icode(ostream & file_buffer);
+	void print_assembly(ostream & file_buffer);
+};
+
+/****************************************************************************************************************************************/
+
+class Jump_IC_Stmt: public Icode_Stmt {
+public:
+	Ics_Opd * opd1;   
+	int jump_label;
+	Jump_IC_Stmt(Tgt_Op op, Ics_Opd * o1, int label);
+	Jump_IC_Stmt(Tgt_Op op, int label);
+	Jump_IC_Stmt & operator=(const Jump_IC_Stmt & rhs);
+	Instruction_Descriptor & get_inst_op_of_ics();
+	Ics_Opd * get_opd1();
+	void set_opd1(Ics_Opd * io);
+	void print_icode(ostream & file_buffer);
+	void print_assembly(ostream & file_buffer);
+};
+
+/****************************************************************************************************************************************/
 
 //////////////////////// Intermediate code for Ast statements ////////////////////////
 

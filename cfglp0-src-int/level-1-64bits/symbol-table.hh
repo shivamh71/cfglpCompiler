@@ -103,7 +103,6 @@ public:
 
 class Symbol_Table_Entry
 {
-	string variable_name;
 	Table_Scope scope;
 
 	int lineno;
@@ -114,6 +113,7 @@ class Symbol_Table_Entry
 	Register_Descriptor * register_description;
 
 public:
+	string variable_name;
 	Data_Type variable_data_type;
 	Symbol_Table_Entry();
 	Symbol_Table_Entry(string & name, Data_Type new_data_type, int line);

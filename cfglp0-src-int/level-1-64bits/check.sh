@@ -25,8 +25,8 @@ then
 		echo $file
 		f=`echo $file | cut -d '/' -f2`
 		f=`echo $f | cut -d '.' -f1`
-		./cfglp64 $file -eval -d > tmpUs/$f.cfg
-		./run $file -eval -d > tmpSir/$f.cfg
+		./cfglp64 $file -ast -d > tmpUs/$f.cfg
+		./run $file -ast -d > tmpSir/$f.cfg
 		# diff -b -B tmpUs/$f.cfg tmpSir/$f.cfg
 	done
 fi
