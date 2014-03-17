@@ -25,8 +25,8 @@ then
 		echo $file
 		f=`echo $file | cut -d '/' -f2`
 		f=`echo $f | cut -d '.' -f1`
-		./cfglp64 $file -ast -d > tmpUs/$f.cfg
-		./run $file -ast -d > tmpSir/$f.cfg
+		./cfglp64 $file -icode -symtab -d > tmpUs/$f.cfg
+		./run $file -icode -symtab -d > tmpSir/$f.cfg
 		# diff -b -B tmpUs/$f.cfg tmpSir/$f.cfg
 	done
 fi
@@ -41,8 +41,8 @@ then
 		echo $file
 		f=`echo $file | cut -d '/' -f2`
 		f=`echo $f | cut -d '.' -f1`
-		./cfglp64 $file -ast -tokens -d > tmpUs/$f.ecfg
-		./run $file -ast -tokens -d > tmpSir/$f.ecfg
+		./cfglp64 test_files/NoRet.ecfg -icode -symtab -d > tmpUs/$f.ecfg
+		./run test_files/NoRet.ecfg -icode -symtab -d > tmpSir/$f.ecfg
 		echo "-------------------------------------------"
 	done
 fi
