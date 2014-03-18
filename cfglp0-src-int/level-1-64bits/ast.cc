@@ -322,10 +322,10 @@ Code_For_Ast & Relational_Expr_Ast::compile() {
 
 	Code_For_Ast & load_stmt1 = lhs->compile();
 	Register_Descriptor * load_register1 = load_stmt1.get_reg();
-	machine_dscr_object.spim_register_table[load_register1->reg_id]->reg_use = fn_result;
+	machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = true;
 	Code_For_Ast & load_stmt2 = rhs->compile();
 	Register_Descriptor * load_register2 = load_stmt2.get_reg();
-	machine_dscr_object.spim_register_table[load_register2->reg_id]->reg_use = fn_result;
+	machine_dscr_object.spim_register_table[load_register2->reg_id]->used_for_expr_result = true;
 	Register_Descriptor * result_register = machine_dscr_object.get_new_register();
 	CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
 	Ics_Opd * register_opd1 = new Register_Addr_Opd(load_register1);
@@ -364,9 +364,9 @@ Code_For_Ast & Relational_Expr_Ast::compile() {
 
 	Code_For_Ast * comparison_code;
 	if (ic_list.empty() == false) comparison_code = new Code_For_Ast(ic_list, result_register);
-	machine_dscr_object.spim_register_table[load_register1->reg_id]->reg_use = gp_data;
-	machine_dscr_object.spim_register_table[load_register2->reg_id]->reg_use = gp_data;
-	machine_dscr_object.spim_register_table[result_register->reg_id]->reg_use = gp_data;
+	machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = false;
+	machine_dscr_object.spim_register_table[load_register2->reg_id]->used_for_expr_result = false;
+	machine_dscr_object.spim_register_table[result_register->reg_id]->used_for_expr_result = false;
 	return *comparison_code;
 }
 
@@ -378,10 +378,10 @@ Code_For_Ast & Relational_Expr_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	// lra.optimize_lra(mc_2m, lhs, rhs);
 	Code_For_Ast & load_stmt1 = lhs->compile_and_optimize_ast(lra);
 	Register_Descriptor * load_register1 = load_stmt1.get_reg();
-	machine_dscr_object.spim_register_table[load_register1->reg_id]->reg_use = fn_result;
+	machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = true;
 	Code_For_Ast & load_stmt2 = rhs->compile_and_optimize_ast(lra);
 	Register_Descriptor * load_register2 = load_stmt2.get_reg();
-	machine_dscr_object.spim_register_table[load_register2->reg_id]->reg_use = fn_result;
+	machine_dscr_object.spim_register_table[load_register2->reg_id]->used_for_expr_result = true;
 	Register_Descriptor * result_register = machine_dscr_object.get_new_register();
 	CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
 	Ics_Opd * register_opd1 = new Register_Addr_Opd(load_register1);
@@ -420,9 +420,9 @@ Code_For_Ast & Relational_Expr_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 
 	Code_For_Ast * comparison_code;
 	if (ic_list.empty() == false) comparison_code = new Code_For_Ast(ic_list, result_register);
-	machine_dscr_object.spim_register_table[load_register1->reg_id]->reg_use = gp_data;
-	machine_dscr_object.spim_register_table[load_register2->reg_id]->reg_use = gp_data;
-	machine_dscr_object.spim_register_table[result_register->reg_id]->reg_use = gp_data;
+	machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = false;
+	machine_dscr_object.spim_register_table[load_register2->reg_id]->used_for_expr_result = false;
+	machine_dscr_object.spim_register_table[result_register->reg_id]->used_for_expr_result = false;
 	return *comparison_code;
 }
 

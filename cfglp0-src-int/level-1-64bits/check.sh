@@ -41,8 +41,8 @@ then
 		echo $file
 		f=`echo $file | cut -d '/' -f2`
 		f=`echo $f | cut -d '.' -f1`
-		./cfglp64 test_files/NoRet.ecfg -icode -symtab -d > tmpUs/$f.ecfg
-		./run test_files/NoRet.ecfg -icode -symtab -d > tmpSir/$f.ecfg
+		./cfglp64 $file -icode -symtab -d > tmpUs/$f.ecfg
+		./run $file -icode -symtab -d > tmpSir/$f.ecfg
 		echo "-------------------------------------------"
 	done
 fi

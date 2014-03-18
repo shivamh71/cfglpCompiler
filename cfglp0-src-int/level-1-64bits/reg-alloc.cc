@@ -59,7 +59,7 @@ bool Register_Descriptor::is_symbol_list_empty()         	{ return lra_symbol_li
 
 bool Register_Descriptor::is_free()     
 { 
-	if ((reg_use == gp_data) && (lra_symbol_list.empty())) 
+	if ((reg_use == gp_data) && (lra_symbol_list.empty()) && !used_for_expr_result) 
 		return true;
 	else 
 		return false;
