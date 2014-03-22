@@ -206,10 +206,19 @@ Code_For_Ast & Assignment_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
 	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
 
-	lra.optimize_lra(mc_2m, lhs, rhs);
-	Code_For_Ast load_stmt = rhs->compile_and_optimize_ast(lra);
-
-	Register_Descriptor * result_register = load_stmt.get_reg();
+	Code_For_Ast load_stmt;
+	Register_Descriptor * result_register;
+	if (typeid(*rhs) != typeid(Relational_Expr_Ast)) {
+		lra.optimize_lra(mc_2m, lhs, rhs);
+		load_stmt = rhs->compile_and_optimize_ast(lra);
+		result_register = load_stmt.get_reg();
+	}
+	else {
+		load_stmt = rhs->compile_and_optimize_ast(lra);
+		result_register = load_stmt.get_reg();
+		Symbol_Table_Entry * destination_symbol_entry = &(lhs->get_symbol_entry());
+		destination_symbol_entry->update_register(result_register);
+	}
 
 	Code_For_Ast store_stmt = lhs->create_store_stmt(result_register);
 
@@ -375,13 +384,16 @@ Code_For_Ast & Relational_Expr_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
 	CHECK_INVARIANT((rhs != NULL), "Rhs cannot be null");
 
-	// lra.optimize_lra(mc_2m, lhs, rhs);
+	lra.optimize_lra(mc_2r, NULL, lhs);
 	Code_For_Ast & load_stmt1 = lhs->compile_and_optimize_ast(lra);
 	Register_Descriptor * load_register1 = load_stmt1.get_reg();
 	machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = true;
+	
+	lra.optimize_lra(mc_2r, NULL, rhs);
 	Code_For_Ast & load_stmt2 = rhs->compile_and_optimize_ast(lra);
 	Register_Descriptor * load_register2 = load_stmt2.get_reg();
 	machine_dscr_object.spim_register_table[load_register2->reg_id]->used_for_expr_result = true;
+	
 	Register_Descriptor * result_register = machine_dscr_object.get_new_register();
 	CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
 	Ics_Opd * register_opd1 = new Register_Addr_Opd(load_register1);

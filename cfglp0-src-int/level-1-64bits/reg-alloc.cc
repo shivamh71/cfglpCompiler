@@ -59,7 +59,7 @@ bool Register_Descriptor::is_symbol_list_empty()         	{ return lra_symbol_li
 
 bool Register_Descriptor::is_free()     
 { 
-	if ((reg_use == gp_data) && (lra_symbol_list.empty()) && !used_for_expr_result) 
+	if ((reg_use == gp_data) && lra_symbol_list.empty() && !used_for_expr_result) 
 		return true;
 	else 
 		return false;
@@ -67,7 +67,12 @@ bool Register_Descriptor::is_free()
 
 void Register_Descriptor::remove_symbol_entry_from_list(Symbol_Table_Entry & sym_entry)
 {
+	list<Symbol_Table_Entry*>::iterator it;
 	lra_symbol_list.remove(&sym_entry);
+	// cout << "left : ";
+	// for (it=lra_symbol_list.begin();it!=lra_symbol_list.end();it++) 
+	// 	cout << (*it)->get_variable_name();
+	// cout << endl;
 }
 
 bool Register_Descriptor::find_symbol_entry_in_list(Symbol_Table_Entry & sym_entry)
@@ -152,7 +157,10 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 		CHECK_INVARIANT(source_memory, 
 			"Sourse ast pointer cannot be NULL for m2m scenario in lra");
 
-		if (typeid(*destination_memory) == typeid(Number_Ast<int>))
+		// if (typeid(*source_memory) == typeid(Relational_Expr_Ast))
+		// 	return;
+
+		if (typeid(*destination_memory) != typeid(Name_Ast))
 			destination_register = NULL;
 		else
 		{
@@ -160,7 +168,7 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 			destination_register = destination_symbol_entry->get_register(); 
 		}
 
-		if (typeid(*source_memory) == typeid(Number_Ast<int>))
+		if (typeid(*source_memory) != typeid(Name_Ast))
 			source_register = NULL;
 		else
 		{
@@ -174,9 +182,11 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 			is_same_as_source = true;
 			load_needed = false;
 		}
-		else if (destination_register != NULL)
+		else if (destination_register != NULL && destination_register->lra_symbol_list.size()==1)
 		{
 			result_register = destination_register;
+
+			// cout<<destination_register->get_name()<<endl;
 			is_same_as_destination = true;
 			load_needed = true;
 		}
@@ -192,8 +202,16 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 	case mc_2r:
 		CHECK_INVARIANT(source_memory, "Sourse ast pointer cannot be NULL for m2r scenario in lra");
 
-		source_symbol_entry = &(source_memory->get_symbol_entry());
-		source_register = source_symbol_entry->get_register(); 
+		// if (typeid(*source_memory) == typeid(Relational_Expr_Ast))
+		// 	return;
+
+		if (typeid(*source_memory) != typeid(Name_Ast)) {
+			source_register = NULL;
+		}
+		else {
+			source_symbol_entry = &(source_memory->get_symbol_entry());
+			source_register = source_symbol_entry->get_register(); 
+		}
 
 		if (source_register != NULL)
 		{
@@ -207,7 +225,6 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 			is_a_new_register = true;
 			load_needed = true;
 		}
-
 		break;
 
 	case r2r:
@@ -232,10 +249,14 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 	CHECK_INVARIANT ((result_register != NULL), "Inconsistent information in lra");
 	register_description = result_register;
 
-	if (destination_register)
+	if (destination_register) {
 		destination_symbol_entry->free_register(destination_register); 
-
-	destination_symbol_entry->update_register(result_register);
+		// cout << destination_symbol_entry->get_variable_name() << " " << destination_register->get_name() << endl;
+	}
+	if (destination_memory) {
+		// cout << "before update : " << destination_symbol_entry->get_variable_name() << " " << result_register->get_name() << endl;
+		destination_symbol_entry->update_register(result_register);
+	}
 }
 
 /******************************* Machine Description *****************************************/
@@ -303,12 +324,13 @@ void Machine_Description::validate_init_local_register_mapping()
 void Machine_Description::clear_local_register_mappings()
 {
 	map<Spim_Register, Register_Descriptor *>::iterator i;
+	spim_register_table[v0]->clear_lra_symbol_list();
 	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
 	{
 		Register_Descriptor * reg_desc = i->second;
 		reg_desc->clear_lra_symbol_list();
+		reg_desc->used_for_expr_result = false;
 	}
-
 	/* 
 	Note that we do not need to save values at the end
 	of a basic block because the values have already been
@@ -328,10 +350,26 @@ Register_Descriptor * Machine_Description::get_new_register()
 	{
 		reg_desc = i->second;
 
-		if (reg_desc->is_free())
+		if (reg_desc->is_free()) {
+			// cout << "returning : " << reg_desc->get_name() << endl;
 			return reg_desc;
+		}
 	}
+	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
+	{
+		reg_desc = i->second;
+		reg_desc->clear_lra_symbol_list();
+		reg_desc->used_for_expr_result = false;
+	}
+	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
+	{
+		reg_desc = i->second;
 
+		if (reg_desc->is_free()) {
+			// cout << "returning : " << reg_desc->get_name() << endl;
+			return reg_desc;
+		}
+	}
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
 			"Error in get_new_reg or register requirements of input program cannot be met");
 }

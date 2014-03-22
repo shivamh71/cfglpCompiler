@@ -20,6 +20,8 @@ main()
 	int r;
 	int s;
 	int t;
+	int u;
+	int v;
 <bb 2>:
 	a = 2;
 	b = 3;
@@ -41,5 +43,7 @@ main()
 	r = 19;
 	s = 20;
 	t = 21;
+	u = 22;
+	v = 23;
 	return;
 }
