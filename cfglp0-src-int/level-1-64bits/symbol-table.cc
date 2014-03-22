@@ -90,6 +90,7 @@ bool Symbol_Table::variable_in_symbol_list_check(string variable)
 		if ((*i)->get_variable_name() == variable)
 			return true;
 	}
+
 	return false;
 }
 
@@ -150,7 +151,7 @@ void Symbol_Table::print(ostream & file_buffer)
 		if (start_off == end_off)
 			file_buffer << " (No offset assigned yet)\n";
 		else
-			file_buffer << " Start Offset: " << start_off << " End Offset: " << end_off << "\n";
+			file_buffer << " Start Offset: " << -start_off << " End Offset: " << -end_off << "\n";
 	}
 }
 
@@ -192,7 +193,7 @@ int Symbol_Table::get_size_of_value_type(Data_Type dt)
 {
 	switch(dt)
 	{
-	case int_data_type: return 4; break;
+	case int_data_type: return -4; break;
 	case void_data_type: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Attempt to seek size of type void");
 	defualt: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Data type not supperted");
 	}
