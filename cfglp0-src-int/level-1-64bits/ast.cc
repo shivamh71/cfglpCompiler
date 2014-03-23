@@ -208,6 +208,7 @@ Code_For_Ast & Assignment_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 
 	Code_For_Ast load_stmt;
 	Register_Descriptor * result_register;
+	
 	if (typeid(*rhs) != typeid(Relational_Expr_Ast)) {
 		lra.optimize_lra(mc_2m, lhs, rhs);
 		load_stmt = rhs->compile_and_optimize_ast(lra);
