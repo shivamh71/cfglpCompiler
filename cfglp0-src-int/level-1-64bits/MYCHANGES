@@ -5,14 +5,12 @@ Submitted by :
 We first brought level 0 code to level 1 using our previous code with slight modifications. 
 
 1)  ast.hh and ast.cc
-	-> added compile function to each of the new ast classes i.e. Relational_Expr_Ast, Goto_Ast, If_Else_Ast etc
-	-> added compile and optimize function to each of the new ast classes i.e. Relational_Expr_Ast, Goto_Ast, If_Else_Ast etc
-
-2)	icode.hh and icode.cc
-	-> created classes for Jump_IC_Stmt, Label_IC_Stmt, Compute_IC_Stmt
-	-> defined classes for new statement types
+	-> wrote function to generate spim code for all the Ast
+	-> wrote code to implement lra tag for Relational Expression, Goto and If_Else Statement
 
 3)	reg-alloc.hh and reg-alloc.cc
-	-> added new spin-instruction entries to handle new kind of instructions needed for relational expression, jump instructions etc.
-	-> updated code for is_free() function of register desriptor
-	-> added some more intermediate code as well as spim code formats to corressponding enum
+	-> updated Stmt classes to generate spim code for corresponding statements
+	-> updated code to implement lra tag for Relation Expression
+
+Corner cases handled :
+	-> lra implementation has been handled with care in case of assignment statements, for eg. case when rhs of assignment is a Relation Expression is handled separately
