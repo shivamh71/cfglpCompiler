@@ -359,7 +359,6 @@ Register_Descriptor * Machine_Description::get_new_register()
 	{
 		reg_desc = i->second;
 		reg_desc->clear_lra_symbol_list();
-		reg_desc->used_for_expr_result = false;
 	}
 	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
 	{
