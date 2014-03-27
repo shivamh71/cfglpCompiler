@@ -1,3 +1,4 @@
+
 /*********************************************************************************************
 
                                 cfglp : A CFG Language Processor
@@ -26,6 +27,7 @@
 #include<string>
 #include<map>
 #include<list>
+#include "common-classes.hh"
 
 #define BB_SPACE "      "
 
@@ -35,19 +37,30 @@ class Basic_Block;
 
 class Basic_Block
 {
-	int id_number;
-	list<Ast *> statement_list;
-  bool has_successor;
+    int id_number;
+    list<Ast *> statement_list;
+
+    list<Icode_Stmt *> bb_icode_list;
+    bool has_successor;
+    int lineno;
+
 public:
-	Basic_Block(int basic_block_number, list<Ast *> & ast_list);
-	~Basic_Block();
+  Basic_Block(int basic_block_number, int line);
+  ~Basic_Block();
 
-	int get_bb_number();
+  int get_bb_number();
+  void set_ast_list(list<Ast *> & ast_list);
 
-	void print_bb(ostream & file_buffer);
+  void print_bb(ostream & file_buffer);
   void set_has_successor(bool );
   bool get_has_successor();
-	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+  Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+  // compile
+  void compile();
+  void print_assembly(ostream & file_buffer);
+  void print_icode(ostream & file_buffer);
 };
 
 #endif

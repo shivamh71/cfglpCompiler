@@ -24,17 +24,19 @@
 #ifndef PARSER_IH
 #define PARSER_IH
 
+#include <typeinfo>
+
+#include "common-classes.hh"
 #include "local-environment.hh"
 #include "error-display.hh"
 #include "user-options.hh"
-
+#include "icode.hh"
+#include "reg-alloc.hh"
 #include "symbol-table.hh"
-
 #include "ast.hh"
 #include "basic-block.hh"
 #include "procedure.hh"
 #include "program.hh"
-
 #include "parser.h"
 
 ////////////////////// cfglp Parser functions ///////////////////////
@@ -78,36 +80,33 @@ int Parser::get_line_number()
 
 inline void Parser::bb_strictly_increasing_order_check(list<Basic_Block *> * bb_list, int bb_number)
 {
-	list<Basic_Block *>::iterator i;
-	for(i = bb_list->begin(); i != bb_list->end(); i++)
-	{
-		if ((*i)->get_bb_number() >= bb_number)
-		{
-			int line = get_line_number();
-			report_error("basic_block should be in strictly increasing order", get_line_number());
-		}
-	}
+  list<Basic_Block *>::iterator i;
+  for(i = bb_list->begin(); i != bb_list->end(); i++)
+    CHECK_INPUT(((*i)->get_bb_number() < bb_number), "Basic blocks should be in strictly increasing order", get_line_number());
 }
 
 ///////////////////////////////////////////////////////////////////
 
 ////////////////// Parser goto_bb_check function ////////////////////////
-inline void Parser::goto_bb_exist_check(list<Basic_Block *>bb_list,list<int>* goto_bb_num)
-{
-  int basic_block_range = bb_list.size()+1;
-  list<int >::iterator i;
-
-  for(i = goto_bb_num->begin(); i != goto_bb_num->end(); i++)
-  {
-    if((*i) > basic_block_range){
-      char* error_string;
-      sprintf(error_string,"bb %d doesn't exist",(*i));
-      report_error(error_string,NOLINE);
+inline void Parser::goto_bb_exist_check(list<Basic_Block *>bb_list,list<int>* goto_bb_num) {
+    list<int >::iterator i;
+    for(i = goto_bb_num->begin(); i != goto_bb_num->end(); i++) {
+        if((*i)<2) {
+            CHECK_INVARIANT(false,"Illegal basic block lable");
+        }
+        int bb_num = *i;
+        list<Basic_Block*>::iterator sit;
+        int flag = 0;
+        for (sit=bb_list.begin();sit!=bb_list.end();sit++) {
+          if ((*sit)->get_bb_number()==bb_num)
+            flag = 1;
+        }
+        if(flag == 0) {
+            char* error_string;
+            sprintf(error_string,"bb %d doesn't exist",bb_num);
+            CHECK_INVARIANT(false,error_string);
+        }
     }
-    if((*i)<2){
-      report_error("Illegal basic block lable",NOLINE);
-    }
-  }
 }
 
 #endif

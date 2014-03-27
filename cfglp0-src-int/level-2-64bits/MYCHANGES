@@ -2,46 +2,15 @@ Submitted by :
 	Shubham Mehta - 110050013
 	Shivam H Prasad - 110050041
 
-1)  ast.hh & ast.cc
-	-> We have made classes for implementing Relational Expressions, Boolean Expressions, Algebraic Expressions (though we have removed all c++ code from parser.yy for this submission)
+We first brought level 0 code to level 1 using our previous code with slight modifications. 
 
-2)	scanner.ll
-	-> added regex to identify <bb num> as a single token which was not the case in 2a submission
-	-> modified the way we have identified operator tokens (no we have used LE, LT etc.. previously we simple identified them as meta-char)
+1)  ast.hh and ast.cc
+	-> wrote function to generate spim code for all the Ast
+	-> wrote code to implement lra tag for Relational Expression, Goto and If_Else Statement
 
-3)	parser.yy
-	-> we added c++ code to handle all the tokens that we identified in 2a and 2b using scanner.ll
-	-> we implementted semantics check to handle the constraints shown by reference implementation
-	-> added code to handle error messages wherever necessary
-	-> added code to check for invalid basic block numbers
-	-> modified the check for atleats one return statement to check that each basic block should have a successor
-	-> we also extended the grammar to include control statements : if-else and goto-statements
-	-> precedence and associativity of opeartors have been taken care of in grammar by using non terminals appropriately instead of adding precedence rules (%token) at the top of parser script  [we did this using techniques taught in class]
-	-> cross class (logical, relational, arithmetic) operator precedence have been taken care of
-	-> bool variable which is used to keep track of successor of basic block in evaluation has been assigned according to basic-block grammar
+3)	reg-alloc.hh and reg-alloc.cc
+	-> updated Stmt classes to generate spim code for corresponding statements
+	-> updated code to implement lra tag for Relation Expression
 
-3)	ast.hh and ast.cc
-	-> created class Relation_Expr_Ast to handle relational expressions (wrote print, evaluate and other functions for it)
-	-> created class Arithmetic_Expr_Ast to handle arithmetic expressions (wrote print, evaluate and other functions for it)
-	-> created class If_Else_Ast to handle the if-else statements (wrote print, evaluate and other functions for it)
-	-> created class Goto_Ast to handle the goto statements (wrote print, evaluate and other functions for it)
-	-> we have used the return values of assignment, goto expressions etc to handle control flow between different basic blocks caused by goto statements
-
-4)	parser.h
-	-> included a bool variable has_successor_bb to handle successor constraint with respect to basic blocks
-
-5)	parser.ih
-	-> created a list to store targets of all goto statements so as to check they point to valid basic blocks
-	-> created a function goto_bb_exist_check to do the above mentioned check
-
-6)	basic-block.cc
-	-> added a bool variable has_successor that keeps track whether the basic block is followed in evaluation by some other basic block or not
-	-> If a basic block doesn't have a successor it given an internal error message as given by reference implementation
-
-7)	procedure.cc
-	-> we modified evaluate function to handle control flow caused by goto statements
-
-Corner cases handled
-	-> return statement is not necessary in the code as in 2a, now we just have to check for basic block successors
-	-> two or more goto statements are not allowed in a basic block
-	-> empty basic block is also allowed in the grammar
+Corner cases handled :
+	-> lra implementation has been handled with care in case of assignment statements, for eg. case when rhs of assignment is a Relation Expression is handled separately
