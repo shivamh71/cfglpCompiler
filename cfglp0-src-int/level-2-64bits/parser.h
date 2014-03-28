@@ -79,6 +79,7 @@ class Parser: public ParserBase
         int lex();
 
   bool has_successor_bb;
+  bool single_var_in_expr_check;
 	bool return_statement_used_flag;				// Keeps track that atleast a procedure has atleast 1 return statement
   void bb_strictly_increasing_order_check(list<Basic_Block *> * bb_list, int bb_number); 
 	void goto_bb_exist_check(list<Basic_Block *> bb_list, list<int>* goto_bb_num);

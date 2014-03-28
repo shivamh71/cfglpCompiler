@@ -589,7 +589,7 @@ basic_expression:
 		{
 			if(NOT_ONLY_PARSE)
 			{
-				$$ = new Negation_Expr_Ast($2);
+				$$ = new Negation_Expr_Ast($2, get_line_number());
 				if ($2->get_data_type()==1) {
 					$$->set_data_type("INTEGER");
 				}

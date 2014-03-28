@@ -21,6 +21,8 @@
 
 ***********************************************************************************************/
 
+#include <iostream>
+#include <iomanip>
 #include<string>
 #include<fstream>
 #include<typeinfo>
@@ -32,14 +34,14 @@ using namespace std;
 #include"error-display.hh"
 #include"user-options.hh"
 
-int Eval_Result::get_value()
+double Eval_Result::get_value()
 {
 	stringstream msg;
 	msg << "No get_value() function for " << typeid(*this).name();
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
 }
 
-void Eval_Result::set_value(int number)
+void Eval_Result::set_value(double number)
 {
 	stringstream msg;
 	msg << "The set_value(int) function for " << typeid(*this).name();
@@ -62,14 +64,14 @@ void Eval_Result::set_variable_status(bool def)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Eval_Result_Value::set_value(int value)
+void Eval_Result_Value::set_value(double value)
 {
 	stringstream msg;
 	msg << "No set_value() fucntion for " << typeid(*this).name();
 	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, msg.str());
 }
 
-int Eval_Result_Value::get_value()
+double Eval_Result_Value::get_value()
 {
 	stringstream msg;
 	msg << "No get_value() function for " << typeid(*this).name();
@@ -88,13 +90,13 @@ Eval_Result_Value_Int::Eval_Result_Value_Int()
 Eval_Result_Value_Int::~Eval_Result_Value_Int()
 { }
 
-void Eval_Result_Value_Int::set_value(int number)
+void Eval_Result_Value_Int::set_value(double number)
 {
 	value = number;
 	defined = true;
 }
 
-int Eval_Result_Value_Int::get_value()
+double Eval_Result_Value_Int::get_value()
 {
 	return value;
 }
@@ -115,6 +117,93 @@ void Eval_Result_Value_Int::set_result_enum(Result_Enum res)
 }
 
 Result_Enum Eval_Result_Value_Int::get_result_enum()
+{
+	return result_type;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+Eval_Result_Value_Float::Eval_Result_Value_Float()
+{
+	value = 0;
+	defined = false;
+	result_type = float_result;
+}
+
+Eval_Result_Value_Float::~Eval_Result_Value_Float()
+{ }
+
+void Eval_Result_Value_Float::set_value(double number)
+{
+	value = number;
+	defined = true;
+}
+
+double Eval_Result_Value_Float::get_value()
+{
+	return value;
+}
+
+void Eval_Result_Value_Float::set_variable_status(bool def)
+{
+	defined = def;
+}
+
+bool Eval_Result_Value_Float::is_variable_defined()
+{
+	return defined;
+}
+
+void Eval_Result_Value_Float::set_result_enum(Result_Enum res)
+{
+	result_type = res;
+}
+
+Result_Enum Eval_Result_Value_Float::get_result_enum()
+{
+	return result_type;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+Eval_Result_Value_Double::Eval_Result_Value_Double()
+{
+	value = 0;
+	defined = false;
+	result_type = double_result;
+}
+
+Eval_Result_Value_Double::~Eval_Result_Value_Double()
+{ }
+
+void Eval_Result_Value_Double::set_value(double number)
+{
+	value = number;
+	defined = true;
+}
+
+double Eval_Result_Value_Double::get_value()
+{
+	return value;
+}
+
+void Eval_Result_Value_Double::set_variable_status(bool def)
+{
+	defined = def;
+	result_type = double_result;
+}
+
+bool Eval_Result_Value_Double::is_variable_defined()
+{
+	return defined;
+}
+
+void Eval_Result_Value_Double::set_result_enum(Result_Enum res)
+{
+	result_type = res;
+}
+
+Result_Enum Eval_Result_Value_Double::get_result_enum()
 {
 	return result_type;
 }
@@ -144,8 +233,12 @@ void Local_Environment::print(ostream & file_buffer)
 		
 			else
 			{
+				file_buffer << std::fixed;
+				file_buffer << std::setprecision(2);
 				if (vi->get_result_enum() == int_result)
-					file_buffer << VAR_SPACE << (*i).first << " : " << vi->get_value() << "\n";
+					file_buffer << VAR_SPACE << (*i).first << " : " << (int)vi->get_value() << "\n";
+				else 
+					file_buffer << VAR_SPACE << (*i).first << " : " << (float)vi->get_value() << "\n";
 			}
 		}
 	}

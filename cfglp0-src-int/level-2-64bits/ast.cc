@@ -178,7 +178,7 @@ Eval_Result & Assignment_Ast::evaluate(Local_Environment & eval_env, ostream & f
 	file_buffer << "\n";
 	print(file_buffer);
 	lhs->print_value(eval_env, file_buffer);
-	Eval_Result * to_return = new Eval_Result_Value_Int();
+	Eval_Result * to_return = new Eval_Result_Value_Float();
 	to_return->set_value(0);
 	return *to_return;
 }
@@ -497,10 +497,10 @@ void Arithmetic_Expr_Ast::print(ostream & file_buffer) {
 	if (O==MUL) file_buffer << AST_NODE_SPACE << "Arith: "<<"MULT"<<"\n";
 	if (O==DIV) file_buffer << AST_NODE_SPACE << "Arith: "<<"DIV"<<"\n";
 	file_buffer << AST_NODE_SPACE << "   LHS (";
-	lhs->print_ast(file_buffer);
+	lhs->print(file_buffer);
 	file_buffer << ")\n";
 	file_buffer << AST_NODE_SPACE "   RHS (";
-	rhs->print_ast(file_buffer);
+	rhs->print(file_buffer);
 	file_buffer << ")";
 }
 
@@ -559,10 +559,8 @@ Eval_Result & Arithmetic_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 			temp = (temp1 * temp2);
 		}
 		else if (O==DIV) {
+			CHECK_INPUT_AND_ABORT(temp2!=0,"Divide by 0",lineno);
 			temp = (temp1 / temp2);
-			if (temp2==0) {
-				report_error("Divide by 0", NOLINE);
-			}
 		}
 		ans = temp;
 	}
@@ -580,10 +578,8 @@ Eval_Result & Arithmetic_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 			temp = (temp1 * temp2);
 		}
 		else if (O==DIV) {
+			CHECK_INPUT_AND_ABORT(temp2!=0,"Divide by 0",lineno);
 			temp = (temp1 / temp2);
-			if (temp2==0) {
-				report_error("Divide by 0", NOLINE);
-			}
 		}
 		ans = temp;
 	}
@@ -716,7 +712,7 @@ void Negation_Expr_Ast::print(ostream & file_buffer) {
 	file_buffer << "\n";
 	file_buffer << AST_NODE_SPACE << "Arith: "<<"UMINUS"<<"\n";
 	file_buffer << AST_NODE_SPACE << "   LHS (";
-	lhs->print_ast(file_buffer);
+	lhs->print(file_buffer);
 	file_buffer << ")";
 }
 
@@ -789,6 +785,20 @@ Goto_Ast::~Goto_Ast()
 
 Data_Type Goto_Ast::get_data_type() {
 	return node_data_type;
+}
+
+void Goto_Ast::set_data_type(string type) {
+	if (type == "FLOAT") {
+		node_data_type = float_data_type;
+	}
+	else if (type == "INTEGER") {
+
+		node_data_type = int_data_type;
+
+	}
+	else if (type == "DOUBLE") {
+		node_data_type = double_data_type;
+	}
 }
 
 int Goto_Ast::get_bb_number() {
@@ -997,6 +1007,20 @@ Data_Type Name_Ast::get_data_type()
 	return node_data_type;
 }
 
+void Name_Ast::set_data_type(string type) {
+	if (type == "FLOAT") {
+		node_data_type = float_data_type;
+	}
+	else if (type == "INTEGER") {
+
+		node_data_type = int_data_type;
+
+	}
+	else if (type == "DOUBLE") {
+		node_data_type = double_data_type;
+	}
+}
+
 Symbol_Table_Entry & Name_Ast::get_symbol_entry()
 {
 	return *variable_symbol_entry;
@@ -1012,22 +1036,39 @@ void Name_Ast::print_value(Local_Environment & eval_env, ostream & file_buffer)
 	Eval_Result * loc_var_val = eval_env.get_variable_value(variable_name);
 	Eval_Result * glob_var_val = interpreter_global_table.get_variable_value(variable_name);
 	file_buffer << "" << AST_SPACE << variable_name << " : ";
+
 	if (!eval_env.is_variable_defined(variable_name) && !interpreter_global_table.is_variable_defined(variable_name))
 		file_buffer << "undefined";
 	else if (eval_env.is_variable_defined(variable_name) && loc_var_val != NULL)
 	{
-		CHECK_INVARIANT(loc_var_val->get_result_enum() == int_result, "Result type can only be int");
-		file_buffer << loc_var_val->get_value() << "\n";
+		CHECK_INVARIANT(((loc_var_val->get_result_enum() == int_result) || (loc_var_val->get_result_enum() == float_result) || (loc_var_val->get_result_enum() == double_result)) , "Result type can only be int and float");
+		file_buffer << std::fixed;
+		file_buffer << std::setprecision(2);
+		if (node_data_type==float_data_type || node_data_type==double_data_type) {
+			file_buffer << (float)loc_var_val->get_value();	
+		}
+		else if (node_data_type==int_data_type){
+			file_buffer << (int)loc_var_val->get_value();
+		}
+		file_buffer << "\n";
 	}
 	else
 	{
-		CHECK_INVARIANT(glob_var_val->get_result_enum() == int_result, 
+		CHECK_INVARIANT(((glob_var_val->get_result_enum() == int_result) || (glob_var_val->get_result_enum() == float_result) || (glob_var_val->get_result_enum() == double_result)), 
 			"Result type can only be int and float");
-
 		if (glob_var_val == NULL)
 			file_buffer << "0\n";
-		else
-			file_buffer << glob_var_val->get_value() << "\n";
+		else {
+			file_buffer << std::fixed;
+			file_buffer << std::setprecision(2);
+			if (node_data_type==float_data_type || node_data_type==double_data_type) {
+				file_buffer << (float)glob_var_val->get_value();	
+			}
+			else if (node_data_type==int_data_type){
+				file_buffer << (int)glob_var_val->get_value();
+			}
+			file_buffer << "\n";
+		}
 	}
 	file_buffer << "\n";
 }
@@ -1051,13 +1092,21 @@ Eval_Result & Name_Ast::get_value_of_evaluation(Local_Environment & eval_env)
 void Name_Ast::set_value_of_evaluation(Local_Environment & eval_env, Eval_Result & result)
 {
 	Eval_Result * i;
-	if (node_data_type == int_data_type)
+	if (get_data_type() == int_data_type)
+	{
 		i = new Eval_Result_Value_Int();
-	else
-		CHECK_INPUT_AND_ABORT(CONTROL_SHOULD_NOT_REACH, "Type of a name can be int/float only", lineno);
-
-	if (result.get_result_enum() == int_result)
 	 	i->set_value(result.get_value());
+	}
+	else if (get_data_type() == float_data_type)
+	{
+		i = new Eval_Result_Value_Float();
+	 	i->set_value(result.get_value());
+	}
+	else if (get_data_type() == double_data_type)
+	{
+		i = new Eval_Result_Value_Double();
+	 	i->set_value(result.get_value());
+	}
 	else
 		CHECK_INPUT_AND_ABORT(CONTROL_SHOULD_NOT_REACH, "Type of a name can be int/float only", lineno);
 
@@ -1155,6 +1204,21 @@ Data_Type Number_Ast<DATA_TYPE>::get_data_type()
 }
 
 template <class DATA_TYPE>
+void Number_Ast<DATA_TYPE>::set_data_type(string type) {
+	if (type == "FLOAT") {
+		node_data_type = float_data_type;
+	}
+	else if (type == "INTEGER") {
+
+		node_data_type = int_data_type;
+
+	}
+	else if (type == "DOUBLE") {
+		node_data_type = double_data_type;
+	}
+}
+
+template <class DATA_TYPE>
 void Number_Ast<DATA_TYPE>::print(ostream & file_buffer)
 {
 	file_buffer << std::fixed;
@@ -1169,6 +1233,21 @@ Eval_Result & Number_Ast<DATA_TYPE>::evaluate(Local_Environment & eval_env, ostr
 	{
 		Eval_Result & result = *new Eval_Result_Value_Int();
 		result.set_value(constant);
+		return result;
+	}
+	else if (node_data_type == float_data_type)
+	{
+		Eval_Result & result = *new Eval_Result_Value_Float();
+		result.set_value(constant);
+
+		return result;
+	}
+
+	else if (node_data_type == double_data_type)
+	{
+		Eval_Result & result = *new Eval_Result_Value_Double();
+		result.set_value(constant);
+
 		return result;
 	}
 }
@@ -1210,4 +1289,6 @@ Code_For_Ast & Number_Ast<DATA_TYPE>::compile_and_optimize_ast(Lra_Outcome & lra
 
 /****************************************************************************************************************************************/
 
+template class Number_Ast<float>;
 template class Number_Ast<int>;
+template class Number_Ast<double>;
