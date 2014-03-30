@@ -48,10 +48,11 @@ typedef enum
 	a_op_r_o1,	/* r <- o1 */
 	a_op_o1_r,	/* r <- o1 */
 	a_op_r_r_o1,	/* r <- r op o1 */
-	a_op_r_o1_o2,	/* r <- o1 op o2 */ 
+	a_op_r_o1_o2,	/* r <- o1 op o2 */
 	a_op_o1_o2_r,	/* r <- o1 op o2 */
 	a_j,
 	a_b,
+	a_op_r_r,
 	a_nsy		/* not specified yet */
 } Assembly_Format;
 
@@ -61,7 +62,8 @@ typedef enum
 	i_op_o1,	/* Only one operand, no result, eg. goto L */
 	i_r_op,		/* Only the result. Operand implicit? */ 
 	i_op_o1_r,    
-	i_op_r_o1,    
+	i_op_r_o1,
+	i_r_op_r,    
 	i_r_op_o1,	/* r <- o1 */
 	i_r_r_op_o1,	/* r <- r op o1 */
 	i_r_o1_op_o2,	/* r <- o1 op o2 */
@@ -83,6 +85,21 @@ typedef enum
 	load, 
 	imm_load, 
 	store,
+	add,
+	sub,
+	mul,
+	divide,
+	load_d, 
+	imm_load_d, 
+	store_d,
+	add_d,
+	sub_d,
+	mul_d,
+	divide_d,
+	neg,
+	neg_d,
+	mtc1,
+	mfc1,
 	sle,
 	slt,
 	sge,

@@ -54,6 +54,7 @@ protected:
 	int is_constant;
 
 public:
+	bool type_casted;
 	Ast();
 	
 	~Ast();

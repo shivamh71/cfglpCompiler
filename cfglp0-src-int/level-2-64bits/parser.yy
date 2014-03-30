@@ -505,6 +505,12 @@ unary_expression:
 			if(NOT_ONLY_PARSE)
 			{
 				$$ = $5;
+				if ($$->get_data_type()==1 && (*$2=="FLOAT" || *$2=="DOUBLE"))
+					$$->type_casted = true;
+				else if ($$->get_data_type()==3 && (*$2=="INTEGER" ))
+					$$->type_casted = true;
+				else if ($$->get_data_type()==4 && ( *$2=="INTEGER"))
+					$$->type_casted = true;
 				$$->set_data_type(*$2);
 			}
 		}
@@ -514,6 +520,12 @@ unary_expression:
 			if(NOT_ONLY_PARSE)
 			{
 				$$ = $4;
+				if ($$->get_data_type()==1 && (*$2=="FLOAT" || *$2=="DOUBLE"))
+					$$->type_casted = true;
+				else if ($$->get_data_type()==3 && (*$2=="INTEGER" ))
+					$$->type_casted = true;
+				else if ($$->get_data_type()==4 && (*$2=="INTEGER"))
+					$$->type_casted = true;
 				$$->set_data_type(*$2);
 			}
 		}
@@ -523,6 +535,12 @@ unary_expression:
 			if(NOT_ONLY_PARSE)
 			{
 				$$ = $4;
+				if ($$->get_data_type()==1 && (*$2=="FLOAT" || *$2=="DOUBLE"))
+					$$->type_casted = true;
+				else if ($$->get_data_type()==3 && (*$2=="INTEGER" ))
+					$$->type_casted = true;
+				else if ($$->get_data_type()==4 && (*$2=="INTEGER"))
+					$$->type_casted = true;
 				$$->set_data_type(*$2);
 			}
 		}

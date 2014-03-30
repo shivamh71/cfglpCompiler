@@ -206,11 +206,11 @@ Label_IC_Stmt::Label_IC_Stmt(int label) {
 }
 
 void Label_IC_Stmt::print_icode(ostream & file_buffer) {
-	file_buffer << "\nlabel" << label << ": \n";
+	file_buffer << "\nlabel" << label << ":    \t\n";
 }
 
 void Label_IC_Stmt::print_assembly(ostream & file_buffer) {
-	file_buffer << "\nlabel" << label << ": \n";
+	file_buffer << "\nlabel" << label << ":    \t\n";
 }
 
 /****************************************************************************************************************************************/
@@ -248,15 +248,24 @@ void Move_IC_Stmt::print_icode(ostream & file_buffer)
 	string operation_name = op_desc.get_name();
 
 	Icode_Format ic_format = op_desc.get_ic_format();
-
+	file_buffer << std::fixed;
+	file_buffer << std::setprecision(2);
 	switch (ic_format)
 	{
 	case i_r_op_o1: 
-			file_buffer << " " << operation_name << ":\t";
+			file_buffer << "\t" << operation_name << ":    \t";
 			result->print_ics_opd(file_buffer);
 			file_buffer << " <- ";
 			opd1->print_ics_opd(file_buffer);
 			file_buffer << "\n";
+			break;
+	case i_r_op_r: 
+			file_buffer << "\t" << operation_name << ":    \t";
+			result->print_ics_opd(file_buffer);
+			file_buffer << " <- ";
+			opd1->print_ics_opd(file_buffer);
+			file_buffer << "\n";
+
 
 			break; 
 
@@ -289,7 +298,15 @@ void Move_IC_Stmt::print_assembly(ostream & file_buffer)
 			file_buffer << ", ";
 			result->print_asm_opd(file_buffer);
 			file_buffer << "\n";
-			break; 
+			break;
+
+	case a_op_r_r: 
+			file_buffer << "\t" << op_name << " ";
+			result->print_asm_opd(file_buffer);
+			file_buffer << ", ";
+			opd1->print_asm_opd(file_buffer);
+			file_buffer << "\n";
+			break;  
 
 	default: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");
 		break;
@@ -330,14 +347,15 @@ void Compute_IC_Stmt::print_icode(ostream & file_buffer) {
 	Icode_Format ic_format = op_desc.get_ic_format();
 	switch (ic_format) {
 		case i_r_o1_op_o2: 
-			file_buffer << " " << operation_name << ": ";
+			file_buffer << "\t" << operation_name << ":    \t";
 			result->print_ics_opd(file_buffer);
 			file_buffer << " <- ";
 			opd1->print_ics_opd(file_buffer);
 			file_buffer << " , ";
 			opd2->print_ics_opd(file_buffer);
 			file_buffer << "\n";
-			break; 
+			break;
+
 		default: 
 			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");
 			break;
@@ -360,7 +378,8 @@ void Compute_IC_Stmt::print_assembly(ostream & file_buffer) {
 			file_buffer << ", ";
 			opd2->print_asm_opd(file_buffer);
 			file_buffer << "\n";
-			break; 
+			break;
+		  
 		case a_op_o1_o2_r: 
 			file_buffer << "\t" << op_name << " ";
 			opd1->print_asm_opd(file_buffer);
@@ -411,14 +430,14 @@ void Jump_IC_Stmt::print_icode(ostream & file_buffer) {
 
 	switch (ic_format) {
 		case i_b: 
-			file_buffer << " " << operation_name << ": ";
+			file_buffer << "\t" << operation_name << ":    \t";
 			opd1->print_ics_opd(file_buffer);
 			file_buffer << " , ";
 			file_buffer << "zero : ";
 			file_buffer <<"goto label" <<jump_label<<endl;
 			break; 
 		case i_j:
-			file_buffer <<" goto label" <<jump_label<<endl;
+			file_buffer <<"\tgoto label" <<jump_label<<endl;
 			break;
 		default: 
 			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");
@@ -520,3 +539,4 @@ Instruction_Descriptor::Instruction_Descriptor()
 }
 
 template class Const_Opd<int>;
+template class Const_Opd<float>;
