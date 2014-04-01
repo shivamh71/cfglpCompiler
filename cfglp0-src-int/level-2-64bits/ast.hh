@@ -54,7 +54,6 @@ protected:
 	int is_constant;
 
 public:
-	bool type_casted;
 	Ast();
 	
 	~Ast();
@@ -167,6 +166,30 @@ public:
 	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
 };
 
+class Type_Cast_Ast:public Ast {
+public:
+	Ast * lhs;
+
+	Data_Type old_data_type;
+
+	Type_Cast_Ast(Ast* arg_lhs, Data_Type old_type, Data_Type new_type, int line);
+
+	~Type_Cast_Ast();
+
+	Data_Type get_data_type();
+
+	void set_data_type(string type);
+	
+	bool check_ast();
+
+	void print(ostream & file_buffer);
+
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+	Code_For_Ast & compile();
+
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+};
 
 class Negation_Expr_Ast:public Ast {
 public:

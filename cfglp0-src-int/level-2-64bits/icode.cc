@@ -265,8 +265,6 @@ void Move_IC_Stmt::print_icode(ostream & file_buffer)
 			file_buffer << " <- ";
 			opd1->print_ics_opd(file_buffer);
 			file_buffer << "\n";
-
-
 			break; 
 
 	default: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, 
@@ -282,6 +280,8 @@ void Move_IC_Stmt::print_assembly(ostream & file_buffer)
 	string op_name = op_desc.get_mnemonic();
 
 	Assembly_Format assem_format = op_desc.get_assembly_format();
+	file_buffer << std::fixed;
+	file_buffer << std::setprecision(2);
 	switch (assem_format)
 	{
 	case a_op_r_o1: 

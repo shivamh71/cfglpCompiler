@@ -114,8 +114,6 @@ Assignment_Ast::Assignment_Ast(Ast * temp_lhs, Ast * temp_rhs, int line)
 	ast_num_child = binary_arity;
 	node_data_type = void_data_type;
 	lineno = line;
-	type_casted = false;
-
 }
 
 Assignment_Ast::~Assignment_Ast()
@@ -270,8 +268,6 @@ Relational_Expr_Ast::Relational_Expr_Ast(Ast* arg_lhs, Comparator c, Ast* arg_rh
 	node_data_type = int_data_type;
 	lineno = line;
 	C = c;
-	type_casted = false;
-
 }
 
 Relational_Expr_Ast::~Relational_Expr_Ast() {
@@ -409,17 +405,11 @@ Code_For_Ast & Relational_Expr_Ast::compile() {
 	Ics_Opd * register_opd4;
 	Icode_Stmt * typecast_stmt;
 
-	if (type_casted){
-		result_register = machine_dscr_object.get_new_register(float_num);
-		register_opd4 = new Register_Addr_Opd(result_register);
-		typecast_stmt = new Move_IC_Stmt(mtc1,register_opd3 , register_opd4);
-	}
 	if (load_stmt1.get_icode_list().empty() == false)
 		ic_list = load_stmt1.get_icode_list();
 	if (load_stmt2.get_icode_list().empty() == false)
 		ic_list.splice(ic_list.end(), load_stmt2.get_icode_list());
 	ic_list.push_back(comparison_stmt);
-	if(type_casted) ic_list.push_back(typecast_stmt);
 
 	Code_For_Ast * comparison_code;
 	if (ic_list.empty() == false) comparison_code = new Code_For_Ast(ic_list, result_register);
@@ -497,8 +487,6 @@ Arithmetic_Expr_Ast::Arithmetic_Expr_Ast(Ast* arg_lhs, Operator o, Ast* arg_rhs,
 	// node_data_type = int_data_type;
 	lineno = line;
 	O = o;
-	type_casted = false;
-
 }
 
 Arithmetic_Expr_Ast::~Arithmetic_Expr_Ast() {
@@ -633,40 +621,21 @@ Code_For_Ast & Arithmetic_Expr_Ast::compile()
 	Ics_Opd * register_opd4;
 	Icode_Stmt * typecast_stmt;
 
-	if(!type_casted){
-		if(node_data_type == int_data_type){
-			result_register = machine_dscr_object.get_new_register(int_num);	
-			register_opd3 = new Register_Addr_Opd(result_register);
+	if(node_data_type == int_data_type){
+		result_register = machine_dscr_object.get_new_register(int_num);	
+		register_opd3 = new Register_Addr_Opd(result_register);
 
-		}
-		else {
-			result_register = machine_dscr_object.get_new_register(float_num);	
-			register_opd3 = new Register_Addr_Opd(result_register);
-		
-		}
-	}else{
-		if(node_data_type == int_data_type){
-			result_register = machine_dscr_object.get_new_register(float_num);	
-			register_opd3 = new Register_Addr_Opd(result_register);
-			result_register = machine_dscr_object.get_new_register(int_num);	
-			register_opd4 = new Register_Addr_Opd(result_register);
-			typecast_stmt = new Move_IC_Stmt(mfc1,register_opd3 , register_opd4);
-		}
-		else {
-			result_register = machine_dscr_object.get_new_register(int_num);	
-			register_opd3 = new Register_Addr_Opd(result_register);
-			result_register = machine_dscr_object.get_new_register(float_num);	
-			register_opd4 = new Register_Addr_Opd(result_register);
-			typecast_stmt = new Move_IC_Stmt(mtc1,register_opd3 , register_opd4);
-
-		
-		}
+	}
+	else {
+		result_register = machine_dscr_object.get_new_register(float_num);	
+		register_opd3 = new Register_Addr_Opd(result_register);
+	
 	}
 	CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
 	Ics_Opd * register_opd1 = new Register_Addr_Opd(load_register1);
 	Ics_Opd * register_opd2 = new Register_Addr_Opd(load_register2);
 	Icode_Stmt * arithmetic_stmt;
-	if((node_data_type == int_data_type && !type_casted) || (node_data_type == float_data_type && type_casted)) {
+	if(node_data_type == int_data_type) {
 		switch (O) {
 			case ADD:
 				arithmetic_stmt = new Compute_IC_Stmt(add,register_opd1,register_opd2,register_opd3);
@@ -705,7 +674,6 @@ Code_For_Ast & Arithmetic_Expr_Ast::compile()
 	if (load_stmt2.get_icode_list().empty() == false)
 		ic_list.splice(ic_list.end(), load_stmt2.get_icode_list());
 	ic_list.push_back(arithmetic_stmt);
-	if (type_casted) ic_list.push_back(typecast_stmt);
 
 	Code_For_Ast * arithmetic_code;
 	if (ic_list.empty() == false) arithmetic_code = new Code_For_Ast(ic_list, result_register);
@@ -766,12 +734,156 @@ Code_For_Ast & Arithmetic_Expr_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 
 /****************************************************************************************************************************************/
 
+Type_Cast_Ast::Type_Cast_Ast(Ast* arg_lhs, Data_Type old_type, Data_Type new_type, int line) {
+	lhs = arg_lhs;
+	lineno = line;
+	ast_num_child = unary_arity;
+	node_data_type = new_type;
+	old_data_type = old_type;
+}
+
+void Type_Cast_Ast::print(ostream & file_buffer) {
+	lhs->print(file_buffer);
+}
+
+Data_Type Type_Cast_Ast::get_data_type() {
+	return node_data_type;
+}
+
+void Type_Cast_Ast::set_data_type(string type) {
+	if (type == "FLOAT") {
+		node_data_type = float_data_type;
+	}
+	else if (type == "INTEGER") {
+
+		node_data_type = int_data_type;
+
+	}
+	else if (type == "DOUBLE") {
+		node_data_type = double_data_type;
+	}
+}
+	
+bool Type_Cast_Ast::check_ast() {
+	return true;
+}
+
+Eval_Result & Type_Cast_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer) {
+	CHECK_INVARIANT((lhs!=NULL), "Lhs of Arithmetic_Ast cannot be null")
+	Eval_Result & result1 = lhs->evaluate(eval_env, file_buffer);
+	CHECK_INPUT_AND_ABORT(result1.is_variable_defined(),"Variable should be defined to be on lhs of Arithmetic Expression", lineno);
+	Eval_Result * result;
+	switch(node_data_type) {
+		case int_data_type:
+			result = new Eval_Result_Value_Int;
+			result->set_value((int)result1.get_value());
+			break;
+		case float_data_type:
+			result = new Eval_Result_Value_Float;
+			result->set_value((double)result1.get_value());
+			break;
+		case double_data_type:
+			result = new Eval_Result_Value_Double;
+			result->set_value((double)result1.get_value());
+			break;
+	}
+	return *result;
+}
+
+Type_Cast_Ast::~Type_Cast_Ast() {
+	delete lhs;
+}
+
+Code_For_Ast & Type_Cast_Ast::compile()
+{
+	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
+	Code_For_Ast & load_stmt1 = lhs->compile();
+	Register_Descriptor * load_register1 = load_stmt1.get_reg();
+	machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = true;
+	Register_Descriptor * result_register;
+	Ics_Opd * register_opd2;
+	Ics_Opd * register_opd3;
+	Icode_Stmt * typecast_stmt;
+	switch (node_data_type) {
+		case int_data_type:
+			register_opd2 = new Register_Addr_Opd(load_register1);
+			result_register = machine_dscr_object.get_new_register(int_num);	
+			register_opd3 = new Register_Addr_Opd(result_register);
+			typecast_stmt = new Move_IC_Stmt(mfc1, register_opd2 , register_opd3);
+			break;
+		case float_data_type:
+			register_opd2 = new Register_Addr_Opd(load_register1);
+			result_register = machine_dscr_object.get_new_register(float_num);	
+			register_opd3 = new Register_Addr_Opd(result_register);
+			typecast_stmt = new Move_IC_Stmt(mtc1, register_opd2 , register_opd3);
+			break;
+		case double_data_type:
+			register_opd2 = new Register_Addr_Opd(load_register1);
+			result_register = machine_dscr_object.get_new_register(float_num);	
+			register_opd3 = new Register_Addr_Opd(result_register);
+			typecast_stmt = new Move_IC_Stmt(mtc1, register_opd2 , register_opd3);
+			break;
+		default:
+			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,"Type_cast can be to int, float and double only");
+	}
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	if (load_stmt1.get_icode_list().empty() == false)
+		ic_list = load_stmt1.get_icode_list();
+	ic_list.push_back(typecast_stmt);
+	Code_For_Ast * arithmetic_code;
+	if (ic_list.empty() == false) arithmetic_code = new Code_For_Ast(ic_list, result_register);
+	machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = false;
+	return *arithmetic_code;
+}
+
+Code_For_Ast & Type_Cast_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
+{
+	CHECK_INVARIANT((lhs != NULL), "Lhs cannot be null");
+	Code_For_Ast & load_stmt1 = lhs->compile();
+	Register_Descriptor * load_register1 = load_stmt1.get_reg();
+	machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = true;
+	Register_Descriptor * result_register;
+	Ics_Opd * register_opd2;
+	Ics_Opd * register_opd3;
+	Icode_Stmt * typecast_stmt;
+	switch (node_data_type) {
+		case int_data_type:
+			register_opd2 = new Register_Addr_Opd(load_register1);
+			result_register = machine_dscr_object.get_new_register(int_num);	
+			register_opd3 = new Register_Addr_Opd(result_register);
+			typecast_stmt = new Move_IC_Stmt(mfc1, register_opd2 , register_opd3);
+			break;
+		case float_data_type:
+			register_opd2 = new Register_Addr_Opd(load_register1);
+			result_register = machine_dscr_object.get_new_register(float_num);	
+			register_opd3 = new Register_Addr_Opd(result_register);
+			typecast_stmt = new Move_IC_Stmt(mtc1, register_opd2 , register_opd3);
+			break;
+		case double_data_type:
+			register_opd2 = new Register_Addr_Opd(load_register1);
+			result_register = machine_dscr_object.get_new_register(float_num);	
+			register_opd3 = new Register_Addr_Opd(result_register);
+			typecast_stmt = new Move_IC_Stmt(mtc1, register_opd2 , register_opd3);
+			break;
+		default:
+			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH,"Type_cast can be to int, float and double only");
+	}
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	if (load_stmt1.get_icode_list().empty() == false)
+		ic_list = load_stmt1.get_icode_list();
+	ic_list.push_back(typecast_stmt);
+	Code_For_Ast * arithmetic_code;
+	if (ic_list.empty() == false) arithmetic_code = new Code_For_Ast(ic_list, result_register);
+	machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = false;
+	return *arithmetic_code;
+}
+
+/****************************************************************************************************************************************/
+
 Negation_Expr_Ast::Negation_Expr_Ast(Ast* arg_lhs, int line) {
 	lhs = arg_lhs;
 	lineno = line;
 	ast_num_child = unary_arity;
-	type_casted = false;
-
 }
 
 void Negation_Expr_Ast::print(ostream & file_buffer) {
@@ -837,39 +949,20 @@ Code_For_Ast & Negation_Expr_Ast::compile()
 	Ics_Opd * register_opd3;
 	Icode_Stmt * typecast_stmt;
 
-	if(!type_casted){
-		if(node_data_type == int_data_type){
-			result_register = machine_dscr_object.get_new_register(int_num);	
-			register_opd2 = new Register_Addr_Opd(result_register);
+	if(node_data_type == int_data_type){
+		result_register = machine_dscr_object.get_new_register(int_num);	
+		register_opd2 = new Register_Addr_Opd(result_register);
 
-		}
-		else {
-			result_register = machine_dscr_object.get_new_register(float_num);	
-			register_opd2 = new Register_Addr_Opd(result_register);
-		
-		}
-	}else{
-		if(node_data_type == int_data_type){
-			result_register = machine_dscr_object.get_new_register(float_num);	
-			register_opd2 = new Register_Addr_Opd(result_register);
-			result_register = machine_dscr_object.get_new_register(int_num);	
-			register_opd3 = new Register_Addr_Opd(result_register);
-			typecast_stmt = new Move_IC_Stmt(mfc1,register_opd2 , register_opd3);
-		}
-		else {
-			result_register = machine_dscr_object.get_new_register(int_num);	
-			register_opd2 = new Register_Addr_Opd(result_register);
-			result_register = machine_dscr_object.get_new_register(float_num);	
-			register_opd3 = new Register_Addr_Opd(result_register);
-			typecast_stmt = new Move_IC_Stmt(mtc1,register_opd2 , register_opd3);
-
-		
-		}
+	}
+	else {
+		result_register = machine_dscr_object.get_new_register(float_num);	
+		register_opd2 = new Register_Addr_Opd(result_register);
+	
 	}
 	CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
 	Ics_Opd * register_opd1 = new Register_Addr_Opd(load_register1);
 	Icode_Stmt * negation_stmt;
-	if((node_data_type == int_data_type && !type_casted) || (node_data_type == float_data_type && type_casted)) {
+	if(node_data_type == int_data_type) {
 		negation_stmt = new Move_IC_Stmt(neg,register_opd1,register_opd2);
 	} else {
 		negation_stmt = new Move_IC_Stmt(neg_d,register_opd1,register_opd2);
@@ -880,7 +973,6 @@ Code_For_Ast & Negation_Expr_Ast::compile()
 	if (load_stmt1.get_icode_list().empty() == false)
 		ic_list = load_stmt1.get_icode_list();
 	ic_list.push_back(negation_stmt);
-	if (type_casted) ic_list.push_back(typecast_stmt);
 
 	Code_For_Ast * arithmetic_code;
 	if (ic_list.empty() == false) arithmetic_code = new Code_For_Ast(ic_list, result_register);
@@ -903,8 +995,6 @@ Goto_Ast::Goto_Ast(int bb_number, int line) {
 	lineno = line;
 	node_data_type = void_data_type;
 	ast_num_child = zero_arity;
-	type_casted = false;
-
 }
 
 Goto_Ast::~Goto_Ast()
@@ -976,8 +1066,6 @@ If_Else_Ast::If_Else_Ast(Ast* cond, Ast* true_successor, Ast* false_successor, i
 	node_data_type = void_data_type;
 	ast_num_child = tri_arity;
 	lineno = line;
-	type_casted = false;
-
 }
 
 If_Else_Ast::~If_Else_Ast() {
@@ -1081,8 +1169,6 @@ Return_Ast::Return_Ast(int line) {
 	ast_num_child = zero_arity;
 	node_data_type  =void_data_type;
 	lineno = line;
-	type_casted = false;
-
 }
 
 Return_Ast::~Return_Ast()
@@ -1128,8 +1214,6 @@ Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry, int line)
 	lineno = line;
 	variable_name = variable_symbol_entry->get_variable_name();
 	variable_symbol_entry->variable_data_type = node_data_type;
-	type_casted = false;
-
 }
 
 Name_Ast::~Name_Ast()
@@ -1262,44 +1346,17 @@ Code_For_Ast & Name_Ast::compile()
 	Ics_Opd * register_opd_typed;
 	Icode_Stmt * load_stmt;
 	list<Icode_Stmt *> ic_list;
-	if(!type_casted){
-		if(get_data_type()==int_data_type){
-			result_register = machine_dscr_object.get_new_register(int_num);
-			register_opd = new Register_Addr_Opd(result_register);
-			load_stmt = new Move_IC_Stmt(load, opd, register_opd);
-		} else {
-			result_register = machine_dscr_object.get_new_register(float_num);
-			register_opd = new Register_Addr_Opd(result_register);
-			load_stmt = new Move_IC_Stmt(load_d, opd, register_opd);
-		}
-		ic_list.push_back(load_stmt);
-	}else {
-		if(node_data_type == int_data_type){
-			result_register = machine_dscr_object.get_new_register(float_num);
-			register_opd = new Register_Addr_Opd(result_register);
-			load_stmt = new Move_IC_Stmt(load_d, opd, register_opd);
-			ic_list.push_back(load_stmt);
-			//mfc printing
-			result_register = machine_dscr_object.get_new_register(int_num);
-			register_opd_typed = new Register_Addr_Opd(result_register);
-			load_stmt = new Move_IC_Stmt(mfc1, register_opd, register_opd_typed);
-			ic_list.push_back(load_stmt);
 
-		}else{
-			result_register = machine_dscr_object.get_new_register(int_num);
-			register_opd = new Register_Addr_Opd(result_register);
-			load_stmt = new Move_IC_Stmt(load, opd, register_opd);
-			ic_list.push_back(load_stmt);
-			//mfc printing
-			result_register = machine_dscr_object.get_new_register(float_num);
-			register_opd_typed = new Register_Addr_Opd(result_register);
-			load_stmt = new Move_IC_Stmt(mtc1, register_opd, register_opd_typed);
-			ic_list.push_back(load_stmt);			
-		}
-
+	if(get_data_type()==int_data_type){
+		result_register = machine_dscr_object.get_new_register(int_num);
+		register_opd = new Register_Addr_Opd(result_register);
+		load_stmt = new Move_IC_Stmt(load, opd, register_opd);
+	} else {
+		result_register = machine_dscr_object.get_new_register(float_num);
+		register_opd = new Register_Addr_Opd(result_register);
+		load_stmt = new Move_IC_Stmt(load_d, opd, register_opd);
 	}
-	
-
+	ic_list.push_back(load_stmt);
 
 	Code_For_Ast & load_code = *new Code_For_Ast(ic_list, result_register);
 
@@ -1363,8 +1420,6 @@ Number_Ast<DATA_TYPE>::Number_Ast(DATA_TYPE number, Data_Type constant_data_type
 	node_data_type = constant_data_type;
 	ast_num_child = zero_arity;
 	lineno = line;
-	type_casted = false;
-
 }
 
 template <class DATA_TYPE>
@@ -1435,48 +1490,21 @@ Code_For_Ast & Number_Ast<DATA_TYPE>::compile()
 	Ics_Opd * load_register_typed;
 	Icode_Stmt * typecast_stmt;
 
-	if(!type_casted){
-		if(node_data_type == int_data_type){
-			result_register = machine_dscr_object.get_new_register(int_num);	
-			opd = new Const_Opd<int>(constant);
-			CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
-			load_register = new Register_Addr_Opd(result_register);
-		}
-		else {
-			result_register = machine_dscr_object.get_new_register(float_num);	
-			opd = new Const_Opd<float>(constant);
-			CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
-			load_register = new Register_Addr_Opd(result_register);
-		}
+	if(node_data_type == int_data_type){
+		result_register = machine_dscr_object.get_new_register(int_num);	
+		opd = new Const_Opd<int>(constant);
+		CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
+		load_register = new Register_Addr_Opd(result_register);
 	}
-	else{
-		if(node_data_type == int_data_type){
-			result_register = machine_dscr_object.get_new_register(float_num);	
-			opd = new Const_Opd<float>(constant);
-			CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
-			load_register = new Register_Addr_Opd(result_register);
-
-			result_register = machine_dscr_object.get_new_register(int_num);	
-			load_register_typed = new Register_Addr_Opd(result_register);
-			typecast_stmt = new Move_IC_Stmt(mfc1, load_register, load_register_typed);
-
-
-		}
-		else {
-			result_register = machine_dscr_object.get_new_register(int_num);	
-			opd = new Const_Opd<int>(constant);
-			CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
-			load_register = new Register_Addr_Opd(result_register);
-
-			result_register = machine_dscr_object.get_new_register(float_num);	
-			load_register_typed = new Register_Addr_Opd(result_register);
-			typecast_stmt = new Move_IC_Stmt(mtc1, load_register, load_register_typed);
-
-		}	
+	else {
+		result_register = machine_dscr_object.get_new_register(float_num);	
+		opd = new Const_Opd<float>(constant);
+		CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
+		load_register = new Register_Addr_Opd(result_register);
 	}
 	
 	Icode_Stmt * load_stmt;
-	if((node_data_type == int_data_type && !type_casted) || (node_data_type == float_data_type && type_casted)  ){
+	if(node_data_type == int_data_type){
 		load_stmt = new Move_IC_Stmt(imm_load, opd, load_register);
 	}else {
 		load_stmt = new Move_IC_Stmt(imm_load_d, opd, load_register);
@@ -1484,7 +1512,6 @@ Code_For_Ast & Number_Ast<DATA_TYPE>::compile()
 
 	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
 	ic_list.push_back(load_stmt);
-	if (type_casted) ic_list.push_back(typecast_stmt);
 
 	Code_For_Ast & num_code = *new Code_For_Ast(ic_list, result_register);
 

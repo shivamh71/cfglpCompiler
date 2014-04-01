@@ -505,13 +505,18 @@ unary_expression:
 			if(NOT_ONLY_PARSE)
 			{
 				$$ = $5;
-				if ($$->get_data_type()==1 && (*$2=="FLOAT" || *$2=="DOUBLE"))
-					$$->type_casted = true;
-				else if ($$->get_data_type()==3 && (*$2=="INTEGER" ))
-					$$->type_casted = true;
-				else if ($$->get_data_type()==4 && ( *$2=="INTEGER"))
-					$$->type_casted = true;
-				$$->set_data_type(*$2);
+				switch($$->get_data_type()) {
+					case int_data_type:
+						if (*$2=="FLOAT") $$ = new Type_Cast_Ast($$,int_data_type,float_data_type,get_line_number());
+						else if (*$2=="DOUBLE") $$ = new Type_Cast_Ast($$,int_data_type,double_data_type,get_line_number());
+						break;
+					case float_data_type:
+						if (*$2=="INTEGER") $$ = new Type_Cast_Ast($$,float_data_type,int_data_type,get_line_number());
+						break;
+					case double_data_type:
+						if (*$2=="INTEGER") $$ = new Type_Cast_Ast($$,double_data_type,int_data_type,get_line_number());
+						break;
+				}
 			}
 		}
 |
@@ -520,13 +525,18 @@ unary_expression:
 			if(NOT_ONLY_PARSE)
 			{
 				$$ = $4;
-				if ($$->get_data_type()==1 && (*$2=="FLOAT" || *$2=="DOUBLE"))
-					$$->type_casted = true;
-				else if ($$->get_data_type()==3 && (*$2=="INTEGER" ))
-					$$->type_casted = true;
-				else if ($$->get_data_type()==4 && (*$2=="INTEGER"))
-					$$->type_casted = true;
-				$$->set_data_type(*$2);
+				switch($$->get_data_type()) {
+					case int_data_type:
+						if (*$2=="FLOAT") $$ = new Type_Cast_Ast($$,int_data_type,float_data_type,get_line_number());
+						else if (*$2=="DOUBLE") $$ = new Type_Cast_Ast($$,int_data_type,double_data_type,get_line_number());
+						break;
+					case float_data_type:
+						if (*$2=="INTEGER") $$ = new Type_Cast_Ast($$,float_data_type,int_data_type,get_line_number());
+						break;
+					case double_data_type:
+						if (*$2=="INTEGER") $$ = new Type_Cast_Ast($$,double_data_type,int_data_type,get_line_number());
+						break;
+				}
 			}
 		}
 |
@@ -535,13 +545,18 @@ unary_expression:
 			if(NOT_ONLY_PARSE)
 			{
 				$$ = $4;
-				if ($$->get_data_type()==1 && (*$2=="FLOAT" || *$2=="DOUBLE"))
-					$$->type_casted = true;
-				else if ($$->get_data_type()==3 && (*$2=="INTEGER" ))
-					$$->type_casted = true;
-				else if ($$->get_data_type()==4 && (*$2=="INTEGER"))
-					$$->type_casted = true;
-				$$->set_data_type(*$2);
+				switch($$->get_data_type()) {
+					case int_data_type:
+						if (*$2=="FLOAT") $$ = new Type_Cast_Ast($$,int_data_type,float_data_type,get_line_number());
+						else if (*$2=="DOUBLE") $$ = new Type_Cast_Ast($$,int_data_type,double_data_type,get_line_number());
+						break;
+					case float_data_type:
+						if (*$2=="INTEGER") $$ = new Type_Cast_Ast($$,float_data_type,int_data_type,get_line_number());
+						break;
+					case double_data_type:
+						if (*$2=="INTEGER") $$ = new Type_Cast_Ast($$,double_data_type,int_data_type,get_line_number());
+						break;
+				}
 			}
 		}
 |
