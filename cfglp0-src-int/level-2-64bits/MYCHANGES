@@ -2,15 +2,19 @@ Submitted by :
 	Shubham Mehta - 110050013
 	Shivam H Prasad - 110050041
 
-We first brought level 0 code to level 1 using our previous code with slight modifications. 
-
 1)  ast.hh and ast.cc
-	-> wrote function to generate spim code for all the Ast
-	-> wrote code to implement lra tag for Relational Expression, Goto and If_Else Statement
+	-> added Arithmetic_Expression class
+	-> wrote print, evaluate, compile functions for Arithmetic Expression
+	-> update all the ast classes to allow int and float data types
+
+2)	icode.hh and icode.cc
+	-> updated Stmt classes to allow float and int type registers
+	-> added newer formats for instructions
 
 3)	reg-alloc.hh and reg-alloc.cc
-	-> updated Stmt classes to generate spim code for corresponding statements
-	-> updated code to implement lra tag for Relation Expression
+	-> modified get_new_register function to get int or float type register whenever needed
+	-> added registers for float operations
+	-> added newer instruction to the instruction_map
 
 Corner cases handled :
-	-> lra implementation has been handled with care in case of assignment statements, for eg. case when rhs of assignment is a Relation Expression is handled separately
+	-> we have handled type casting operations carefully
