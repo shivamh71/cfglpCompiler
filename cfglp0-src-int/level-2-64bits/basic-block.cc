@@ -111,7 +111,7 @@ void Basic_Block::compile()
 		{
 			if (command_options.is_do_lra_selected() == true)
 			{
-				Lra_Outcome lra(machine_dscr_object.spim_register_table[v0],false,false,false,false,false);
+				Lra_Outcome lra;
 				ast_code = ast->compile_and_optimize_ast(lra);
 			}
 

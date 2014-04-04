@@ -197,7 +197,10 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 		}
 		else 
 		{
-			result_register = machine_dscr_object.get_new_register(int_num);
+			if (source_memory->get_data_type() == int_data_type)
+				result_register = machine_dscr_object.get_new_register(int_num);
+			else
+				result_register = machine_dscr_object.get_new_register(float_num);
 			is_a_new_register = true;
 			load_needed = true;
 		}
@@ -226,7 +229,11 @@ void Lra_Outcome::optimize_lra(Lra_Scenario lcase, Ast * destination_memory, Ast
 		}
 		else 
 		{
-			result_register = machine_dscr_object.get_new_register(int_num);
+			if (source_memory->get_data_type() == int_data_type)
+				result_register = machine_dscr_object.get_new_register(int_num);
+			else
+				result_register = machine_dscr_object.get_new_register(float_num);
+
 			is_a_new_register = true;
 			load_needed = true;
 		}
@@ -387,24 +394,20 @@ Register_Descriptor * Machine_Description::get_new_register(Register_Val_Type vt
 	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
 	{
 		reg_desc = i->second;
-
 		if (reg_desc->is_free() && reg_desc->get_val_type()==vt) {
-			// cout << "returning : " << reg_desc->get_name() << endl;
 			return reg_desc;
 		}
 	}
 	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
 	{
 		reg_desc = i->second;
-		if(reg_desc->get_val_type()==vt)
-			reg_desc->clear_lra_symbol_list();
+		// if(reg_desc->get_val_type()==vt)
+		reg_desc->clear_lra_symbol_list();
 	}
 	for (i = spim_register_table.begin(); i != spim_register_table.end(); i++)
 	{
 		reg_desc = i->second;
-
 		if (reg_desc->is_free()&&reg_desc->get_val_type()==vt) {
-			// cout << "returning : " << reg_desc->get_name() << endl;
 			return reg_desc;
 		}
 	}
