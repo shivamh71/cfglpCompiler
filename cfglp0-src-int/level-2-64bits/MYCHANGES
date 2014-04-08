@@ -3,18 +3,10 @@ Submitted by :
 	Shivam H Prasad - 110050041
 
 1)  ast.hh and ast.cc
-	-> added Arithmetic_Expression class
-	-> wrote print, evaluate, compile functions for Arithmetic Expression
-	-> update all the ast classes to allow int and float data types
+	-> implemented compile_and_optimize function for Type_Cast, Arithmetic, Negation Ast
 
-2)	icode.hh and icode.cc
-	-> updated Stmt classes to allow float and int type registers
-	-> added newer formats for instructions
-
-3)	reg-alloc.hh and reg-alloc.cc
-	-> modified get_new_register function to get int or float type register whenever needed
-	-> added registers for float operations
-	-> added newer instruction to the instruction_map
+2)	reg-alloc.hh and reg-alloc.cc
+	-> modified optimize lra function to allow float register types
 
 Corner cases handled :
-	-> we have handled type casting operations carefully
+	-> we have handled cases when all the registers gets used up very carefully
