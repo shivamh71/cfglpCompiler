@@ -27,21 +27,24 @@
 
 using namespace std;
 
-#include <stdio.h>
+#include"common-classes.hh"
 #include"error-display.hh"
+#include"user-options.hh"
 #include"local-environment.hh"
-
+#include"icode.hh"
+#include"reg-alloc.hh"
 #include"symbol-table.hh"
 #include"ast.hh"
 #include"basic-block.hh"
 #include"procedure.hh"
 #include"program.hh"
-#define AST_SPACE "         "
 
-Procedure::Procedure(Data_Type proc_return_type, string proc_name)
+Procedure::Procedure(Data_Type proc_return_type, string proc_name, int line)
 {
 	return_type = proc_return_type;
 	name = proc_name;
+
+	lineno = line;
 }
 
 Procedure::~Procedure()
@@ -56,7 +59,7 @@ string Procedure::get_proc_name()
 	return name;
 }
 
-void Procedure::set_basic_block_list(list<Basic_Block *> bb_list)
+void Procedure::set_basic_block_list(list<Basic_Block *> & bb_list)
 {
 	basic_block_list = bb_list;
 }
@@ -65,12 +68,6 @@ void Procedure::set_local_list(Symbol_Table & new_list)
 {
 	local_symbol_table = new_list;
 	local_symbol_table.set_table_scope(local);
-}
-
-void Procedure::set_arg_list(Symbol_Table & new_list)
-{
-	local_arg_table = new_list;
-	local_arg_table.set_table_scope(local);
 }
 
 Data_Type Procedure::get_return_type()
@@ -83,30 +80,31 @@ bool Procedure::variable_in_symbol_list_check(string variable)
 	return local_symbol_table.variable_in_symbol_list_check(variable);
 }
 
-bool Procedure::variable_in_arg_list_check(string variable)
-{
-	return local_arg_table.variable_in_symbol_list_check(variable);
-}
-
 Symbol_Table_Entry & Procedure::get_symbol_table_entry(string variable_name)
 {
 	return local_symbol_table.get_symbol_table_entry(variable_name);
 }
 
-Symbol_Table_Entry & Procedure::get_arg_table_entry(string variable_name)
+void Procedure::print(ostream & file_buffer)
 {
-	return local_arg_table.get_symbol_table_entry(variable_name);
+	CHECK_INVARIANT((return_type == void_data_type), "Only void return type of funtion is allowed");
+
+	file_buffer << PROC_SPACE << "Procedure: " << name << ", Return Type: void\n";
+
+	if ((command_options.is_show_symtab_selected()) || (command_options.is_show_program_selected()))
+	{
+		file_buffer << "   Local Declarartions\n";
+		local_symbol_table.print(file_buffer);
+	}
+
+	if ((command_options.is_show_program_selected()) || (command_options.is_show_ast_selected()))
+	{
+		list<Basic_Block *>::iterator i;
+		for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
+			(*i)->print_bb(file_buffer);
+	}
 }
 
-void Procedure::print_ast(ostream & file_buffer)
-{
-	file_buffer << PROC_SPACE << "Procedure: "<<name << "\n";
-
-	list<Basic_Block *>::iterator i;
-	for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
-		(*i)->print_bb(file_buffer);
-}
-	
 Basic_Block & Procedure::get_start_basic_block()
 {
 	list<Basic_Block *>::iterator i;
@@ -133,21 +131,15 @@ Basic_Block * Procedure::get_next_bb(Basic_Block & current_bb)
 	return NULL;
 }
 
-Eval_Result & Procedure::evaluate(ostream & file_buffer,map<string, Eval_Result_Value *> arg_value_table)
+Eval_Result & Procedure::evaluate(ostream & file_buffer)
 {
 	Local_Environment & eval_env = *new Local_Environment();
 	local_symbol_table.create(eval_env);
 	
-	map<string, Eval_Result_Value *>::iterator i;
-
-	for (i = arg_value_table.begin(); i != arg_value_table.end(); i++){
-		eval_env.put_variable_value(*(*i).second, (*i).first);
-	}
 	Eval_Result * result = NULL;
 
-	file_buffer <<"" PROC_SPACE << "Evaluating Procedure << " << name << " >>\n";
+	file_buffer << PROC_SPACE << "Evaluating Procedure " << name << "\n";
 	file_buffer << LOC_VAR_SPACE << "Local Variables (before evaluating):\n";
-	eval_env.flag = 1;
 	eval_env.print(file_buffer);
 	file_buffer << "\n";
 	
@@ -175,43 +167,84 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer,map<string, Eval_Result_
 		}		
 	}
 
-	Eval_Result* final_return = NULL;
-	// Eval_Result_Value* to_return = NULL;
-	// char str[100];
-	string temp_string  = "return";
-	switch(return_type){
-		case int_data_type:
-			final_return = new Eval_Result_Value_Int();
-			// to_return = new Eval_Result_Value_Int();
-			final_return->set_value((int)eval_env.return_value);
-			// to_return->set_value((int)eval_env.return_value);
-			// eval_env.put_variable_value(*to_return, temp_string);
-			break;
-		case float_data_type:
-			final_return = new Eval_Result_Value_Float();
-			// to_return = new Eval_Result_Value_Float();
-			final_return->set_value((double)eval_env.return_value);
-			// to_return->set_value((double)eval_env.return_value);
-			// eval_env.put_variable_value(*to_return, temp_string);
-			break;
-		case double_data_type:
-			final_return = new Eval_Result_Value_Double();
-			// to_return = new Eval_Result_Value_Double();
-			final_return->set_value((double)eval_env.return_value);
-			// to_return->set_value((double)eval_env.return_value);
-			// eval_env.put_variable_value(*to_return, temp_string);
-			break;
-		default:
-			final_return = new Eval_Result_Value_Int();
-			break;
-	}
-	if (eval_env.return_type == 0)
-		final_return->set_variable_status(false);
 	file_buffer << "\n\n";
-	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating) Function: << "<< name << " >>\n";
-	eval_env.flag = 1;
+	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating):\n";
 	eval_env.print(file_buffer);
 
-	return *final_return;
+	return *result;
 }
 
+void Procedure::compile()
+{
+	// assign offsets to local symbol table
+	local_symbol_table.set_start_offset_of_first_symbol(4);
+	local_symbol_table.set_size(4);
+	local_symbol_table.assign_offsets();
+
+	// compile the program by visiting each basic block
+	list<Basic_Block *>::iterator i;
+	for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
+		(*i)->compile();
+}
+
+void Procedure::print_icode(ostream & file_buffer)
+{
+	file_buffer << "  Procedure: " << name << "\n";
+	file_buffer << "  Intermediate Code Statements\n";
+
+	list<Basic_Block *>::iterator i;
+	for (i = basic_block_list.begin(); i != basic_block_list.end(); i++)
+		(*i)->print_icode(file_buffer);
+}
+
+void Procedure::print_assembly(ostream & file_buffer)
+{
+	print_prologue(file_buffer);
+
+	list<Basic_Block *>::iterator i;
+	for(i = basic_block_list.begin(); i != basic_block_list.end(); i++)
+		(*i)->print_assembly(file_buffer);
+
+	print_epilogue(file_buffer);
+}
+
+void Procedure::print_prologue(ostream & file_buffer)
+{
+	stringstream prologue;
+
+	prologue << "\n\
+	.text \t\t\t# The .text assembler directive indicates\n\
+	.globl " << name << "\t\t# The following is the code (as oppose to data)\n";
+
+	prologue << name << ":\t\t\t\t# .globl makes main know to the \n\t\t\t\t# outside of the program.\n\
+# Prologue begins \n\
+	sw $fp, 0($sp)\t\t# Save the frame pointer\n\
+	sub $fp, $sp, 4\t\t# Update the frame pointer\n";
+
+	int size = local_symbol_table.get_size();
+	size = -size;
+	if (size > 0)
+		prologue << "\n\tsub $sp, $sp, " << (size + 4) << "\t\t# Make space for the locals\n";
+	else
+		prologue << "\n\tsub $sp, $sp, 4\t\t#Make space for the locals\n";
+
+	prologue << "# Prologue ends\n\n";
+
+	file_buffer << prologue.str();
+}
+
+void Procedure::print_epilogue(ostream & file_buffer)
+{
+	stringstream epilogue;
+
+	int size = local_symbol_table.get_size();
+	size = -size;
+	if (size > 0)
+		epilogue << "\n# Epilogue Begins\n\tadd $sp, $sp, " << (size + 4) << "\n";
+	else
+		epilogue << "\n#Epilogue Begins\n\tadd $sp, $sp, 4\n";
+
+	epilogue << "\tlw $fp, 0($sp)  \n\tjr        $31\t\t# Jump back to the operating system.\n# Epilogue Ends\n\n";
+
+	file_buffer << epilogue.str();
+}

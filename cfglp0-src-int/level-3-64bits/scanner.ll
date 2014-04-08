@@ -41,10 +41,6 @@ double	{
 			return Parser::DOUBLE; 
 		}
 
-void	{
-			store_token_name("VOID");
-			return Parser::VOID;
-		}
 return	{
 			store_token_name("RETURN");
 			return Parser::RETURN; 
@@ -131,7 +127,7 @@ goto 	{
 			return Parser::ASSIGN_OP;
 		}
 
-[-:{}();=|&!,]	{
+[-:{}();=|&!]	{
 						store_token_name("META CHAR");
 						return matched()[0];
 					}
@@ -180,7 +176,5 @@ goto 	{
 			string error_message;
 			error_message =  "Illegal character `" + matched();
 			error_message += "' on line " + lineNr();
-			
-			int line_number = lineNr();
-			report_error(error_message, line_number);
+			CHECK_INVARIANT(false,error_message);
 		}

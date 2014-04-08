@@ -3,7 +3,11 @@ int r(int a)
 if(a==1)
 return 1;
 else
-return r(a-1) + 1;
+{
+int i;
+i = r(a-1);
+return i + 1;
+}
 
 }
 
