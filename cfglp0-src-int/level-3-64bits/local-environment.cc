@@ -211,7 +211,9 @@ Result_Enum Eval_Result_Value_Double::get_result_enum()
 ///////////////////////////////////////////////////////////////////////////////////
 
 Local_Environment::Local_Environment()
-{}
+{
+	flag = 0;
+}
 
 Local_Environment::~Local_Environment()
 {}
@@ -235,10 +237,14 @@ void Local_Environment::print(ostream & file_buffer)
 			{
 				file_buffer << std::fixed;
 				file_buffer << std::setprecision(2);
-				if (vi->get_result_enum() == int_result)
-					file_buffer << VAR_SPACE << (*i).first << " : " << (int)vi->get_value() << "\n";
-				else 
-					file_buffer << VAR_SPACE << (*i).first << " : " << (float)vi->get_value() << "\n";
+				if (flag) {
+					if (vi->get_result_enum() == int_result)
+						file_buffer << VAR_SPACE << (*i).first << " : " << (int)vi->get_value() << "\n";
+					else 
+						file_buffer << VAR_SPACE << (*i).first << " : " << (float)vi->get_value() << "\n";
+				}
+				else
+					file_buffer << VAR_SPACE << (*i).first << " : " << 0 << "\n";
 			}
 		}
 	}

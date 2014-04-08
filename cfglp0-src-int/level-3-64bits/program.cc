@@ -102,6 +102,16 @@ Procedure * Program::get_main_procedure(ostream & file_buffer)
 	return NULL;
 }
 
+Procedure * Program::get_procedure(string name) {
+	map<string, Procedure *>::iterator i;
+	for(i = procedure_map.begin(); i != procedure_map.end(); i++)
+	{
+		if (i->second != NULL && i->second->get_proc_name() == name)
+				return i->second;
+	}
+	CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Procedure corresponding to the name is not found");
+}
+
 void Program::print()
 {
 	ostream * file_buffer;
@@ -140,22 +150,20 @@ void Program::print()
 Eval_Result & Program::evaluate()
 {
 	Procedure * main = get_main_procedure(command_options.get_output_buffer());
+	map<string, Eval_Result *> arg_value_table;
 	CHECK_INPUT_AND_ABORT((main != NULL), 
 		"No main function found in the program", NO_FILE_LINE);
-
 	global_symbol_table.create(interpreter_global_table);
-
 	command_options.create_output_buffer();
 	ostream & file_buffer = command_options.get_output_buffer();
 	file_buffer << "Evaluating Program\n";
 	file_buffer << GLOB_SPACE << "Global Variables (before evaluating):\n";
+	interpreter_global_table.flag = 1;
 	interpreter_global_table.print(file_buffer);
-
-	Eval_Result & result = main->evaluate(file_buffer);
-
+	Eval_Result & result = main->evaluate(file_buffer,arg_value_table);
 	file_buffer << GLOB_SPACE << "Global Variables (after evaluating):\n";
+	interpreter_global_table.flag = 1;
 	interpreter_global_table.print(file_buffer);
-
 	return result;
 }
 

@@ -316,9 +316,44 @@ public:
 
 class Return_Ast:public Ast {
 public:
-	Return_Ast(int line);
+	Ast* to_return;
+	Data_Type function_return_type;
+
+	Return_Ast(Ast* to_return, Data_Type T, int line);
 
 	~Return_Ast();
+
+	Data_Type get_data_type();
+
+	void set_data_type(string type);
+
+	void print(ostream & file_buffer);
+
+	Eval_Result & evaluate(Local_Environment & eval_env, ostream & file_buffer);
+
+	Code_For_Ast & compile();
+
+	Code_For_Ast & compile_and_optimize_ast(Lra_Outcome & lra);
+};
+
+class Function_Call_Ast:public Ast
+{
+public:
+	string func_name;
+
+	list<Ast*> arg_list;
+	
+	map<string, Eval_Result *> arg_value_table;
+
+	Function_Call_Ast(list<Ast*> arguments, int line);
+	
+	~Function_Call_Ast();
+
+	Data_Type get_data_type();
+
+	void set_data_type(string type);
+
+	void set_name(string name);
 
 	void print(ostream & file_buffer);
 

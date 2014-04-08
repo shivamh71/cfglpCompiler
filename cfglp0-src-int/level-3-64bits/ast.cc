@@ -1221,30 +1221,102 @@ Code_For_Ast & If_Else_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 
 /****************************************************************************************************************************************/
 
-Return_Ast::Return_Ast(int line) {
+Return_Ast::Return_Ast(Ast* to_return, Data_Type T, int line) {
+	this->to_return = to_return;
+	if (to_return!=NULL) {
+		node_data_type = to_return->get_data_type();
+	}
+	else
+		node_data_type = void_data_type;
+	function_return_type = T;
+
 	ast_num_child = zero_arity;
-	node_data_type  =void_data_type;
 	lineno = line;
 }
 
 Return_Ast::~Return_Ast()
 {}
 
+Data_Type Return_Ast::get_data_type()
+{
+	return node_data_type;
+}
+
+void Return_Ast::set_data_type(string type) {
+	if (type == "FLOAT") {
+		node_data_type = float_data_type;
+	}
+	else if (type == "INTEGER") {
+
+		node_data_type = int_data_type;
+
+	}
+	else if (type == "DOUBLE") {
+		node_data_type = double_data_type;
+	}
+	else {
+		node_data_type = void_data_type;
+	}
+}
+
 void Return_Ast::print(ostream & file_buffer)
 {
-	file_buffer << AST_SPACE << "Return <NOTHING>\n";
+	switch (node_data_type) {
+		case void_data_type:
+			file_buffer << endl << AST_SPACE << "RETURN <NOTHING>\n";
+			break;
+		default:
+			file_buffer << endl << AST_SPACE << "RETURN ";
+			to_return->print(file_buffer);
+			file_buffer << endl;
+			break;
+	}
 }
 
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
 	Eval_Result & result = *new Eval_Result_Value_Int();
-	file_buffer << "\n";
 	print(file_buffer);
 
-	Eval_Result * to_return = new Eval_Result_Value_Int();
-	to_return->set_value(-1);
+	Eval_Result * final_return = new Eval_Result_Value_Int();
 
-	return *to_return;
+	switch (node_data_type) {
+		case void_data_type:
+			final_return->set_value(-1);
+			eval_env.return_type = 0;
+			break;
+		default:
+			Eval_Result & result = to_return->evaluate(eval_env,file_buffer);
+			CHECK_INPUT_AND_ABORT(result.is_variable_defined(), "Variable should be defined before its use", lineno);
+			eval_env.return_value = result.get_value();
+			eval_env.return_type = 1;
+			final_return->set_value(-1);
+			break;
+	}
+	string temp_string  = "return";
+	Eval_Result_Value * to_return;
+	switch(node_data_type){
+		case int_data_type:
+			to_return = new Eval_Result_Value_Int();
+			to_return->set_value((int)eval_env.return_value);
+			eval_env.put_variable_value(*to_return, temp_string);
+			break;
+		case float_data_type:
+			to_return = new Eval_Result_Value_Float();
+			to_return->set_value((double)eval_env.return_value);
+			eval_env.put_variable_value(*to_return, temp_string);
+			break;
+		case double_data_type:
+			to_return = new Eval_Result_Value_Double();
+			to_return->set_value((double)eval_env.return_value);
+			eval_env.put_variable_value(*to_return, temp_string);
+			break;
+		default:
+			final_return->set_variable_status(false);
+			break;
+	}
+
+	return *final_return;
 }
 
 Code_For_Ast & Return_Ast::compile()
@@ -1254,6 +1326,110 @@ Code_For_Ast & Return_Ast::compile()
 }
 
 Code_For_Ast & Return_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
+{
+	Code_For_Ast & ret_code = *new Code_For_Ast();
+	return ret_code;
+}
+
+/****************************************************************************************************************************************/
+
+Function_Call_Ast::Function_Call_Ast(list<Ast*> arguments, int line) {
+	arg_list = arguments;
+	lineno = line;
+	ast_num_child = zero_arity;
+}
+
+Function_Call_Ast::~Function_Call_Ast()
+{}
+
+void Function_Call_Ast::print(ostream & file_buffer)
+{
+	Procedure * cur_proc = program_object.get_procedure(func_name);
+	CHECK_INPUT_AND_ABORT(cur_proc->basic_block_list.size() != 0, "Called procedure is not defined", lineno);
+	file_buffer << endl << AST_SPACE << "FN CALL: "<<func_name<<"(";
+	list<Ast*>::iterator it;
+	for (it=arg_list.begin();it!=arg_list.end();it++) {
+		file_buffer << endl;
+		file_buffer << AST_NODE_SPACE;
+		(*it)->print(file_buffer);
+	}
+	file_buffer << ")";
+}
+
+Data_Type Function_Call_Ast::get_data_type()
+{
+	return node_data_type;
+}
+
+void Function_Call_Ast::set_data_type(string type) {
+	if (type == "FLOAT") {
+		node_data_type = float_data_type;
+	}
+	else if (type == "INTEGER") {
+
+		node_data_type = int_data_type;
+
+	}
+	else if (type == "DOUBLE") {
+		node_data_type = double_data_type;
+	}
+	else {
+		node_data_type = void_data_type;
+	}
+}
+
+void Function_Call_Ast::set_name(string name) {
+	this->func_name = name;
+}
+
+Eval_Result & Function_Call_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
+{
+	Procedure* func = program_object.get_procedure(func_name);
+	CHECK_INPUT_AND_ABORT(func->basic_block_list.size()!=0, "Called procedure is not defined", lineno);
+	list<Ast*>::iterator it ;
+	list<Symbol_Table_Entry*>::iterator sit;
+	for (it=arg_list.begin(),sit=func->local_arg_table.variable_table.begin(); it != arg_list.end() && sit!=func->local_arg_table.variable_table.end(); it++,sit++)
+	{
+		Eval_Result & result = (*it)->evaluate(eval_env, file_buffer);
+		CHECK_INPUT_AND_ABORT(result.is_variable_defined(), "Variable should be defined before its use", lineno);
+
+		string name = (*sit)->get_variable_name();
+		if ((*sit)->get_data_type()==int_data_type) {
+			Eval_Result_Value * j = new Eval_Result_Value_Int();
+			j->set_variable_status(true);
+			j->set_value(result.get_value());
+			arg_value_table[name] = j;
+		}
+		else if ((*sit)->get_data_type()==float_data_type) {
+			Eval_Result_Value * j = new Eval_Result_Value_Float();
+			j->set_variable_status(true);
+			j->set_value(result.get_value());
+			arg_value_table[name] = j;
+		}
+		else if ((*sit)->get_data_type()==double_data_type) {
+			Eval_Result_Value * j = new Eval_Result_Value_Double();
+			j->set_variable_status(true);
+			j->set_value(result.get_value());
+			arg_value_table[name] = j;
+		}
+	}
+
+	Eval_Result & result = func->evaluate(file_buffer,arg_value_table);
+
+	// Eval_Result * to_return = new Eval_Result_Value_Int();
+	// to_return->set_value(-1);
+
+	return result;
+	// return result;
+}
+
+Code_For_Ast & Function_Call_Ast::compile()
+{
+	Code_For_Ast & ret_code = *new Code_For_Ast();
+	return ret_code;
+}
+
+Code_For_Ast & Function_Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 {
 	Code_For_Ast & ret_code = *new Code_For_Ast();
 	return ret_code;

@@ -38,7 +38,6 @@
 	list<Basic_Block *> * basic_block_list;
 	list<int> * goto_bb_num ; 
 	Procedure * procedure;
-
 };
 
 %token <integer_value> INTEGER_NUMBER
@@ -173,18 +172,11 @@ procedure_name:
 					report_error("Formal parameter list cannot be same as function name", line);
 				}
 			}
-			// if (*$1=="main") {
-			// 	current_procedure = new Procedure(void_data_type, *$1);
-			// 	program_object.set_procedure_map(*current_procedure);
-			// 	current_procedure = program_object.get_procedure("main");
-			// }
-			// else {
 			current_procedure = program_object.get_procedure(*$1);
 			if (current_procedure == NULL) {
 				int line = get_line_number();
 				report_error("Procedure corresponding to the name is not found", line);
 			}
-
 			// check if variables in definition are consistent with variables in declaration
 			list<Symbol_Table_Entry*> temp_list = $3->variable_table;
 			list<Symbol_Table_Entry*> arg_list = current_procedure->local_arg_table.variable_table;
@@ -219,14 +211,7 @@ procedure_name:
 				int line = get_line_number();
 				report_error("Procedure name cannot be same as global variable", line);
 			}
-			// if (*$1=="main") {
-			// 	current_procedure = new Procedure(void_data_type, *$1);
-			// 	program_object.set_procedure_map(*current_procedure);
-			// 	current_procedure = program_object.get_procedure("main");
-			// }
-			// else {
 			current_procedure = program_object.get_procedure(*$1);	
-			// }
 			if (current_procedure == NULL) {
 				int line = get_line_number();
 				report_error("Procedure corresponding to the name is not found", line);
@@ -928,10 +913,6 @@ assignment_statement:
 return_statement:
 	RETURN ';'
 		{
-			// if (current_procedure->get_return_type()!=void_data_type) {
-			// 	int line = get_line_number();
-			// 	report_error("Return type of procedure and its prototype should match", line);
-			// }
 			$$ = new Return_Ast(NULL,current_procedure->get_return_type());
 			$$->set_data_type("VOID");
 		}

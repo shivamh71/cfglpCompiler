@@ -128,9 +128,11 @@ public:
 
 class Local_Environment
 {
-	map<string, Eval_Result *> variable_table;
-
 public:
+	map<string, Eval_Result *> variable_table;
+	double return_value;
+	int return_type;
+	int flag;
 	Local_Environment();
 	~Local_Environment();
 

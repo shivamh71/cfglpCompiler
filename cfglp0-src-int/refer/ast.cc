@@ -816,9 +816,6 @@ void Return_Ast::print_ast(ostream & file_buffer)
 
 Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_buffer)
 {
-	// if (node_data_type != function_return_type) {
-	// 	report_error("Return type of procedure and its prototype should match", NOLINE);
-	// }
 	Eval_Result & result = *new Eval_Result_Value_Int();
 	print_ast(file_buffer);
 

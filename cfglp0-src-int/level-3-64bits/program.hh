@@ -27,6 +27,7 @@
 #include<string>
 #include<map>
 #include<list>
+#include <vector>
 
 #define GLOB_SPACE "   "
 
@@ -38,15 +39,19 @@ extern Program program_object;
 
 class Program
 {
-	Symbol_Table global_symbol_table;
-	map<string, Procedure *> procedure_map;
-
 public:
+	Symbol_Table global_symbol_table;
+	vector<string> procedure_list;
+	map<string, Procedure *> procedure_map;
+	
 	Program();
+
 	~Program();
+
 	void delete_all();
 
 	void set_procedure_map(Procedure * proc, int line);
+
 	void set_global_table(Symbol_Table & new_global_table);
 
 	Symbol_Table_Entry & get_symbol_table_entry(string variable);
@@ -55,14 +60,19 @@ public:
 
 	Procedure * get_main_procedure(ostream & file_buffer);
 
+	Procedure * get_procedure(string name);
+
 	Eval_Result & evaluate();
 
 	bool variable_in_proc_map_check(string symbol);
+
 	bool variable_in_symbol_list_check(string variable);
+
 	void global_list_in_proc_map_check();
 
 	// compile
 	void compile();
+
 	void print_assembly();
 };
 

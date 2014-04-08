@@ -53,14 +53,14 @@ typedef enum
 
 class Symbol_Table {
 
-	list<Symbol_Table_Entry *> variable_table;
-	Table_Scope scope;
 
 	// compile
 	int size_in_bytes;		// size of list
 	int start_offset_of_first_symbol;
 
 public:
+	Table_Scope scope;
+	list<Symbol_Table_Entry *> variable_table;
 
 	Symbol_Table();
 

@@ -27,6 +27,7 @@
 
 using namespace std;
 
+#include <stdio.h>
 #include"common-classes.hh"
 #include"error-display.hh"
 #include"user-options.hh"
@@ -70,6 +71,12 @@ void Procedure::set_local_list(Symbol_Table & new_list)
 	local_symbol_table.set_table_scope(local);
 }
 
+void Procedure::set_arg_list(Symbol_Table & new_list)
+{
+	local_arg_table = new_list;
+	local_arg_table.set_table_scope(local);
+}
+
 Data_Type Procedure::get_return_type()
 {
 	return return_type;
@@ -80,9 +87,19 @@ bool Procedure::variable_in_symbol_list_check(string variable)
 	return local_symbol_table.variable_in_symbol_list_check(variable);
 }
 
+bool Procedure::variable_in_arg_list_check(string variable)
+{
+	return local_arg_table.variable_in_symbol_list_check(variable);
+}
+
 Symbol_Table_Entry & Procedure::get_symbol_table_entry(string variable_name)
 {
 	return local_symbol_table.get_symbol_table_entry(variable_name);
+}
+
+Symbol_Table_Entry & Procedure::get_arg_table_entry(string variable_name)
+{
+	return local_arg_table.get_symbol_table_entry(variable_name);
 }
 
 void Procedure::print(ostream & file_buffer)
@@ -131,15 +148,21 @@ Basic_Block * Procedure::get_next_bb(Basic_Block & current_bb)
 	return NULL;
 }
 
-Eval_Result & Procedure::evaluate(ostream & file_buffer)
+Eval_Result & Procedure::evaluate(ostream & file_buffer, map<string, Eval_Result *> arg_value_table)
 {
 	Local_Environment & eval_env = *new Local_Environment();
 	local_symbol_table.create(eval_env);
 	
+	map<string, Eval_Result *>::iterator i;
+
+	for (i = arg_value_table.begin(); i != arg_value_table.end(); i++){
+		eval_env.put_variable_value(*(*i).second, (*i).first);
+	}
 	Eval_Result * result = NULL;
 
-	file_buffer << PROC_SPACE << "Evaluating Procedure " << name << "\n";
+	file_buffer <<"" PROC_SPACE << "Evaluating Procedure << " << name << " >>\n";
 	file_buffer << LOC_VAR_SPACE << "Local Variables (before evaluating):\n";
+	eval_env.flag = 1;
 	eval_env.print(file_buffer);
 	file_buffer << "\n";
 	
@@ -167,11 +190,44 @@ Eval_Result & Procedure::evaluate(ostream & file_buffer)
 		}		
 	}
 
+	Eval_Result* final_return = NULL;
+	// Eval_Result_Value* to_return = NULL;
+	// char str[100];
+	string temp_string  = "return";
+	switch(return_type){
+		case int_data_type:
+			final_return = new Eval_Result_Value_Int();
+			// to_return = new Eval_Result_Value_Int();
+			final_return->set_value((int)eval_env.return_value);
+			// to_return->set_value((int)eval_env.return_value);
+			// eval_env.put_variable_value(*to_return, temp_string);
+			break;
+		case float_data_type:
+			final_return = new Eval_Result_Value_Float();
+			// to_return = new Eval_Result_Value_Float();
+			final_return->set_value((double)eval_env.return_value);
+			// to_return->set_value((double)eval_env.return_value);
+			// eval_env.put_variable_value(*to_return, temp_string);
+			break;
+		case double_data_type:
+			final_return = new Eval_Result_Value_Double();
+			// to_return = new Eval_Result_Value_Double();
+			final_return->set_value((double)eval_env.return_value);
+			// to_return->set_value((double)eval_env.return_value);
+			// eval_env.put_variable_value(*to_return, temp_string);
+			break;
+		default:
+			final_return = new Eval_Result_Value_Int();
+			break;
+	}
+	if (eval_env.return_type == 0)
+		final_return->set_variable_status(false);
 	file_buffer << "\n\n";
-	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating):\n";
+	file_buffer << LOC_VAR_SPACE << "Local Variables (after evaluating) Function: << "<< name << " >>\n";
+	eval_env.flag = 1;
 	eval_env.print(file_buffer);
 
-	return *result;
+	return *final_return;
 }
 
 void Procedure::compile()
