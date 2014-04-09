@@ -1321,14 +1321,82 @@ Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 
 Code_For_Ast & Return_Ast::compile()
 {
-	Code_For_Ast & ret_code = *new Code_For_Ast();
-	return ret_code;
+	if (to_return==NULL) {
+		Code_For_Ast & ret_code = *new Code_For_Ast();
+		return ret_code;
+	}
+	else {
+		CHECK_INVARIANT((to_return != NULL), "Lhs cannot be null");
+		Code_For_Ast & load_stmt1 = to_return->compile();
+		Register_Descriptor * load_register1 = load_stmt1.get_reg();
+		machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = true;
+		Register_Descriptor * result_register;
+		Ics_Opd * register_opd1;
+		Ics_Opd * register_opd2;
+		Icode_Stmt * return_stmt;
+		if (node_data_type == int_data_type) {
+		 	result_register = machine_dscr_object.spim_register_table[v1];
+			register_opd1 = new Register_Addr_Opd(load_register1);
+			register_opd2 = new Register_Addr_Opd(result_register);
+			return_stmt = new Move_IC_Stmt(mov, register_opd1, register_opd2);
+		}
+		else {
+			result_register = machine_dscr_object.spim_register_table[f0];
+			register_opd1 = new Register_Addr_Opd(load_register1);
+			register_opd2 = new Register_Addr_Opd(result_register);
+			return_stmt = new Move_IC_Stmt(mov_d, register_opd1, register_opd2);
+		}
+
+		list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+		if (load_stmt1.get_icode_list().empty() == false)
+			ic_list = load_stmt1.get_icode_list();
+		ic_list.push_back(return_stmt);
+
+		Code_For_Ast * return_code;
+		if (ic_list.empty() == false) return_code = new Code_For_Ast(ic_list, result_register);
+		machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = false;
+		return *return_code;
+	}
 }
 
 Code_For_Ast & Return_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 {
-	Code_For_Ast & ret_code = *new Code_For_Ast();
-	return ret_code;
+	if (to_return==NULL) {
+		Code_For_Ast & ret_code = *new Code_For_Ast();
+		return ret_code;
+	}
+	else {
+		CHECK_INVARIANT((to_return != NULL), "Lhs cannot be null");
+		Code_For_Ast & load_stmt1 = to_return->compile();
+		Register_Descriptor * load_register1 = load_stmt1.get_reg();
+		machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = true;
+		Register_Descriptor * result_register;
+		Ics_Opd * register_opd1;
+		Ics_Opd * register_opd2;
+		Icode_Stmt * return_stmt;
+		if (node_data_type == int_data_type) {
+		 	result_register = machine_dscr_object.spim_register_table[v1];
+			register_opd1 = new Register_Addr_Opd(load_register1);
+			register_opd2 = new Register_Addr_Opd(result_register);
+			return_stmt = new Move_IC_Stmt(mov, register_opd1, register_opd2);
+		}
+		else {
+			result_register = machine_dscr_object.spim_register_table[f0];
+			register_opd1 = new Register_Addr_Opd(load_register1);
+			register_opd2 = new Register_Addr_Opd(result_register);
+			return_stmt = new Move_IC_Stmt(mov_d, register_opd1, register_opd2);
+		}
+
+		list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+		if (load_stmt1.get_icode_list().empty() == false)
+			ic_list = load_stmt1.get_icode_list();
+		ic_list.push_back(return_stmt);
+
+		Code_For_Ast * return_code;
+		if (ic_list.empty() == false) return_code = new Code_For_Ast(ic_list, result_register);
+		machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = false;
+		return *return_code;
+	}
 }
 
 /****************************************************************************************************************************************/
@@ -1425,14 +1493,106 @@ Eval_Result & Function_Call_Ast::evaluate(Local_Environment & eval_env, ostream 
 
 Code_For_Ast & Function_Call_Ast::compile()
 {
-	Code_For_Ast & ret_code = *new Code_For_Ast();
-	return ret_code;
+	Procedure* func = program_object.get_procedure(func_name);
+	CHECK_INPUT_AND_ABORT(func->basic_block_list.size()!=0, "Called procedure is not defined", lineno);
+	list<Ast*>::reverse_iterator it ;
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	list<Symbol_Table_Entry*>::reverse_iterator sit;
+	for (it=arg_list.rbegin(),sit=func->local_arg_table.variable_table.rbegin(); it != arg_list.rend() && sit!=func->local_arg_table.variable_table.rend(); it++,sit++)
+	{
+		Code_For_Ast & arg_code = (*it)->compile();
+		ic_list.splice(ic_list.end(), arg_code.get_icode_list());
+		Register_Descriptor * load_register1 = arg_code.get_reg();
+		string name = (*sit)->get_variable_name();
+		Ast * param = new Name_Ast(name, *(*sit), (*sit)->get_lineno());
+		param->set_data_type("INTEGER");
+		Code_For_Ast store_stmt = param->create_store_stmt(load_register1);
+		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
+	}
+
+	Icode_Stmt * jal_stmt = new Jump_IC_Stmt(jal,func_name);
+	ic_list.push_back(jal_stmt);
+	Icode_Stmt * move_stmt;
+	Ics_Opd * register_opd1;
+	Ics_Opd * register_opd2;
+	Register_Descriptor * new_reg;
+	Register_Descriptor * fn_reg;
+	if (node_data_type != void_data_type) {
+		switch (node_data_type) {
+			case int_data_type:
+				new_reg = machine_dscr_object.get_new_register(int_num);
+				fn_reg = machine_dscr_object.spim_register_table[v1];
+				register_opd1 = new Register_Addr_Opd(new_reg);
+				register_opd2 = new Register_Addr_Opd(fn_reg);
+				move_stmt = new Move_IC_Stmt(mov, register_opd2, register_opd1);
+				ic_list.push_back(move_stmt);
+				break;
+			default:
+				new_reg = machine_dscr_object.get_new_register(float_num);
+				fn_reg = machine_dscr_object.spim_register_table[f0];
+				register_opd1 = new Register_Addr_Opd(new_reg);
+				register_opd2 = new Register_Addr_Opd(fn_reg);
+				move_stmt = new Move_IC_Stmt(mov_d, register_opd2, register_opd1);
+				ic_list.push_back(move_stmt);
+				break;
+		}
+	}
+	Code_For_Ast * jal_code;
+	if (ic_list.empty() == false && node_data_type==void_data_type) jal_code = new Code_For_Ast(ic_list, machine_dscr_object.spim_register_table[v0]);
+	if (ic_list.empty() == false && node_data_type!=void_data_type) jal_code = new Code_For_Ast(ic_list, new_reg);
+	return *jal_code;
 }
 
 Code_For_Ast & Function_Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 {
-	Code_For_Ast & ret_code = *new Code_For_Ast();
-	return ret_code;
+	Procedure* func = program_object.get_procedure(func_name);
+	CHECK_INPUT_AND_ABORT(func->basic_block_list.size()!=0, "Called procedure is not defined", lineno);
+	list<Ast*>::reverse_iterator it ;
+	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+	list<Symbol_Table_Entry*>::reverse_iterator sit;
+	for (it=arg_list.rbegin(),sit=func->local_arg_table.variable_table.rbegin(); it != arg_list.rend() && sit!=func->local_arg_table.variable_table.rend(); it++,sit++)
+	{
+		Code_For_Ast & arg_code = (*it)->compile();
+		ic_list.splice(ic_list.end(), arg_code.get_icode_list());
+		Register_Descriptor * load_register1 = arg_code.get_reg();
+		string name = (*sit)->get_variable_name();
+		Ast * param = new Name_Ast(name, *(*sit), (*sit)->get_lineno());
+		param->set_data_type("INTEGER");
+		Code_For_Ast store_stmt = param->create_store_stmt(load_register1);
+		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
+	}
+
+	Icode_Stmt * jal_stmt = new Jump_IC_Stmt(jal,func_name);
+	ic_list.push_back(jal_stmt);
+	Icode_Stmt * move_stmt;
+	Ics_Opd * register_opd1;
+	Ics_Opd * register_opd2;
+	Register_Descriptor * new_reg;
+	Register_Descriptor * fn_reg;
+	if (node_data_type != void_data_type) {
+		switch (node_data_type) {
+			case int_data_type:
+				new_reg = machine_dscr_object.get_new_register(int_num);
+				fn_reg = machine_dscr_object.spim_register_table[v1];
+				register_opd1 = new Register_Addr_Opd(new_reg);
+				register_opd2 = new Register_Addr_Opd(fn_reg);
+				move_stmt = new Move_IC_Stmt(mov, register_opd2, register_opd1);
+				ic_list.push_back(move_stmt);
+				break;
+			default:
+				new_reg = machine_dscr_object.get_new_register(float_num);
+				fn_reg = machine_dscr_object.spim_register_table[f0];
+				register_opd1 = new Register_Addr_Opd(new_reg);
+				register_opd2 = new Register_Addr_Opd(fn_reg);
+				move_stmt = new Move_IC_Stmt(mov_d, register_opd2, register_opd1);
+				ic_list.push_back(move_stmt);
+				break;
+		}
+	}
+	Code_For_Ast * jal_code;
+	if (ic_list.empty() == false && node_data_type==void_data_type) jal_code = new Code_For_Ast(ic_list, machine_dscr_object.spim_register_table[v0]);
+	if (ic_list.empty() == false && node_data_type!=void_data_type) jal_code = new Code_For_Ast(ic_list, new_reg);
+	return *jal_code;
 }
 
 /****************************************************************************************************************************************/

@@ -278,6 +278,7 @@ void Machine_Description::initialize_register_table()
 	spim_register_table[zero] = new Register_Descriptor(zero, "zero", int_num, fixed_reg);
 	spim_register_table[v0] = new Register_Descriptor(v0, "v0", int_num, gp_data);
 	spim_register_table[v1] = new Register_Descriptor(v1, "v1", int_num, fn_result);
+	spim_register_table[f0] = new Register_Descriptor(f0, "f0", float_num, fn_result);
 	spim_register_table[a0] = new Register_Descriptor(a0, "a0", int_num, argument);
 	spim_register_table[a1] = new Register_Descriptor(a1, "a1", int_num, argument);
 	spim_register_table[a2] = new Register_Descriptor(a2, "a2", int_num, argument);
@@ -338,6 +339,7 @@ void Machine_Description::initialize_instruction_table()
 	spim_instruction_table[load] = new Instruction_Descriptor(load, "load", "lw", "", i_r_op_o1, a_op_r_o1);
 	spim_instruction_table[store] = new Instruction_Descriptor(store, "store", "sw", "", i_r_op_o1, a_op_o1_r);
 	spim_instruction_table[imm_load] = new Instruction_Descriptor(imm_load, "iLoad", "li", "", i_r_op_o1, a_op_r_o1);
+	spim_instruction_table[jal] = new Instruction_Descriptor(jal, "call", "jal", "", i_f, a_f);
 
 	/* for floating point calculations */
 
@@ -350,6 +352,8 @@ void Machine_Description::initialize_instruction_table()
 	spim_instruction_table[imm_load_d] = new Instruction_Descriptor(imm_load_d, "iLoad.d", "li.d", "", i_r_op_o1, a_op_r_o1);
 	spim_instruction_table[mtc1] = new Instruction_Descriptor(mtc1, "mtc1", "mtc1", "", i_r_op_r, a_op_r_r);
 	spim_instruction_table[mfc1] = new Instruction_Descriptor(mfc1, "mfc1", "mfc1", "", i_r_op_r, a_op_r_r);
+	spim_instruction_table[mov] = new Instruction_Descriptor(mov, "move", "move", "", i_r_op_r, a_op_r_r);
+	spim_instruction_table[mov_d] = new Instruction_Descriptor(mov_d, "move.d", "move.d", "", i_r_op_r, a_op_r_r);
 	spim_instruction_table[neg] = new Instruction_Descriptor(neg, "uminus", "neg", "", i_r_op_r, a_op_r_r);
 	spim_instruction_table[neg_d] = new Instruction_Descriptor(neg_d, "uminus.d", "neg.d", "", i_r_op_r, a_op_r_r);
 

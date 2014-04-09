@@ -411,10 +411,18 @@ Jump_IC_Stmt::Jump_IC_Stmt(Tgt_Op op, int label) {
 	jump_label = label;
 }
 
+Jump_IC_Stmt::Jump_IC_Stmt(Tgt_Op op, string label) {
+	CHECK_INVARIANT((machine_dscr_object.spim_instruction_table[op] != NULL),"Instruction description in spim table cannot be null");
+	op_desc = *(machine_dscr_object.spim_instruction_table[op]);
+	opd1 = NULL;
+	jump_target = label;
+}
+
 Jump_IC_Stmt & Jump_IC_Stmt::operator=(const Jump_IC_Stmt & rhs) {
 	op_desc = rhs.op_desc;
 	opd1 = rhs.opd1;
 	jump_label = rhs.jump_label;
+	jump_target = rhs.jump_target;
 	return *this;
 }
 
@@ -439,6 +447,9 @@ void Jump_IC_Stmt::print_icode(ostream & file_buffer) {
 		case i_j:
 			file_buffer <<"\tgoto label" <<jump_label<<endl;
 			break;
+		case i_f:
+			file_buffer <<"\tcall "<< jump_target<<endl;
+			break;
 		default: 
 			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");
 			break;
@@ -462,6 +473,9 @@ void Jump_IC_Stmt::print_assembly(ostream & file_buffer) {
 			file_buffer << "$zero, ";
 			file_buffer <<"label" <<jump_label<<" "<<endl;
 			break;  
+		case a_f:
+			file_buffer << "\tjal " << jump_target << endl;
+			break;
 		default: 
 			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");
 			break;

@@ -53,6 +53,7 @@ typedef enum
 	a_j,
 	a_b,
 	a_op_r_r,
+	a_f,
 	a_nsy		/* not specified yet */
 } Assembly_Format;
 
@@ -69,6 +70,7 @@ typedef enum
 	i_r_o1_op_o2,	/* r <- o1 op o2 */
 	i_j,
 	i_b,
+	i_f,
 	i_nsy		/* not specified yet */
 } Icode_Format;
 
@@ -109,6 +111,9 @@ typedef enum
 	goto_label,
 	jump,
 	branch,
+	jal,
+	mov,
+	mov_d,
 	nop 
 } Tgt_Op;
 
@@ -285,8 +290,10 @@ class Jump_IC_Stmt: public Icode_Stmt {
 public:
 	Ics_Opd * opd1;   
 	int jump_label;
+	string jump_target;
 	Jump_IC_Stmt(Tgt_Op op, Ics_Opd * o1, int label);
 	Jump_IC_Stmt(Tgt_Op op, int label);
+	Jump_IC_Stmt(Tgt_Op op, string label);
 	Jump_IC_Stmt & operator=(const Jump_IC_Stmt & rhs);
 	Instruction_Descriptor & get_inst_op_of_ics();
 	Ics_Opd * get_opd1();
