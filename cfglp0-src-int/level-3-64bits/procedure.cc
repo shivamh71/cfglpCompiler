@@ -104,9 +104,20 @@ Symbol_Table_Entry & Procedure::get_arg_table_entry(string variable_name)
 
 void Procedure::print(ostream & file_buffer)
 {
-	CHECK_INVARIANT((return_type == void_data_type), "Only void return type of funtion is allowed");
-
-	file_buffer << PROC_SPACE << "Procedure: " << name << ", Return Type: void\n";
+	// CHECK_INVARIANT((return_type == void_data_type), "Only void return type of funtion is allowed");
+	if (return_type==void_data_type)
+		file_buffer << PROC_SPACE << "Procedure: " << name << ", Return Type: VOID\n";
+	else if (return_type==int_data_type)
+		file_buffer << PROC_SPACE << "Procedure: " << name << ", Return Type: INT\n";
+	else if (return_type==float_data_type)
+		file_buffer << PROC_SPACE << "Procedure: " << name << ", Return Type: FLOAT\n";
+	else
+		file_buffer << PROC_SPACE << "Procedure: " << name << ", Return Type: FLOAT\n";
+	if ((command_options.is_show_symtab_selected()) || (command_options.is_show_program_selected()))
+	{
+		file_buffer << "   Fromal Parameter List\n";
+		local_arg_table.print_arg(file_buffer);
+	}
 
 	if ((command_options.is_show_symtab_selected()) || (command_options.is_show_program_selected()))
 	{

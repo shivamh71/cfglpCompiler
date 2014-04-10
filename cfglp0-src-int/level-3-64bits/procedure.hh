@@ -42,6 +42,7 @@ public:
 	string name;
 	Symbol_Table local_symbol_table;
 	Symbol_Table local_arg_table;
+	Symbol_Table formal_arg_table;
 	list<Basic_Block *> basic_block_list;
 
 	int lineno;

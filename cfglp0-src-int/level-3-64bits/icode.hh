@@ -159,6 +159,7 @@ class Ics_Opd
 	*/
 
 public:
+	int flag;
 	Opd_Category type;     
 
 	Opd_Category get_opd_category(); 
@@ -298,6 +299,17 @@ public:
 	Instruction_Descriptor & get_inst_op_of_ics();
 	Ics_Opd * get_opd1();
 	void set_opd1(Ics_Opd * io);
+	void print_icode(ostream & file_buffer);
+	void print_assembly(ostream & file_buffer);
+};
+
+/****************************************************************************************************************************************/
+
+class Fun_Call_Stmt: public Icode_Stmt {
+public:
+	int flag;
+	int offset;
+	Fun_Call_Stmt(int offset, int flag);
 	void print_icode(ostream & file_buffer);
 	void print_assembly(ostream & file_buffer);
 };

@@ -59,6 +59,7 @@ class Symbol_Table {
 	int start_offset_of_first_symbol;
 
 public:
+	int size_new;
 	Table_Scope scope;
 	list<Symbol_Table_Entry *> variable_table;
 
@@ -73,6 +74,8 @@ public:
 	void set_table_scope(Table_Scope list_scope); // sets table scope
 
 	void print(ostream & file_buffer);
+
+	void print_arg(ostream & file_buffer);
 
 	void push_symbol(Symbol_Table_Entry * variable); // push a symbol in list of symbols
 
@@ -95,6 +98,10 @@ public:
 	int get_start_offset_of_first_symbol();
 
 	void assign_offsets();
+
+	void assign_arg_offsets();
+
+	void assign_post_offsets();
 	
 	int get_size();
 	
@@ -115,6 +122,8 @@ class Symbol_Table_Entry
 	Register_Descriptor * register_description;
 
 public:
+	int start_arg_offset;
+	int end_arg_offset;
 	string variable_name;
 	Data_Type variable_data_type;
 	Symbol_Table_Entry();

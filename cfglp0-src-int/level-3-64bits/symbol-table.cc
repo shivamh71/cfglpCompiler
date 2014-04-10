@@ -43,6 +43,7 @@ Symbol_Table::Symbol_Table()
 {
 	start_offset_of_first_symbol = 0;
 	size_in_bytes = 0;
+	size_new = 0;
 }
 
 Symbol_Table::~Symbol_Table()
@@ -163,6 +164,7 @@ void Symbol_Table::print(ostream & file_buffer)
 		{
 		case int_data_type: file_buffer << " Type: INT"; break;
 		case float_data_type: file_buffer << " Type: FLOAT"; break;
+		case double_data_type: file_buffer << " Type: FLOAT"; break;
 		defualt: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Variable data type can only be int");
 		} 
 
@@ -172,6 +174,36 @@ void Symbol_Table::print(ostream & file_buffer)
 			file_buffer << " (No offset assigned yet)\n";
 		else
 			file_buffer << " Start Offset: " << -start_off << " End Offset: " << -end_off << "\n";
+	}
+}
+
+void Symbol_Table::print_arg(ostream & file_buffer)
+{
+	list<Symbol_Table_Entry *>::iterator i;
+
+	for(i = variable_table.begin(); i != variable_table.end(); i++)
+	{
+		string name = (*i)->get_variable_name();
+		Data_Type dt = (*i)->get_data_type();
+		int start_off = (*i)->get_start_offset();
+		int end_off = (*i)->get_end_offset();
+
+		file_buffer << "   Name: " << name;
+
+		switch(dt)
+		{
+		case int_data_type: file_buffer << " Type: INT"; break;
+		case float_data_type: file_buffer << " Type: FLOAT"; break;
+		case double_data_type: file_buffer << " Type: FLOAT"; break;
+		defualt: CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Variable data type can only be int");
+		} 
+
+		file_buffer << " Entity Type: VAR";
+
+		if (start_off == end_off)
+			file_buffer << " (No offset assigned yet)\n";
+		else
+			file_buffer << " Start Offset: " << start_off << " End Offset: " << end_off << "\n";
 	}
 }
 
@@ -207,6 +239,38 @@ void Symbol_Table::assign_offsets()
 		size_in_bytes += size;
 		(*i)->set_end_offset(size_in_bytes);
 	}
+	size_new = 0;
+	for (i = variable_table.begin(); i!=variable_table.end(); i++) {
+		size_new += get_size_of_value_type((*i)->get_data_type());
+	}
+}
+
+void Symbol_Table::assign_arg_offsets() {
+	list<Symbol_Table_Entry *>::reverse_iterator i;
+	size_new = 0;
+	for (i = variable_table.rbegin(); i!=variable_table.rend(); i++) {
+		size_new += get_size_of_value_type((*i)->get_data_type());
+	}
+	size_in_bytes = 0;
+	for (i = variable_table.rbegin(); i!=variable_table.rend(); i++) {
+		int size = get_size_of_value_type((*i)->get_data_type());
+		(*i)->start_arg_offset = size_in_bytes;
+		size_in_bytes += size;
+		(*i)->end_arg_offset = size_in_bytes;
+	}
+	// cout << "size is " << size_new << endl;
+}
+
+void Symbol_Table::assign_post_offsets() {
+	list<Symbol_Table_Entry *>::iterator i;
+	int temp = 8;
+	for (i = variable_table.begin(); i!=variable_table.end(); i++) {
+		int size = get_size_of_value_type((*i)->get_data_type());
+		(*i)->set_end_offset(temp);
+		temp += -1*size;
+		(*i)->set_start_offset(temp);
+	}
+	// cout << "size is " << size_new << endl;
 }
 
 int Symbol_Table::get_size_of_value_type(Data_Type dt)

@@ -218,11 +218,15 @@ class Name_Ast:public Ast {
 public:
 	string variable_name;
 
+	int flag;
+
 	Data_Type node_data_type;
 	
 	Symbol_Table_Entry * variable_symbol_entry;
 	
 	Name_Ast(string & name, Symbol_Table_Entry & var_entry, int line);
+
+	Name_Ast(string & name, Symbol_Table_Entry & var_entry, int line, int flag);
 	
 	~Name_Ast();
 

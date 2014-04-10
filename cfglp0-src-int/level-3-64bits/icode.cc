@@ -64,6 +64,7 @@ Mem_Addr_Opd::Mem_Addr_Opd(Symbol_Table_Entry & se)
 {
 	symbol_entry = &se;
 	type = memory_addr;
+	flag = 0;
 }
 
 Mem_Addr_Opd & Mem_Addr_Opd::operator=(const Mem_Addr_Opd & rhs)
@@ -87,10 +88,14 @@ void Mem_Addr_Opd::print_asm_opd(ostream & file_buffer)
 	CHECK_INVARIANT(((symbol_scope == local) || (symbol_scope == global)), 
 			"Wrong scope value");
 
-	if (symbol_scope == local)
+	if (symbol_scope == local && flag==0)
 	{
 		int offset = symbol_entry->get_start_offset();
 		file_buffer << offset << "($fp)";
+	}
+	else if (symbol_scope == local && flag==1) {
+		int offset = symbol_entry->start_arg_offset;
+		file_buffer << offset << "($sp)";	
 	}
 	else
 		file_buffer << symbol_entry->get_variable_name();
@@ -476,6 +481,39 @@ void Jump_IC_Stmt::print_assembly(ostream & file_buffer) {
 		case a_f:
 			file_buffer << "\tjal " << jump_target << endl;
 			break;
+		default: 
+			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");
+			break;
+	}
+}
+
+/****************************************************************************************************************************************/
+
+Fun_Call_Stmt::Fun_Call_Stmt(int offset, int flag) {
+	this->offset = offset;
+	this->flag = flag;
+}
+
+void Fun_Call_Stmt::print_icode(ostream & file_buffer) {
+	switch (flag) {
+		case 0: 
+			break; 
+		case 1:
+			break;
+		default: 
+			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");
+			break;
+	}
+}
+
+void Fun_Call_Stmt::print_assembly(ostream & file_buffer) {
+	switch (flag) {
+		case 0: 
+			file_buffer <<"\tsub $sp, $sp, "<<offset<<endl;
+			break; 
+		case 1: 
+			file_buffer <<"\tadd $sp, $sp, "<<offset<<endl;
+			break;  
 		default: 
 			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");
 			break;

@@ -1498,20 +1498,30 @@ Code_For_Ast & Function_Call_Ast::compile()
 	list<Ast*>::reverse_iterator it ;
 	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
 	list<Symbol_Table_Entry*>::reverse_iterator sit;
+	func->local_arg_table.assign_arg_offsets();
 	for (it=arg_list.rbegin(),sit=func->local_arg_table.variable_table.rbegin(); it != arg_list.rend() && sit!=func->local_arg_table.variable_table.rend(); it++,sit++)
 	{
 		Code_For_Ast & arg_code = (*it)->compile();
 		ic_list.splice(ic_list.end(), arg_code.get_icode_list());
 		Register_Descriptor * load_register1 = arg_code.get_reg();
 		string name = (*sit)->get_variable_name();
-		Ast * param = new Name_Ast(name, *(*sit), (*sit)->get_lineno());
+		Ast * param = new Name_Ast(name, *(*sit), (*sit)->get_lineno(), 1);
 		param->set_data_type("INTEGER");
 		Code_For_Ast store_stmt = param->create_store_stmt(load_register1);
 		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
 	}
-
+	Icode_Stmt * sub_stmt;
+	if (func->local_arg_table.size_new!=0) {
+		sub_stmt = new Fun_Call_Stmt(-1 * func->local_arg_table.size_new, 0);
+		ic_list.push_back(sub_stmt);
+	}
 	Icode_Stmt * jal_stmt = new Jump_IC_Stmt(jal,func_name);
 	ic_list.push_back(jal_stmt);
+	Icode_Stmt * add_stmt;
+	if (func->local_arg_table.size_new!=0) {
+		add_stmt = new Fun_Call_Stmt(-1 * func->local_arg_table.size_new, 1);
+		ic_list.push_back(add_stmt);
+	}
 	Icode_Stmt * move_stmt;
 	Ics_Opd * register_opd1;
 	Ics_Opd * register_opd2;
@@ -1540,6 +1550,7 @@ Code_For_Ast & Function_Call_Ast::compile()
 	Code_For_Ast * jal_code;
 	if (ic_list.empty() == false && node_data_type==void_data_type) jal_code = new Code_For_Ast(ic_list, machine_dscr_object.spim_register_table[v0]);
 	if (ic_list.empty() == false && node_data_type!=void_data_type) jal_code = new Code_For_Ast(ic_list, new_reg);
+	func->local_arg_table.assign_post_offsets();
 	return *jal_code;
 }
 
@@ -1550,20 +1561,31 @@ Code_For_Ast & Function_Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	list<Ast*>::reverse_iterator it ;
 	list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
 	list<Symbol_Table_Entry*>::reverse_iterator sit;
+	func->local_arg_table.assign_arg_offsets();
 	for (it=arg_list.rbegin(),sit=func->local_arg_table.variable_table.rbegin(); it != arg_list.rend() && sit!=func->local_arg_table.variable_table.rend(); it++,sit++)
 	{
 		Code_For_Ast & arg_code = (*it)->compile();
 		ic_list.splice(ic_list.end(), arg_code.get_icode_list());
 		Register_Descriptor * load_register1 = arg_code.get_reg();
 		string name = (*sit)->get_variable_name();
-		Ast * param = new Name_Ast(name, *(*sit), (*sit)->get_lineno());
+		Ast * param = new Name_Ast(name, *(*sit), (*sit)->get_lineno(), 1);
 		param->set_data_type("INTEGER");
 		Code_For_Ast store_stmt = param->create_store_stmt(load_register1);
 		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
 	}
 
+	Icode_Stmt * sub_stmt;
+	if (func->local_arg_table.get_size()!=0) {
+		sub_stmt = new Fun_Call_Stmt(-1 * func->local_arg_table.get_size(), 0);
+		ic_list.push_back(sub_stmt);
+	}
 	Icode_Stmt * jal_stmt = new Jump_IC_Stmt(jal,func_name);
 	ic_list.push_back(jal_stmt);
+	Icode_Stmt * add_stmt;
+	if (func->local_arg_table.get_size()!=0) {
+		add_stmt = new Fun_Call_Stmt(-1 * func->local_arg_table.get_size(), 1);
+		ic_list.push_back(add_stmt);
+	}
 	Icode_Stmt * move_stmt;
 	Ics_Opd * register_opd1;
 	Ics_Opd * register_opd2;
@@ -1597,6 +1619,18 @@ Code_For_Ast & Function_Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 
 /****************************************************************************************************************************************/
 
+Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry, int line, int flag)
+{
+	variable_symbol_entry = &var_entry;
+	CHECK_INVARIANT((variable_symbol_entry->get_variable_name() == name), "Variable's symbol entry is not matching its name");
+	ast_num_child = zero_arity;
+	node_data_type = variable_symbol_entry->get_data_type();
+	lineno = line;
+	variable_name = variable_symbol_entry->get_variable_name();
+	variable_symbol_entry->variable_data_type = node_data_type;
+	this->flag = flag;
+}
+
 Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry, int line)
 {
 	variable_symbol_entry = &var_entry;
@@ -1606,6 +1640,7 @@ Name_Ast::Name_Ast(string & name, Symbol_Table_Entry & var_entry, int line)
 	lineno = line;
 	variable_name = variable_symbol_entry->get_variable_name();
 	variable_symbol_entry->variable_data_type = node_data_type;
+	flag = 0;
 }
 
 Name_Ast::~Name_Ast()
@@ -1761,6 +1796,7 @@ Code_For_Ast & Name_Ast::create_store_stmt(Register_Descriptor * store_register)
 
 	Ics_Opd * register_opd = new Register_Addr_Opd(store_register);
 	Ics_Opd * opd = new Mem_Addr_Opd(*variable_symbol_entry);
+	opd->flag = flag;
 	Icode_Stmt * store_stmt;
 	if(get_data_type()==int_data_type){
 		store_stmt = new Move_IC_Stmt(store, register_opd, opd);
