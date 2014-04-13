@@ -1,6 +1,6 @@
 ;; Function main (main)
 ;; No error - Parsing
-
+void main();
 main ()
 {
 	int b;

@@ -1,6 +1,5 @@
-
 ;; Function main (main)
-
+void main();
 main ()
 {
   int e;

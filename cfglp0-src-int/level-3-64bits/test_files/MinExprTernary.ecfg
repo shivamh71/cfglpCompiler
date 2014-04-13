@@ -1,4 +1,4 @@
-
+void main();
 ;; Function main (main)
 
 main ()

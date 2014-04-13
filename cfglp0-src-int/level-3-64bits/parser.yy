@@ -95,6 +95,23 @@ program:
 			}
 		}
 |
+	function_declaration_list declaration_statement_list procedure_list
+		{
+			if (NOT_ONLY_PARSE)
+			{
+				for (int i=0;i<called_procedures.size();i++) {
+					int check_flag = 1;
+					for (int j=0;j<defined_procedures.size();j++) {
+						if (defined_procedures[j] == called_procedures[i]) {
+							check_flag = 0;
+							break;
+						}
+					}
+					CHECK_INVARIANT(!check_flag, "Called procedure is not defined");
+				}
+			}
+		}
+|
 	function_declaration_list procedure_list
 		{
 			if (NOT_ONLY_PARSE)
@@ -149,23 +166,20 @@ program:
 
 procedure_list:
 	procedure_list procedure_statement
-	{
-		// nothing to be done here
-	}
+		{
+			// nothing to be done here
+		}
 |
 	procedure_statement
-	{
-		// nothing to be done here
-	}
+		{
+			// nothing to be done here
+		}
 ;
 
 procedure_statement:
 	procedure_name	procedure_body
 		{
-			if (NOT_ONLY_PARSE)
-			{
-				CHECK_INPUT(return_statement_used_flag, "Last return statement type, of procedure, and its prototype should match", get_line_number());
-			}
+			// nothing to be done here
 		}
 ;
 
@@ -196,6 +210,7 @@ procedure_name:
 				defined_procedures.push_back(*$1);
 				// empty basic block list
 				goto_bb_num->clear();
+				return_type_used = 0;
 				if (current_procedure->get_return_type() == void_data_type)
 					return_statement_used_flag = true;
 				else
@@ -741,7 +756,7 @@ greater_than_expression:
 			{
 				$$ = $1;
 			}
-		}	
+		}
 ;
 
 equality_expression:
@@ -844,26 +859,6 @@ unary_expression:
 				}
 			}
 		}
-// |
-// 	'(' type_name ')' function_call_statement
-// 		{
-// 			if (NOT_ONLY_PARSE)
-// 			{
-// 				$$ = $4;
-// 				switch($$->get_data_type()) {
-// 					case int_data_type:
-// 						if (*$2=="FLOAT") $$ = new Type_Cast_Ast($$,int_data_type,float_data_type,get_line_number());
-// 						else if (*$2=="DOUBLE") $$ = new Type_Cast_Ast($$,int_data_type,double_data_type,get_line_number());
-// 						break;
-// 					case float_data_type:
-// 						if (*$2=="INTEGER") $$ = new Type_Cast_Ast($$,float_data_type,int_data_type,get_line_number());
-// 						break;
-// 					case double_data_type:
-// 						if (*$2=="INTEGER") $$ = new Type_Cast_Ast($$,double_data_type,int_data_type,get_line_number());
-// 						break;
-// 				}
-// 			}
-// 		}
 |
 	identifier
 		{
@@ -880,14 +875,6 @@ unary_expression:
 				$$ = $1;
 			}
 		}
-// |
-// 	function_call_statement
-// 		{
-// 			if (NOT_ONLY_PARSE)
-// 			{
-// 				$$ = $1;
-// 			}
-// 		}
 |
 	'(' expression ')'
 		{
@@ -1064,7 +1051,7 @@ return_statement:
 		{
 			if(NOT_ONLY_PARSE)
 			{
-				$$ = new Return_Ast(NULL, current_procedure->get_return_type(), get_line_number());
+				$$ = new Return_Ast(NULL, current_procedure->get_return_type(), current_procedure->get_proc_name(), get_line_number());
 				return_statement_used_flag = true;
 			}
 		}
@@ -1073,17 +1060,18 @@ return_statement:
 		{
 			if (NOT_ONLY_PARSE)
 			{
-				CHECK_INPUT($2->get_data_type()==current_procedure->get_return_type(), "Last return statement type, of procedure, and its prototype should match", get_line_number());
+				CHECK_INPUT(current_procedure->get_return_type()==void_data_type || ($2->get_data_type()==current_procedure->get_return_type()), "Two or more types of return values", get_line_number());
 				return_statement_used_flag = true;
-				$$ = new Return_Ast($2,current_procedure->get_return_type(), get_line_number());
+				current_procedure->return_type = $2->get_data_type();
+				$$ = new Return_Ast($2,current_procedure->get_return_type(), current_procedure->get_proc_name(), get_line_number());
 				switch ($2->get_data_type()) {
-					case 1:
+					case int_data_type:
 						$$->set_data_type("INTEGER");
 						break;
-					case 3:
+					case float_data_type:
 						$$->set_data_type("FLOAT");
 						break;
-					case 4:
+					case double_data_type:
 						$$->set_data_type("DOUBLE");
 						break;
 				}

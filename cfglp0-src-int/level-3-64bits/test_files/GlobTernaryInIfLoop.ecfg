@@ -1,5 +1,6 @@
 int a;
 int b;
+void main();
 main()
 {
 	int c;

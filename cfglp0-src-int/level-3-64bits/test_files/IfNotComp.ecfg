@@ -1,3 +1,4 @@
+void main();
 main()
 {
 	int a;
@@ -11,21 +12,16 @@ main()
 	d = 5.6;
 	if (a >= b != a)
 		goto <bb 3>;
-	else 
+	else
 		goto <bb 4>;
 <bb 3>:
-	a = a + 1;
 	goto <bb 6>;
 
 <bb 4>:
-	if (c >= b + c != a)
 		goto <bb 5>;
-	else
-		goto <bb 6>;
 
 <bb 5>:
-	a = a - 1;
-
+	return a;
 <bb 6>:
 	return;
 }

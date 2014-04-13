@@ -322,8 +322,9 @@ class Return_Ast:public Ast {
 public:
 	Ast* to_return;
 	Data_Type function_return_type;
+	string fun_name;
 
-	Return_Ast(Ast* to_return, Data_Type T, int line);
+	Return_Ast(Ast* to_return, Data_Type T, string name, int line);
 
 	~Return_Ast();
 

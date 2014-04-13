@@ -1,3 +1,4 @@
+void main();
 void fn();
 void fn2(int a, int a);
 fn2(int a, int a)

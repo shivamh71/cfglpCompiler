@@ -1159,7 +1159,7 @@ Eval_Result & If_Else_Ast::evaluate(Local_Environment & eval_env, ostream & file
 	// print(file_buffer);
 
 	result = &(result1);
-	
+
 	int flag = result->get_value();
 	if (flag) {
 		file_buffer << AST_SPACE << "Condition True : Goto (BB " << true_successor->get_bb_number() <<")";
@@ -1221,7 +1221,7 @@ Code_For_Ast & If_Else_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 
 /****************************************************************************************************************************************/
 
-Return_Ast::Return_Ast(Ast* to_return, Data_Type T, int line) {
+Return_Ast::Return_Ast(Ast* to_return, Data_Type T, string name, int line) {
 	this->to_return = to_return;
 	if (to_return!=NULL) {
 		node_data_type = to_return->get_data_type();
@@ -1229,7 +1229,7 @@ Return_Ast::Return_Ast(Ast* to_return, Data_Type T, int line) {
 	else
 		node_data_type = void_data_type;
 	function_return_type = T;
-
+	fun_name = name;
 	ast_num_child = zero_arity;
 	lineno = line;
 }
@@ -1322,8 +1322,12 @@ Eval_Result & Return_Ast::evaluate(Local_Environment & eval_env, ostream & file_
 Code_For_Ast & Return_Ast::compile()
 {
 	if (to_return==NULL) {
-		Code_For_Ast & ret_code = *new Code_For_Ast();
-		return ret_code;
+		list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+		Icode_Stmt * jal_stmt = new Jump_IC_Stmt(jal,"epilogue",fun_name);
+		ic_list.push_back(jal_stmt);
+		Code_For_Ast * return_code;
+		if (ic_list.empty() == false) return_code = new Code_For_Ast(ic_list, machine_dscr_object.spim_register_table[v0]);
+		return *return_code;
 	}
 	else {
 		CHECK_INVARIANT((to_return != NULL), "Lhs cannot be null");
@@ -1351,7 +1355,8 @@ Code_For_Ast & Return_Ast::compile()
 		if (load_stmt1.get_icode_list().empty() == false)
 			ic_list = load_stmt1.get_icode_list();
 		ic_list.push_back(return_stmt);
-
+		Icode_Stmt * jal_stmt = new Jump_IC_Stmt(jal,"epilogue",fun_name);
+		ic_list.push_back(jal_stmt);
 		Code_For_Ast * return_code;
 		if (ic_list.empty() == false) return_code = new Code_For_Ast(ic_list, result_register);
 		machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = false;
@@ -1362,12 +1367,17 @@ Code_For_Ast & Return_Ast::compile()
 Code_For_Ast & Return_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 {
 	if (to_return==NULL) {
-		Code_For_Ast & ret_code = *new Code_For_Ast();
-		return ret_code;
+		list<Icode_Stmt *> & ic_list = *new list<Icode_Stmt *>;
+		Icode_Stmt * jal_stmt = new Jump_IC_Stmt(jal,"epilogue",fun_name);
+		ic_list.push_back(jal_stmt);
+		Code_For_Ast * return_code;
+		if (ic_list.empty() == false) return_code = new Code_For_Ast(ic_list, machine_dscr_object.spim_register_table[v0]);
+		return *return_code;
 	}
 	else {
 		CHECK_INVARIANT((to_return != NULL), "Lhs cannot be null");
-		Code_For_Ast & load_stmt1 = to_return->compile();
+		lra.optimize_lra(mc_2r, NULL, to_return);
+		Code_For_Ast & load_stmt1 = to_return->compile_and_optimize_ast(lra);
 		Register_Descriptor * load_register1 = load_stmt1.get_reg();
 		machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = true;
 		Register_Descriptor * result_register;
@@ -1391,7 +1401,8 @@ Code_For_Ast & Return_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 		if (load_stmt1.get_icode_list().empty() == false)
 			ic_list = load_stmt1.get_icode_list();
 		ic_list.push_back(return_stmt);
-
+		Icode_Stmt * jal_stmt = new Jump_IC_Stmt(jal,"epilogue",fun_name);
+		ic_list.push_back(jal_stmt);
 		Code_For_Ast * return_code;
 		if (ic_list.empty() == false) return_code = new Code_For_Ast(ic_list, result_register);
 		machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = false;
@@ -1506,7 +1517,10 @@ Code_For_Ast & Function_Call_Ast::compile()
 		Register_Descriptor * load_register1 = arg_code.get_reg();
 		string name = (*sit)->get_variable_name();
 		Ast * param = new Name_Ast(name, *(*sit), (*sit)->get_lineno(), 1);
-		param->set_data_type("INTEGER");
+		if ((*it)->get_data_type()==int_data_type)
+			param->set_data_type("INTEGER");
+		else
+			param->set_data_type("FLOAT");
 		Code_For_Ast store_stmt = param->create_store_stmt(load_register1);
 		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
 	}
@@ -1564,26 +1578,39 @@ Code_For_Ast & Function_Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	func->local_arg_table.assign_arg_offsets();
 	for (it=arg_list.rbegin(),sit=func->local_arg_table.variable_table.rbegin(); it != arg_list.rend() && sit!=func->local_arg_table.variable_table.rend(); it++,sit++)
 	{
-		Code_For_Ast & arg_code = (*it)->compile();
+		lra.optimize_lra(mc_2r, NULL, *it);
+		Code_For_Ast & arg_code = (*it)->compile_and_optimize_ast(lra);
 		ic_list.splice(ic_list.end(), arg_code.get_icode_list());
 		Register_Descriptor * load_register1 = arg_code.get_reg();
 		string name = (*sit)->get_variable_name();
 		Ast * param = new Name_Ast(name, *(*sit), (*sit)->get_lineno(), 1);
-		param->set_data_type("INTEGER");
+		if ((*it)->get_data_type()==int_data_type)
+			param->set_data_type("INTEGER");
+		else
+			param->set_data_type("FLOAT");
 		Code_For_Ast store_stmt = param->create_store_stmt(load_register1);
 		ic_list.splice(ic_list.end(), store_stmt.get_icode_list());
 	}
-
 	Icode_Stmt * sub_stmt;
-	if (func->local_arg_table.get_size()!=0) {
-		sub_stmt = new Fun_Call_Stmt(-1 * func->local_arg_table.get_size(), 0);
+	if (func->local_arg_table.size_new!=0) {
+		sub_stmt = new Fun_Call_Stmt(-1 * func->local_arg_table.size_new, 0);
 		ic_list.push_back(sub_stmt);
 	}
 	Icode_Stmt * jal_stmt = new Jump_IC_Stmt(jal,func_name);
 	ic_list.push_back(jal_stmt);
+
+	// Free all registers
+	Register_Descriptor * reg_desc;
+	map<Spim_Register, Register_Descriptor *>::iterator rit;
+	for (rit = machine_dscr_object.spim_register_table.begin(); rit != machine_dscr_object.spim_register_table.end(); rit++)
+	{
+		reg_desc = rit->second;
+		reg_desc->clear_lra_symbol_list();
+	}
+
 	Icode_Stmt * add_stmt;
-	if (func->local_arg_table.get_size()!=0) {
-		add_stmt = new Fun_Call_Stmt(-1 * func->local_arg_table.get_size(), 1);
+	if (func->local_arg_table.size_new!=0) {
+		add_stmt = new Fun_Call_Stmt(-1 * func->local_arg_table.size_new, 1);
 		ic_list.push_back(add_stmt);
 	}
 	Icode_Stmt * move_stmt;
@@ -1614,6 +1641,7 @@ Code_For_Ast & Function_Call_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	Code_For_Ast * jal_code;
 	if (ic_list.empty() == false && node_data_type==void_data_type) jal_code = new Code_For_Ast(ic_list, machine_dscr_object.spim_register_table[v0]);
 	if (ic_list.empty() == false && node_data_type!=void_data_type) jal_code = new Code_For_Ast(ic_list, new_reg);
+	func->local_arg_table.assign_post_offsets();
 	return *jal_code;
 }
 

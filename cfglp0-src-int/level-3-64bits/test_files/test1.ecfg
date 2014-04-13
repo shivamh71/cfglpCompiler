@@ -1,3 +1,4 @@
+void main();
    int a32;
    int a31;
    int a30;

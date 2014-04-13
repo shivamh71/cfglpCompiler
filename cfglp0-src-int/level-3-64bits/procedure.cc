@@ -311,11 +311,11 @@ void Procedure::print_epilogue(ostream & file_buffer)
 	size = -size;
 	size += 4;
 	if (size > 0)
-		epilogue << "\n# Epilogue Begins\n\tadd $sp, $sp, " << (size + 4) << "\n";
+		epilogue << "\n# Epilogue Begins\nepilogue_"<<name<<":\n\tadd $sp, $sp, " << (size + 4) << "\n";
 	else
-		epilogue << "\n#Epilogue Begins\n\tadd $sp, $sp, 4\n";
+		epilogue << "\n#Epilogue Begins\nepilogue_"<<name<<":\n\tadd $sp, $sp, 4\n";
 
-	epilogue <<"\tlw $fp, -4($sp)  \n\tlw $ra, 0($sp)   \n\tjr        $31\t\t# Jump back to the operating system.\n# Epilogue Ends\n\n";
+	epilogue <<"\tlw $fp, -4($sp)  \n\tlw $ra, 0($sp)   \n\tjr        $31\t\t# Jump back to the called procedure\n# Epilogue Ends\n\n";
 
 	file_buffer << epilogue.str();
 }

@@ -289,12 +289,14 @@ public:
 
 class Jump_IC_Stmt: public Icode_Stmt {
 public:
-	Ics_Opd * opd1;   
+	Ics_Opd * opd1;
 	int jump_label;
 	string jump_target;
+	string fun_name;
 	Jump_IC_Stmt(Tgt_Op op, Ics_Opd * o1, int label);
 	Jump_IC_Stmt(Tgt_Op op, int label);
 	Jump_IC_Stmt(Tgt_Op op, string label);
+	Jump_IC_Stmt(Tgt_Op op, string label1, string label2);
 	Jump_IC_Stmt & operator=(const Jump_IC_Stmt & rhs);
 	Instruction_Descriptor & get_inst_op_of_ics();
 	Ics_Opd * get_opd1();

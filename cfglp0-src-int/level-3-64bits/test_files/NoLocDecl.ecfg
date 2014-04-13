@@ -1,3 +1,4 @@
+void main();
 ;; Function main (main)
 
 int b;

@@ -407,6 +407,7 @@ Jump_IC_Stmt::Jump_IC_Stmt(Tgt_Op op, Ics_Opd * o1, int label) {
 	op_desc = *(machine_dscr_object.spim_instruction_table[op]);
 	opd1 = o1;
 	jump_label = label;
+	fun_name = "";
 }
 
 Jump_IC_Stmt::Jump_IC_Stmt(Tgt_Op op, int label) {
@@ -414,6 +415,7 @@ Jump_IC_Stmt::Jump_IC_Stmt(Tgt_Op op, int label) {
 	op_desc = *(machine_dscr_object.spim_instruction_table[op]);
 	opd1 = NULL;
 	jump_label = label;
+	fun_name = "";
 }
 
 Jump_IC_Stmt::Jump_IC_Stmt(Tgt_Op op, string label) {
@@ -421,6 +423,15 @@ Jump_IC_Stmt::Jump_IC_Stmt(Tgt_Op op, string label) {
 	op_desc = *(machine_dscr_object.spim_instruction_table[op]);
 	opd1 = NULL;
 	jump_target = label;
+	fun_name = "";
+}
+
+Jump_IC_Stmt::Jump_IC_Stmt(Tgt_Op op, string label1, string label2) {
+	CHECK_INVARIANT((machine_dscr_object.spim_instruction_table[op] != NULL),"Instruction description in spim table cannot be null");
+	op_desc = *(machine_dscr_object.spim_instruction_table[op]);
+	opd1 = NULL;
+	jump_target = label1;
+	fun_name = label2;
 }
 
 Jump_IC_Stmt & Jump_IC_Stmt::operator=(const Jump_IC_Stmt & rhs) {
@@ -428,6 +439,7 @@ Jump_IC_Stmt & Jump_IC_Stmt::operator=(const Jump_IC_Stmt & rhs) {
 	opd1 = rhs.opd1;
 	jump_label = rhs.jump_label;
 	jump_target = rhs.jump_target;
+	fun_name = rhs.fun_name;
 	return *this;
 }
 
@@ -442,20 +454,23 @@ void Jump_IC_Stmt::print_icode(ostream & file_buffer) {
 	Icode_Format ic_format = op_desc.get_ic_format();
 
 	switch (ic_format) {
-		case i_b: 
+		case i_b:
 			file_buffer << "\t" << operation_name << ":    \t";
 			opd1->print_ics_opd(file_buffer);
 			file_buffer << " , ";
 			file_buffer << "zero : ";
 			file_buffer <<"goto label" <<jump_label<<endl;
-			break; 
+			break;
 		case i_j:
 			file_buffer <<"\tgoto label" <<jump_label<<endl;
 			break;
 		case i_f:
-			file_buffer <<"\tcall "<< jump_target<<endl;
+			if (fun_name!="")
+				file_buffer<<"\treturn"<<endl;
+			else
+				file_buffer <<"\tcall "<< jump_target<<endl;
 			break;
-		default: 
+		default:
 			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");
 			break;
 	}
@@ -479,7 +494,10 @@ void Jump_IC_Stmt::print_assembly(ostream & file_buffer) {
 			file_buffer <<"label" <<jump_label<<" "<<endl;
 			break;  
 		case a_f:
-			file_buffer << "\tjal " << jump_target << endl;
+			if (fun_name!="")
+				file_buffer<< "\tj " << jump_target << "_" << fun_name <<endl;
+			else
+				file_buffer << "\tjal " << jump_target << endl;
 			break;
 		default: 
 			CHECK_INVARIANT(CONTROL_SHOULD_NOT_REACH, "Intermediate code format not supported");

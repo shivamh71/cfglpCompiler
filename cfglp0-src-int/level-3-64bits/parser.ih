@@ -60,7 +60,7 @@ inline int Parser::lex()
     return d_scanner.lex();
 }
 
-inline void Parser::print()         
+inline void Parser::print()
 {
 ////////////////// cfglp print tokens ///////////////////////////////
 
