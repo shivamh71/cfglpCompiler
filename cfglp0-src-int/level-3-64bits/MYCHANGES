@@ -1,12 +1,20 @@
-Submitted by : 
+Submitted by :
 	Shubham Mehta - 110050013
 	Shivam H Prasad - 110050041
 
-1)  ast.hh and ast.cc
-	-> implemented compile_and_optimize function for Type_Cast, Arithmetic, Negation Ast
+1)	parser.yy
+	-> made changes to grammar to allow function call only in assignment operations and in type_cast operations
 
-2)	reg-alloc.hh and reg-alloc.cc
-	-> modified optimize lra function to allow float register types
+2)  ast.hh and ast.cc
+	-> implemented compile and compile_and_optimize functions for function call statement
+	-> modified Return_Ast to allow returning of int or float data
+	-> updated Name_Ast to create store stmt for param list of function call
+
+3)	icode.hh and icode.cc
+	-> create icode statements for function call (JAL), return, epilogue printing etc
+
+4)	symbol_table.hh and symbol_table.cc
+	-> modified functions for calculating size and offsets to get correct results
 
 Corner cases handled :
-	-> we have handled cases when all the registers gets used up very carefully
+	-> we have handled cases of checking type of returned vales carefully

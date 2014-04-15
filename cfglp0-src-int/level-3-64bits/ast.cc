@@ -218,7 +218,7 @@ Code_For_Ast & Assignment_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 
 	Code_For_Ast load_stmt;
 	Register_Descriptor * result_register;
-	
+
 	if ( (typeid(*rhs) == typeid(Name_Ast)) || (typeid(*rhs) == typeid(Number_Ast<int>)) || (typeid(*rhs) == typeid(Number_Ast<float>)) || (typeid(*rhs) == typeid(Number_Ast<double>)) ) {
 		lra.optimize_lra(mc_2m, lhs, rhs);
 		load_stmt = rhs->compile_and_optimize_ast(lra);
@@ -298,7 +298,7 @@ void Relational_Expr_Ast::set_data_type(string type) {
 		node_data_type = double_data_type;
 	}
 }
-	
+
 bool Relational_Expr_Ast::check_ast() {
 	CHECK_INVARIANT((rhs != NULL), "Rhs of Relational_Ast cannot be null");
 	CHECK_INVARIANT((lhs != NULL), "Lhs of Relational_Ast cannot be null");
@@ -318,7 +318,7 @@ Eval_Result & Relational_Expr_Ast::evaluate(Local_Environment & eval_env, ostrea
 	CHECK_INVARIANT((rhs!=NULL), "Rhs of Relational_Ast cannot be null")
 	Eval_Result & result2 = rhs->evaluate(eval_env, file_buffer);
 	Eval_Result* result_rhs = new Eval_Result_Value_Int();
-	CHECK_INPUT_AND_ABORT(result1.is_variable_defined(),"Variable should be defined to be on rhs of condition", lineno);	
+	CHECK_INPUT_AND_ABORT(result1.is_variable_defined(),"Variable should be defined to be on rhs of condition", lineno);
 
 	result_lhs = &(result1);
 	result_rhs = &(result2);
@@ -417,12 +417,12 @@ Code_For_Ast & Relational_Expr_Ast::compile_and_optimize_ast(Lra_Outcome & lra)
 	Code_For_Ast & load_stmt1 = lhs->compile_and_optimize_ast(lra);
 	Register_Descriptor * load_register1 = load_stmt1.get_reg();
 	machine_dscr_object.spim_register_table[load_register1->reg_id]->used_for_expr_result = true;
-	
+
 	lra.optimize_lra(mc_2r, NULL, rhs);
 	Code_For_Ast & load_stmt2 = rhs->compile_and_optimize_ast(lra);
 	Register_Descriptor * load_register2 = load_stmt2.get_reg();
 	machine_dscr_object.spim_register_table[load_register2->reg_id]->used_for_expr_result = true;
-	
+
 	Register_Descriptor * result_register = machine_dscr_object.get_new_register(int_num);
 	CHECK_INVARIANT((result_register != NULL), "Result register cannot be null");
 	Ics_Opd * register_opd1 = new Register_Addr_Opd(load_register1);
