@@ -1,2 +1,2 @@
-cs306_cfglp
+cfglpCompiler
 ===========
